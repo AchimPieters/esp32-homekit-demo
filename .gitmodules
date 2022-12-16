@@ -1,6 +1,6 @@
 [submodule "components/common/homekit"]
 	path = components/common/homekit
 	url = https://AchimPieters@github.com/AchimPieters/esp32-homekit.git
-[submodule "components/common/wolfssl"]
-	path = components/common/wolfssl
+[submodule "components/common/wolffs"]
+	path = components/common/wolffs
 	url = https://AchimPieters@github.com/AchimPieters/esp32-wolfssl.git
