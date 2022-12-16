@@ -1,4 +1,4 @@
 idf_component_register(
     SRCS "led.c"
-    REQUIRES homekit nvs_flash esp_wifi driver
+    REQUIRES homekit nvs_flash esp_wifi driver spi_flash
 )
