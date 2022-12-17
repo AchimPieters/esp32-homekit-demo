@@ -15,18 +15,18 @@
 
 void on_wifi_ready();
 
-esp_err_t event_handler(void *ctx, system_event_t *event)
+esp_err_t event_handler(void *ctx, esp_event_loop_handle_t *event)
 {
     switch(event->event_id) {
-        case SYSTEM_EVENT_STA_START:
+        case WIFI_EVENT_STA_START:
             printf("STA start\n");
             esp_wifi_connect();
             break;
-        case SYSTEM_EVENT_STA_GOT_IP:
+        case IP_EVENT_STA_GOT_IP:
             printf("WiFI ready\n");
             on_wifi_ready();
             break;
-        case SYSTEM_EVENT_STA_DISCONNECTED:
+        case WIFI_EVENT_STA_DISCONNECTED:
             printf("STA disconnected\n");
             esp_wifi_connect();
             break;
