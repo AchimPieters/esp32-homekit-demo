@@ -9,6 +9,16 @@
 
 <br>
 
+|                  | <sub>ESP32 Series</sub> | <sub>ESP32-C6 Series</sub> | <sub>ESP32-C3 Series</sub> | <sub>ESP32-C Series</sub> | <sub>ESP32-S3 Series</sub> | <sub>ESP32-S2 Series</sub> | <sub>ESP32-H2 Series</sub> |
+|------------------|--------------|-----------------|-----------------|----------------|-----------------|-----------------|-----------------|
+| <sub>LED</sub>              |              |                 |                 |                |                 |                 |                 |
+| <sub>BUTTON</sub>           |              |                 |                 |                |                 |                 |                 |
+| <sub>DYNAMIC SERVICES</sub> |              |                 |                 |                |                 |                 |                 |
+
+
+
+<br>
+
 <img  style="float: right;" src="https://github.com/AchimPieters/ESP32-SmartPlug/blob/main/images/works-with-apple-home.svg" width="150"> <img  style="float: right;" src="https://github.com/AchimPieters/ESP32-SmartPlug/blob/main/images/MIT%7C%20SOFTWARE%20WHITE.svg" width="150"> 
 
 <br>
