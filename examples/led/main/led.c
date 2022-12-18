@@ -17,7 +17,7 @@ void on_wifi_ready();
 
 esp_err_t event_handler(void *ctx, esp_event_loop_handle_t *event)
 {
-    switch(event->event_id) {
+    switch(event->event_data) {
         case WIFI_EVENT_STA_START:
             printf("STA start\n");
             esp_wifi_connect();
@@ -37,8 +37,8 @@ esp_err_t event_handler(void *ctx, esp_event_loop_handle_t *event)
 }
 
 static void wifi_init() {
-    tcpip_adapter_init();
-    ESP_ERROR_CHECK(esp_event_loop_init(event_handler, NULL));
+    esp_netif_init();
+    ESP_ERROR_CHECK(esp_event_loop_run(event_handler, NULL));
 
     wifi_init_config_t wifi_init_config = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&wifi_init_config));
