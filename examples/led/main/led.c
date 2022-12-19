@@ -17,7 +17,7 @@ void on_wifi_ready();
 
 esp_err_t event_handler(void *ctx, esp_event_loop_handle_t *event)
 {
-    switch(event->event_data) {
+    switch(event==WIFI_EVENT) {
         case WIFI_EVENT_STA_START:
             printf("STA start\n");
             esp_wifi_connect();
