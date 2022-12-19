@@ -1,5 +1,4 @@
-# esp32-homekit-demo
-esp32-homekit-demo
+# ESP32 - HomeKit Demo
 
 1. Install docker
 2. Install IDF V5.0 - `docker pull espressif/idf:v5.0`
@@ -7,6 +6,16 @@ esp32-homekit-demo
 4. start IDF - ` docker run -it -v ~/ESP32-HOMEKIT-DEMO:/project -w /project espressif/idf:v5.0`
 5. cd `examples` - cd `led`
 6. `idf.py build`
+
+<br>
+
+|                  | <sub>ESP32 Series</sub> | <sub>ESP32-C6 Series</sub> | <sub>ESP32-C3 Series</sub> | <sub>ESP32-C Series</sub> | <sub>ESP32-S3 Series</sub> | <sub>ESP32-S2 Series</sub> | <sub>ESP32-H2 Series</sub> |
+|------------------|--------------|-----------------|-----------------|----------------|-----------------|-----------------|-----------------|
+| <sub>LED</sub>              |<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">
+| <sub>BUTTON</sub>           |<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">
+| <sub>DYNAMIC SERVICES</sub> |<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/UNDETERMIND.svg" width="70">
+
+
 
 <br>
 
@@ -40,7 +49,8 @@ Your safety is your own responsibility, including proper use of equipment and sa
 <br>
 <sub><sup>-------------------------------------------------------------------------------------------------------------------------------------</sup></sub>
 <br>
-<br>
+
+**<sub>APPLE HOME</sub>**
 
 <img  style="float: right;" src="https://github.com/AchimPieters/ESP32-SmartPlug/blob/main/images/apple_logo.png" width="10"> <sub><sup>HomeKit Accessory Protocol (HAP) is Apple’s proprietary protocol that enables third-party accessories in the home (e.g., lights, thermostats and door locks) and Apple products to communicate with each other. HAP supports two transports, IP and Bluetooth LE. The information provided in the HomeKit Accessory Protocol Specification (Non-Commercial Version) describes how to implement HAP in an accessory that you create for non-commercial use and that will not be distributed or sold.</sup></sub>
 
