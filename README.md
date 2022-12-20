@@ -1,5 +1,7 @@
 # ESP32 - HomeKit Demo
 
+## Project on Hold - More work is needed to have full support for wolfSSL on the Espressif ESP-IDF v5. See Issue: https://github.com/wolfSSL/wolfssl/issues/5909
+
 1. Install docker
 2. Install IDF V5.0 - `docker pull espressif/idf:v5.0`
 3. Clone repository - `git clone --recursive https://github.com/AchimPieters/esp32-homekit-demo.git`
