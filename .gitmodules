@@ -3,4 +3,4 @@
 	url = https://AchimPieters@github.com/AchimPieters/esp32-homekit.git
 [submodule "components/wolfssl"]
 	path = components/wolfssl
-	url = https://AchimPieters@github.com/AchimPieters/esp32-wolfssl.git
+	url = https://AchimPieters@github.com/wolfSSL/wolfssl.git
