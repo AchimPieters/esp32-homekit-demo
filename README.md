@@ -2,17 +2,34 @@
 
 
 
-1. Install docker
-2. Install IDF V5.0 - `docker pull espressif/idf:v5.0`
-3. Clone repository - `git clone --recursive https://github.com/AchimPieters/esp32-homekit-demo.git`
-4. `cd ~/esp32-homekit-demo`
-5. `git clone https://github.com/bandi13/wolfssl.git bandi13-wolfssl-install --branch ESP-IDF_fixes --depth 1`
-6. `cd /project/bandi13-wolfssl-install/IDE/Espressif/ESP-IDF`
-7. `./setup.sh`
-8. `cd /project/examples/led`
-9. `idf.py build`
+## Reproduction steps
+```
+docker pull espressif/idf:v5.0
+```
 
+```
+git clone --recursive https://github.com/AchimPieters/esp32-homekit-demo.git
+```
+```
 docker run -it -v ~/esp32-homekit-demo:/project -w /project espressif/idf:v5.0
+```
+
+```
+git clone https://github.com/bandi13/wolfssl.git bandi13-wolfssl-install --branch ESP-IDF_fixes --depth 1
+```
+```
+cd bandi13-wolfssl-install/IDE/Espressif/ESP-IDF
+```
+```
+./setup.sh
+```
+
+```
+cd /project/examples/led
+```
+```
+idf.py build
+```
 <br>
 
 |                  | <sub>ESP32 Series</sub> | <sub>ESP32-C6 Series</sub> | <sub>ESP32-C3 Series</sub> | <sub>ESP32-C Series</sub> | <sub>ESP32-S3 Series</sub> | <sub>ESP32-S2 Series</sub> | <sub>ESP32-H2 Series</sub> |
