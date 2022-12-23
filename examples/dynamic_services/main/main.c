@@ -3,6 +3,7 @@
 #include <esp_event_loop.h>
 #include <esp_log.h>
 #include <esp_system.h>
+#include <esp_mac.h>
 #include <nvs_flash.h>
 #include <driver/gpio.h>
 
@@ -13,24 +14,23 @@
 #include <homekit/characteristics.h>
 #include "wifi.h"
 
-
 #define MAX_SERVICES 20
 
 
 void on_wifi_ready();
 
-esp_err_t event_handler(void *ctx, system_event_t *event)
+esp_err_t event_handler(void *ctx, esp_event_loop_handle_t *event)
 {
-    switch(event->event_id) {
-        case SYSTEM_EVENT_STA_START:
+    switch(event==WIFI_EVENT) {
+        case WIFI_EVENT_STA_START:
             printf("STA start\n");
             esp_wifi_connect();
             break;
-        case SYSTEM_EVENT_STA_GOT_IP:
+        case IP_EVENT_STA_GOT_IP:
             printf("WiFI ready\n");
             on_wifi_ready();
             break;
-        case SYSTEM_EVENT_STA_DISCONNECTED:
+        case WIFI_EVENT_STA_DISCONNECTED:
             printf("STA disconnected\n");
             esp_wifi_connect();
             break;
@@ -41,8 +41,8 @@ esp_err_t event_handler(void *ctx, system_event_t *event)
 }
 
 static void wifi_init() {
-    tcpip_adapter_init();
-    ESP_ERROR_CHECK(esp_event_loop_init(event_handler, NULL));
+    esp_netif_init();
+    ESP_ERROR_CHECK(esp_event_loop_run(event_handler, NULL));
 
     wifi_init_config_t wifi_init_config = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&wifi_init_config));
