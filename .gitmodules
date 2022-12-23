@@ -1,4 +1,3 @@
 [submodule "components/common/homekit"]
 	path = components/common/homekit
 	url = https://Achimpieters@github.com/AchimPieters/esp32-homekit.git
-	fetchrecursesubmodules = true
