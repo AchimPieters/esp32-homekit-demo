@@ -16,8 +16,7 @@
 #include <lwip/err.h>
 #include <lwip/sys.h>
 
-
-
+// connects to AP with Wi-Fi - Start
 
 #define EXAMPLE_ESP_WIFI_SSID      CONFIG_ESP_WIFI_SSID
 #define EXAMPLE_ESP_WIFI_PASS      CONFIG_ESP_WIFI_PASSWORD
@@ -142,7 +141,7 @@ void wifi_init_sta(void)
     }
 }
 
-
+// connects to AP with Wi-Fi - End
 
 
 
@@ -197,7 +196,7 @@ void led_on_set(homekit_value_t value) {
 
 
 homekit_accessory_t *accessories[] = {
-    HOMEKIT_ACCESSORY(.id=1, .category=homekit_accessory_category_lightbulb, .services=(homekit_service_t*[]){
+    HOMEKIT_ACCESSORY(.id=1, .category=homekit_accessory_category_lighting, .services=(homekit_service_t*[]){
         HOMEKIT_SERVICE(ACCESSORY_INFORMATION, .characteristics=(homekit_characteristic_t*[]){
             HOMEKIT_CHARACTERISTIC(NAME, "LED"),
             HOMEKIT_CHARACTERISTIC(MANUFACTURER, "StudioPieters®"),
@@ -226,9 +225,6 @@ homekit_server_config_t config = {
     .password = "202-02-021"
 };
 
-void on_wifi_ready() {
-    homekit_server_init(&config);
-}
 
 void app_main(void) {
   //Initialize NVS
@@ -243,4 +239,5 @@ void app_main(void) {
     wifi_init_sta();
 
     led_init();
+    homekit_server_init(&config);
 }
