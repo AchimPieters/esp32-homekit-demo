@@ -1,6 +1,7 @@
 [submodule "components/common/homekit"]
 	path = components/common/homekit
 	url = https://Achimpieters@github.com/AchimPieters/esp32-homekit.git
+	fetchrecursesubmodules = true
 [submodule "components/wolfssl"]
 	path = components/wolfssl
 	url = https://Achimpieters@github.com/wolfSSL/wolfssl.git
