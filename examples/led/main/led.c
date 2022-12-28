@@ -10,7 +10,7 @@
 
 #include <homekit/homekit.h>
 #include <homekit/characteristics.h>
-#include "wifi.h"
+// #include "wifi.h" // not needed when using LCM
 
 
 void on_wifi_ready();
@@ -56,7 +56,7 @@ static void wifi_init() {
     ESP_ERROR_CHECK(esp_wifi_start());
 }
 
-const int led_gpio = 2;
+const int led_gpio = CONFIG_LED_GPIO;
 bool led_on = false;
 
 void led_write(bool on) {
