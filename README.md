@@ -18,7 +18,7 @@ docker run -it -v ~/esp32-homekit-demo:/project -w /project espressif/idf:v5.0
 git clone https://github.com/wolfssl/wolfssl.git wolfssl-install --depth 1
 ```
 ```
-cd wolfssl-install/IDE/Espressif/ESP-IDF
+cd wolfssl/IDE/Espressif/ESP-IDF
 ```
 
 ```
