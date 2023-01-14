@@ -6,28 +6,25 @@
 ```
 docker pull espressif/idf:v5.0
 ```
-
 ```
 git clone --recursive https://github.com/AchimPieters/esp32-homekit-demo.git
 ```
 ```
 docker run -it -v ~/esp32-homekit-demo:/project -w /project espressif/idf:v5.0
 ```
-
 ```
-git clone https://github.com/wolfssl/wolfssl.git wolfssl-install --depth 1
+cd components/wolfssl/IDE/Espressif/ESP-IDF
 ```
-```
-cd wolfssl/IDE/Espressif/ESP-IDF
-```
-
 ```
 ./setup.sh
 ```
-
 ```
 cd /project/examples/led
 ```
+```
+idf.py menuconfig
+```
+- Select in the Menu STUDIOPIETERS and fill in the SSID adn the PASSWORD.
 ```
 idf.py build
 ```
