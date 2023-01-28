@@ -27,7 +27,7 @@ cd /project/examples/led
 ```
 idf.py menuconfig
 ```
-- Select in the Menu STUDIOPIETERS and fill in the SSID adn the PASSWORD.
+- Select in the Menu STUDIOPIETERS and fill in the SSID and the PASSWORD.
 ```
 idf.py build
 ```
@@ -62,7 +62,7 @@ Your safety is your own responsibility, including proper use of equipment and sa
 
 <sub><sup>MIT LICENCE</sup></sub>
 
-<sub><sup>Copyright © 2017 [Maxim Kulkin](https://github.com/maximkulkin/esp-homekit-demo)</sup></sub>
+<sub><sup>Copyright © 2017 [Maxim Kulkin | ESP-Homekit-demo](https://github.com/maximkulkin/esp-homekit-demo)</sup></sub>
 
 <sub><sup>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</sup></sub>
 
