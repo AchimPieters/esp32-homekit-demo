@@ -1,9 +1,5 @@
 # ESP32 - HomeKit Demo
 
-NOTE: currently stranded on: flash storage - Porting to IDF V5.0 ->
-https://github.com/espressif/esp-idf/issues/10541#issuecomment-1399214695
-
-All help is welcome!
 
 ## Reproduction steps
 ```
