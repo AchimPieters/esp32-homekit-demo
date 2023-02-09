@@ -219,10 +219,11 @@ homekit_accessory_t *accessories[] = {
     }),
     NULL
 };
-
+// tools/gen_qrcode 5 202-02-021 1AB2 qrcode.png
 homekit_server_config_t config = {
     .accessories = accessories,
-    .password = "202-02-021"
+    .password = "202-02-021",
+    .setupId="1AB2",
 };
 
 
