@@ -2,31 +2,49 @@
 
 <b>REPRODUCTION STEPS</b>
 
+Open a terminal window on your mac.
+
 ```
-docker pull espressif/idf:v5.0
+docker pull espressif/idf:latest
 ```
 ```
 git clone --recursive https://github.com/AchimPieters/esp32-homekit-demo.git
 ```
 ```
-docker run -it -v ~/esp32-homekit-demo:/project -w /project espressif/idf:v5.0
+docker run -it -v ~/esp32-homekit-demo:/project -w /project espressif/idf:latest
 ```
 ```
-cd components/wolfssl/IDE/Espressif/ESP-IDF
+cd examples/led
 ```
 ```
-./setup.sh
-```
-```
-cd /project/examples/led
+idf.py set-target esp32
 ```
 ```
 idf.py menuconfig
 ```
-- Select in the Menu STUDIOPIETERS and fill in the SSID and the PASSWORD.
+- Select 'Serial falsher config' and then 'Flash size (2MB)' set to '4MB'
+- Select 'Partition table' and then 'Partition Table(Single factory app, no OTA)' Set to 'Custom partition table CSV'
+- Select 'StudioPieters' and then '(mysid) WIFI SSID' and fill in your Wi-Fi Network name, then Select '(mypassword) WiFI Password' and fill in your Wi-Fi Network password.
+- Then press 'ESC' until you are asked 'Save Configuration?' and select '(Y)es'
 ```
 idf.py build
 ```
+Open a new terminal window on your mac.
+```
+cd esp32-homekit-demo/examples/led
+```
+```
+esptool.py erase_flash
+```
+```
+esptool.py -p /dev/tty.usbserial-01FD1166 -b 460800 --before default_reset --after hard_reset --chip esp32  write_flash --flash_mode dio --flash_size detect --flash_freq 40m 0x1000 build/bootloader/bootloader.bin 0x8000 build/partition_table/partition-table.bin 0x10000 build/main.bin
+```
+- Replace '/dev/tty.usbserial-01FD1166' with your USB port.
+```
+screen /dev/tty.usbserial-01FD1166 115200
+```
+- Replace '/dev/tty.usbserial-01FD1166' with your USB port.
+
 <br>
 
 |                  | <sub>ESP32 Series</sub> | <sub>ESP32-C6 Series</sub> | <sub>ESP32-C3 Series</sub> | <sub>ESP32-C Series</sub> | <sub>ESP32-S3 Series</sub> | <sub>ESP32-S2 Series</sub> | <sub>ESP32-H2 Series</sub> |
@@ -39,7 +57,7 @@ idf.py build
 
 <br>
 
-<img  style="float: right;" src="https://github.com/AchimPieters/ESP32-SmartPlug/blob/main/images/works-with-apple-home.svg" width="150"> <img  style="float: right;" src="https://github.com/AchimPieters/ESP32-SmartPlug/blob/main/images/MIT%7C%20SOFTWARE%20WHITE.svg" width="150"> 
+<img  style="float: right;" src="https://github.com/AchimPieters/ESP32-SmartPlug/blob/main/images/works-with-apple-home.svg" width="150"> <img  style="float: right;" src="https://github.com/AchimPieters/ESP32-SmartPlug/blob/main/images/MIT%7C%20SOFTWARE%20WHITE.svg" width="150">
 
 <br>
 <sub><sup>-------------------------------------------------------------------------------------------------------------------------------------</sup></sub>

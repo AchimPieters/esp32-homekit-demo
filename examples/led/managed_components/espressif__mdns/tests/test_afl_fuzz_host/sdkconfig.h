@@ -1,4 +1,9 @@
 /*
+ * SPDX-FileCopyrightText: 2022-2023 Espressif Systems (Shanghai) CO LTD
+ *
+ * SPDX-License-Identifier: Unlicense OR CC0-1.0
+ */
+/*
  * This config file commited in order to not run `idf.py reconfigure` each time when running fuzzer test. You can modify it manually or run `idf.py reconfigure` to generate new one if needed.
  * Espressif IoT Development Framework (ESP-IDF) Configuration Header
  */
@@ -285,6 +290,7 @@
 #define CONFIG_MDNS_MAX_SERVICES 25
 #define CONFIG_MDNS_MAX_INTERFACES 3
 #define CONFIG_MDNS_TASK_PRIORITY 1
+#define CONFIG_MDNS_ACTION_QUEUE_LEN 16
 #define CONFIG_MDNS_TASK_STACK_SIZE 4096
 #define CONFIG_MDNS_TASK_AFFINITY_CPU0 1
 #define CONFIG_MDNS_TASK_AFFINITY 0x0

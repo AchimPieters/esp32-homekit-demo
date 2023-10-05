@@ -1,0 +1,7 @@
+description: wolfSSL Embedded SSL/TLS Library
+discussion: https://www.wolfssl.com/forums
+documentation: https://www.wolfssl.com/docs
+issues: https://github.com/wolfSSL/wolfssl/issues
+repository: https://github.com/wolfSSL/wolfssl.git
+url: https://www.wolfssl.com
+version: 5.6.0-stable
