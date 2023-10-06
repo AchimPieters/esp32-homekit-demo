@@ -7,6 +7,7 @@ Open a terminal window on your mac.
 ```
 docker pull espressif/idf:latest
 ```
+- At this point idf (5.2.0)
 ```
 git clone --recursive https://github.com/AchimPieters/esp32-homekit-demo.git
 ```
