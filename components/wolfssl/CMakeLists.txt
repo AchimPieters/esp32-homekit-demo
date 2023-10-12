@@ -28,6 +28,7 @@ cmake_minimum_required(VERSION 3.16)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DWOLFSSL_USER_SETTINGS")
 set(CMAKE_CURRENT_SOURCE_DIR ".")
 set(COMPONENT_REQUIRES freertos lwip) # we typically don't need lwip directly in wolfssl component
+set(WOLFSSL_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
 
 # COMPONENT_NAME = wolfssl
 # The component name is the directory name. "No feature to change this".
