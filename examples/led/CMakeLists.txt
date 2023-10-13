@@ -5,8 +5,6 @@ set(EXTRA_COMPONENT_DIRS
     ../../components/esp-idf
 )
 
-include_directories(../../)
-
 set(COMPONENTS main)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)

@@ -30,3 +30,41 @@
 *.exe
 *.out
 *.app
+
+# Visual Studio Code Workspace Files
+*.vscode
+*.userprefs
+*.exe
+*.dll
+.vs
+Backup
+UpgradeLog.htm
+*.aps
+*.VC.db
+*.filters
+
+
+*.gz
+*.zip
+*.bak
+*.dummy
+
+# VisualGDB
+**/.visualgdb
+
+# Espressif sdk config default should be saved in sdkconfig.defaults
+# we won't track the actual working sdkconfig files
+/IDE/Espressif/**/sdkconfig
+
+# Espressif managed components to exclude:
+/IDE/Espressif/**/managed_components/**
+
+# Espressif managed component lock files to exclude.
+# "In general, it's ok to have it under version control, however, it ties
+# the solution to the exact version of ESP-IDF and will be ignored if an
+# example is built against another IDF version or for a different target.
+# So it's better to git ignore it for the examples."
+/IDE/Espressif/**/dependencies.lock
+
+/components/**/.component_hash
+/examples/l**/dependencies.lock

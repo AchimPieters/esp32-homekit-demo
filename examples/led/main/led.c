@@ -28,7 +28,6 @@
 #include <nvs_flash.h>
 
 #include <freertos/FreeRTOS.h>
-//#include <freertos/task.h>
 #include <freertos/task_snapshot.h>
 #include <driver/gpio.h>
 
