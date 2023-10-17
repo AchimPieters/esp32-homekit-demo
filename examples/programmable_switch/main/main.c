@@ -72,10 +72,18 @@ static void wifi_init() {
         ESP_ERROR_CHECK(esp_wifi_start());
 }
 
-#define BUTTON_GPIO  CONFIG_BUTTON_GPIO;
+#define BUTTON_GPIO CONFIG_BUTTON_GPIO
 
-#define LED_GPIO CONFIG_LED_GPIO;
+#define LED_GPIO CONFIG_LED_GPIO
 bool led_on = false;
+
+// Variables to track button presses
+bool buttonPressed = false;
+bool doublePress = false;
+bool longPress = false;
+
+// Time limit for considering a press as a long press (in milliseconds)
+#define LONG_PRESS_DELAY 1000
 
 void led_write(bool on) {
         gpio_set_level(LED_GPIO, on ? 1 : 0);
@@ -90,28 +98,20 @@ void button_init() {
         gpio_set_direction(BUTTON_GPIO, GPIO_MODE_INPUT);
 }
 
-// Variabelen om de knopdrukken bij te houden
-bool buttonPressed = false;
-bool doublePress = false;
-bool longPress = false;
-
-// Tijdlimiet voor het beschouwen van een druk als een lange druk (in milliseconden)
-#define LONG_PRESS_DELAY 1000
-
-// Callback-functie die wordt aangeroepen wanneer de knop wordt ingedrukt
+// Callback function that is called when the button is pressed
 void IRAM_ATTR button_isr_handler(void* arg) {
-    static uint32_t last_press = 0;
-    uint32_t current_press = xTaskGetTickCountFromISR();
+        static uint32_t last_press = 0;
+        uint32_t current_press = xTaskGetTickCountFromISR();
 
-    // Bepaal de tijd tussen de huidige en vorige knopdruk
-    uint32_t interval = current_press - last_press;
-    last_press = current_press;
+        // Determine the time between the current and previous button press
+        uint32_t interval = current_press - last_press;
+        last_press = current_press;
 
-    if (interval < 200) {
-        doublePress = true;
-    } else {
-        buttonPressed = true;
-    }
+        if (interval < 200) {
+                doublePress = true;
+        } else {
+                buttonPressed = true;
+        }
 }
 
 
@@ -141,41 +141,41 @@ homekit_characteristic_t button_event = HOMEKIT_CHARACTERISTIC_(PROGRAMMABLE_SWI
 
 
 void button_task(void* arg) {
-    uint32_t long_press_start = 0;
+        uint32_t long_press_start = 0;
 
-    while (1) {
-        if (buttonPressed) {
-            printf("Single press detected\n");
-            homekit_characteristic_notify(&button_event, HOMEKIT_UINT8(0));
-            buttonPressed = false;
+        while (1) {
+                if (buttonPressed) {
+                        printf("Single press detected\n");
+                        homekit_characteristic_notify(&button_event, HOMEKIT_UINT8(0));
+                        buttonPressed = false;
+                }
+
+                if (doublePress) {
+                        printf("Double press detected\n");
+                        homekit_characteristic_notify(&button_event, HOMEKIT_UINT8(1));
+                        doublePress = false;
+                }
+
+                if (longPress) {
+                        printf("Long press detected\n");
+                        homekit_characteristic_notify(&button_event, HOMEKIT_UINT8(2));
+                        longPress = false;
+                }
+
+                vTaskDelay(100 / portTICK_PERIOD_MS);
+
+                // Controleer voor een lange druk
+                if (gpio_get_level(BUTTON_GPIO) == 0) {
+                        long_press_start = esp_log_timestamp();
+                        while (gpio_get_level(BUTTON_GPIO) == 0) {
+                                vTaskDelay(10 / portTICK_PERIOD_MS);
+                        }
+                        uint32_t long_press_duration = esp_log_timestamp() - long_press_start;
+                        if (long_press_duration >= LONG_PRESS_DELAY) {
+                                longPress = true;
+                        }
+                }
         }
-
-        if (doublePress) {
-            printf("Double press detected\n");
-            homekit_characteristic_notify(&button_event, HOMEKIT_UINT8(1));
-            doublePress = false;
-        }
-
-        if (longPress) {
-            printf("Long press detected\n");
-            homekit_characteristic_notify(&button_event, HOMEKIT_UINT8(2));
-            longPress = false;
-        }
-
-        vTaskDelay(100 / portTICK_PERIOD_MS);
-
-        // Controleer voor een lange druk
-        if (gpio_get_level(BUTTON_GPIO) == 0) {
-            long_press_start = esp_log_timestamp();
-            while (gpio_get_level(BUTTON_GPIO) == 0) {
-                vTaskDelay(10 / portTICK_PERIOD_MS);
-            }
-            uint32_t long_press_duration = esp_log_timestamp() - long_press_start;
-            if (long_press_duration >= LONG_PRESS_DELAY) {
-                longPress = true;
-            }
-        }
-    }
 }
 
 #define DEVICE_NAME "Programmable Switch"
@@ -233,12 +233,12 @@ void app_main(void) {
         ESP_ERROR_CHECK( ret );
 
         gpio_config_t button_config = BUTTON_GPIO(
-            button_active_low,
-            .max_repeat_presses=2,
-            .long_press_time=1000,
-        );
+                button_active_low,
+                .max_repeat_presses=2,
+                .long_press_time=1000,
+                );
         if (button_task(PUSH_BUTTON_PINidf, button_config, button_callback, NULL)) {
-            printf("Failed to initialize button\n");
+                printf("Failed to initialize button\n");
         }
 
         wifi_init();

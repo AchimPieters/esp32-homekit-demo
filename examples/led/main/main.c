@@ -72,7 +72,7 @@ static void wifi_init() {
 }
 
 
-#define LED_GPIO = CONFIG_LED_GPIO;
+#define LED_GPIO CONFIG_ESP_LED_GPIO
 bool led_on = false;
 
 void led_write(bool on) {

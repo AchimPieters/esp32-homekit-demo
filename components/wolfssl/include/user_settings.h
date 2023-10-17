@@ -65,6 +65,31 @@
 #define CURVE25519_SMALL
 #define HAVE_ED25519
 
+#define WOLFSSL_BASE64_ENCODE
+
+ /* see internal.c */
+ #define OPENSSL_EXTRA
+ #define WOLFCRYPT_HAVE_SRP
+ #undef NO_SHA
+
+ /* from components/homekit/CMakeLists.txt */
+ #define WOLFCRYPT_HAVE_SRP
+ #define WOLFSSL_SHA512
+ #define WOLFSSL_BASE64_ENCODE
+ #define NO_MD5
+ #define NO_SHA
+ #define NO_DSA
+ #define HAVE_HKDF
+ #define HAVE_CHACHA
+ #define HAVE_POLY1305
+ #define HAVE_ED25519
+ #define HAVE_CURVE25519
+ #define NO_SESSION_CACHE
+ #define RSA_LOW_MEM
+ #define GCM_SMALL
+ #define USE_SLOW_SHA512
+ #define WOLFCRYPT_ONLY
+
 /* when you want to use pkcs7 */
 /* #define HAVE_PKCS7 */
 
@@ -119,6 +144,6 @@
 /* adjust wait-timeout count if you see timeout in rsa hw acceleration */
 #define ESP_RSA_TIMEOUT_CNT    0x249F00
 
-/* SHA512/224 and SHA512/256 were fixed for ESP32 after 5.6 release */ 
+/* SHA512/224 and SHA512/256 were fixed for ESP32 after 5.6 release */
 #define WOLFSSL_NOSHA512_224
 #define WOLFSSL_NOSHA512_256

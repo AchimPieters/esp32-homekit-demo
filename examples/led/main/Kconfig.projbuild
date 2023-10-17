@@ -12,17 +12,11 @@ menu "StudioPieters"
               help
                   WiFi password (WPA or WPA2) for the example to use.
 
-      config LED_GPIO
+      config ESP_LED_GPIO
               int "Set the GPIO for the LED"
               default 4
               help
                   The GPIO number the LED is connected to.
-
-        config BUTTON_GPIO
-              int "Set the GPIO for the Button"
-              default 22
-              help
-                  The GPIO number the Button is connected to.
 
       config ESP_SETUP_CODE
               string "HomeKit Setup Code"
