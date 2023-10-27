@@ -28,7 +28,6 @@
 #include <nvs_flash.h>
 
 #include <freertos/FreeRTOS.h>
-#include "freertos/task.h"
 #include <driver/gpio.h>
 
 #include <homekit/homekit.h>
@@ -72,18 +71,9 @@ static void wifi_init() {
         ESP_ERROR_CHECK(esp_wifi_start());
 }
 
-#define BUTTON_GPIO CONFIG_BUTTON_GPIO
 
-#define LED_GPIO CONFIG_LED_GPIO
+#define LED_GPIO CONFIG_ESP_LED_GPIO
 bool led_on = false;
-
-// Variables to track button presses
-bool buttonPressed = false;
-bool doublePress = false;
-bool longPress = false;
-
-// Time limit for considering a press as a long press (in milliseconds)
-#define LONG_PRESS_DELAY 1000
 
 void led_write(bool on) {
         gpio_set_level(LED_GPIO, on ? 1 : 0);
@@ -92,26 +82,6 @@ void led_write(bool on) {
 void led_init() {
         gpio_set_direction(LED_GPIO, GPIO_MODE_OUTPUT);
         led_write(led_on);
-}
-
-void button_init() {
-        gpio_set_direction(BUTTON_GPIO, GPIO_MODE_INPUT);
-}
-
-// Callback function that is called when the button is pressed
-void IRAM_ATTR button_isr_handler(void* arg) {
-        static uint32_t last_press = 0;
-        uint32_t current_press = xTaskGetTickCountFromISR();
-
-        // Determine the time between the current and previous button press
-        uint32_t interval = current_press - last_press;
-        last_press = current_press;
-
-        if (interval < 200) {
-                doublePress = true;
-        } else {
-                buttonPressed = true;
-        }
 }
 
 
@@ -137,48 +107,21 @@ void led_identify(homekit_value_t _value) {
         xTaskCreate(led_identify_task, "LED identify", 512, NULL, 2, NULL);
 }
 
-homekit_characteristic_t button_event = HOMEKIT_CHARACTERISTIC_(PROGRAMMABLE_SWITCH_EVENT, 0);
-
-
-void button_task(void* arg) {
-        uint32_t long_press_start = 0;
-
-        while (1) {
-                if (buttonPressed) {
-                        printf("Single press detected\n");
-                        homekit_characteristic_notify(&button_event, HOMEKIT_UINT8(0));
-                        buttonPressed = false;
-                }
-
-                if (doublePress) {
-                        printf("Double press detected\n");
-                        homekit_characteristic_notify(&button_event, HOMEKIT_UINT8(1));
-                        doublePress = false;
-                }
-
-                if (longPress) {
-                        printf("Long press detected\n");
-                        homekit_characteristic_notify(&button_event, HOMEKIT_UINT8(2));
-                        longPress = false;
-                }
-
-                vTaskDelay(100 / portTICK_PERIOD_MS);
-
-                // Controleer voor een lange druk
-                if (gpio_get_level(BUTTON_GPIO) == 0) {
-                        long_press_start = esp_log_timestamp();
-                        while (gpio_get_level(BUTTON_GPIO) == 0) {
-                                vTaskDelay(10 / portTICK_PERIOD_MS);
-                        }
-                        uint32_t long_press_duration = esp_log_timestamp() - long_press_start;
-                        if (long_press_duration >= LONG_PRESS_DELAY) {
-                                longPress = true;
-                        }
-                }
-        }
+homekit_value_t led_on_get() {
+        return HOMEKIT_BOOL(led_on);
 }
 
-#define DEVICE_NAME "Programmable Switch"
+void led_on_set(homekit_value_t value) {
+        if (value.format != homekit_format_bool) {
+                printf("Invalid value format: %d\n", value.format);
+                return;
+        }
+
+        led_on = value.bool_value;
+        led_write(led_on);
+}
+
+#define DEVICE_NAME "HomeKit LED"
 #define DEVICE_MANUFACTURER "StudioPieters®"
 #define DEVICE_SERIAL "NLDA4SQN1466"
 #define DEVICE_MODEL "SD466NL/A"
@@ -191,7 +134,7 @@ homekit_characteristic_t model= HOMEKIT_CHARACTERISTIC_(MODEL, DEVICE_MODEL);
 homekit_characteristic_t revision = HOMEKIT_CHARACTERISTIC_(FIRMWARE_REVISION,  FW_VERSION);
 
 homekit_accessory_t *accessories[] = {
-        HOMEKIT_ACCESSORY(.id=1, .category=homekit_accessory_category_programmable_switch, .services=(homekit_service_t*[]){
+        HOMEKIT_ACCESSORY(.id=1, .category=homekit_accessory_category_switch, .services=(homekit_service_t*[]){
                 HOMEKIT_SERVICE(ACCESSORY_INFORMATION, .characteristics=(homekit_characteristic_t*[]){
                         &name,
                         &manufacturer,
@@ -201,10 +144,12 @@ homekit_accessory_t *accessories[] = {
                         HOMEKIT_CHARACTERISTIC(IDENTIFY, led_identify),
                         NULL
                 }),
-                HOMEKIT_SERVICE(STATELESS_PROGRAMMABLE_SWITCH, .primary=true, .characteristics=(homekit_characteristic_t*[]){
-                        HOMEKIT_CHARACTERISTIC(NAME, "Switch"),
+                HOMEKIT_SERVICE(SWITCH, .primary=true, .characteristics=(homekit_characteristic_t*[]){
+                        HOMEKIT_CHARACTERISTIC(NAME, "HomeKit LED"),
                         HOMEKIT_CHARACTERISTIC(
-                                &button_event,
+                                ON, false,
+                                .getter=led_on_get,
+                                .setter=led_on_set
                                 ),
                         NULL
                 }),
@@ -232,18 +177,6 @@ void app_main(void) {
         }
         ESP_ERROR_CHECK( ret );
 
-        gpio_config_t button_config = BUTTON_GPIO(
-                button_active_low,
-                .max_repeat_presses=2,
-                .long_press_time=1000,
-                );
-        if (button_task(PUSH_BUTTON_PINidf, button_config, button_callback, NULL)) {
-                printf("Failed to initialize button\n");
-        }
-
         wifi_init();
         led_init();
-        button_init();
-
-        xTaskCreate(button_task, "button_task", 2048, NULL, 10, NULL);
 }

@@ -14,7 +14,7 @@ menu "StudioPieters"
 
       config ESP_LED_GPIO
               int "Set the GPIO for the LED"
-              default 2
+              default 4
               help
                   The GPIO number the LED is connected to.
 
