@@ -1,0 +1,30 @@
+menu "StudioPieters"
+
+    config EXAMPLE_SSP_ENABLED
+            bool "Secure Simple Pairing"
+            depends on BT_CLASSIC_ENABLED
+            default y
+            help
+                This enables the Secure Simple Pairing. If disable this option,
+                Bluedroid will only support Legacy Pairing
+
+
+      config ESP_LED_GPIO
+              int "Set the GPIO for the LED"
+              default 2
+              help
+                  The GPIO number the LED is connected to.
+
+      config ESP_SETUP_CODE
+              string "HomeKit Setup Code"
+              default "338-77-883"
+              help
+                  If you want to change the HomeKit Setup Code, you can do that here (Note:  you need to make a new QR-CODE To make it work)
+
+      config ESP_SETUP_ID
+              string "HomeKit Setup ID"
+              default "1QJ8"
+              help
+                   If you want to change the HomeKit Setup ID, you can do that here (Note: you need to make a new QR-CODE To make it work)
+
+endmenu

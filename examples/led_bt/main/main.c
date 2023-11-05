@@ -20,7 +20,7 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
    for more information visit https://www.studiopieters.nl
-   
+
  **/
 
 #include <stdio.h>
@@ -34,41 +34,96 @@
 #include <homekit/homekit.h>
 #include <homekit/characteristics.h>
 
-// WiFi setup
-void on_wifi_ready();
+//BLE setup
+#include <esp_bt.h>
+#include <esp_gap_ble_api.h>
+#include <esp_gatts_api.h>
+#include <esp_bt_main.h>
 
-static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
-    if (event_base == WIFI_EVENT && (event_id == WIFI_EVENT_STA_START || event_id == WIFI_EVENT_STA_DISCONNECTED)) {
-        ESP_LOGI("WIFI_EVENT", "STA start");
-        esp_wifi_connect();
-    } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
-        ESP_LOGI("IP_EVENT", "WiFI ready");
-        on_wifi_ready();
+void on_ble_ready();
+
+static void event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) {
+    switch (event) {
+        case ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT:
+            esp_ble_gap_start_advertising(&esp_ble_adv_params_t);
+            break;
+        case ESP_GAP_BLE_SCAN_RSP_DATA_SET_COMPLETE_EVT:
+            esp_ble_gap_start_advertising(&ble_adv_params);
+            break;
+        case ESP_GAP_BLE_ADV_START_COMPLETE_EVT:
+            if (param->adv_start_cmpl.status == ESP_BT_STATUS_SUCCESS) {
+                ESP_LOGI("BLE", "BLE advertising started");
+            }
+            break;
+        case ESP_GAP_BLE_ADV_STOP_COMPLETE_EVT:
+            if (param->adv_stop_cmpl.status == ESP_BT_STATUS_SUCCESS) {
+                ESP_LOGI("BLE", "BLE advertising stopped");
+            }
+            break;
+        case ESP_GAP_BLE_UPDATE_CONN_PARAMS_EVT:
+            ESP_LOGI("BLE", "Update connection parameters");
+            break;
+        case ESP_GAP_BLE_PASSKEY_REQ_EVT:
+            // Handle passkey request (if needed)
+            break;
+        case ESP_GAP_BLE_SEC_REQ_EVT:
+            // Handle security request (if needed)
+            break;
+        case ESP_GAP_BLE_AUTH_CMPL_EVT:
+            // Handle authentication complete event
+            break;
+        case  ESP_GAP_BLE_NC_REQ_EVT:
+            ESP_LOGI("BLE", "Connection opened");
+            on_ble_ready();
+            break;
+        case  ESP_GAP_BLE_NC_REQ_EVT:
+            ESP_LOGI("BLE", "Connection closed");
+            break;
+        default:
+            break;
     }
 }
 
-static void wifi_init() {
-    ESP_ERROR_CHECK(esp_netif_init());
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
-    esp_netif_create_default_wifi_sta();
+static void ble_init() {
+    esp_err_t ret;
 
-    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
-    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL));
+    esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
+    ret = esp_bt_controller_init(&bt_cfg);
+    if (ret != ESP_OK) {
+        ESP_LOGE("BLE", "Bluetooth controller initialization failed");
+        return;
+    }
 
-    wifi_init_config_t wifi_init_config = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK(esp_wifi_init(&wifi_init_config));
-    ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
+    ret = esp_bt_controller_enable(ESP_BT_MODE_BLE);
+    if (ret != ESP_OK) {
+        ESP_LOGE("BLE", "Bluetooth controller enable failed");
+        return;
+    }
 
-    wifi_config_t wifi_config = {
-        .sta = {
-            .ssid = CONFIG_ESP_WIFI_SSID,
-            .password = CONFIG_ESP_WIFI_PASSWORD,
-        },
-    };
+    ret = esp_bluedroid_init();
+    if (ret != ESP_OK) {
+        ESP_LOGE("BLE", "Bluedroid initialization failed");
+        return;
+    }
 
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-    ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
-    ESP_ERROR_CHECK(esp_wifi_start());
+    ret = esp_bluedroid_enable();
+    if (ret != ESP_OK) {
+        ESP_LOGE("BLE", "Bluedroid enable failed");
+        return;
+    }
+
+    esp_ble_gatts_register_callback(event_handler);
+    esp_ble_gap_register_callback(event_handler);
+
+    esp_ble_gatts_app_register(0);
+
+    esp_ble_gatts_app_register(1);
+
+    esp_ble_gatts_app_register(2);
+
+    esp_ble_gatts_app_register(3);
+
+    esp_ble_gap_set_device_name("ESP32_BLE_Device");
 }
 
 // LED control
@@ -173,6 +228,7 @@ void app_main(void) {
     }
     ESP_ERROR_CHECK(ret);
 
-    wifi_init();
+    ble_init();
+
     led_init();
 }
