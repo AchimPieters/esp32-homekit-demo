@@ -35,9 +35,9 @@
 #include <homekit/characteristics.h>
 
 //BLE setup
-#include <esp_bt.h>
 #include <esp_gap_ble_api.h>
 #include <esp_gatts_api.h>
+#include <esp_bt.h>
 #include <esp_bt_main.h>
 
 void on_ble_ready();
@@ -45,10 +45,10 @@ void on_ble_ready();
 static void event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) {
     switch (event) {
         case ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT:
-            esp_ble_gap_start_advertising(&esp_ble_adv_params_t);
+            esp_ble_gap_start_advertising(&ble_adv_params); // Use updated parameter name
             break;
         case ESP_GAP_BLE_SCAN_RSP_DATA_SET_COMPLETE_EVT:
-            esp_ble_gap_start_advertising(&ble_adv_params);
+            esp_ble_gap_start_advertising(&ble_adv_params); // Use updated parameter name
             break;
         case ESP_GAP_BLE_ADV_START_COMPLETE_EVT:
             if (param->adv_start_cmpl.status == ESP_BT_STATUS_SUCCESS) {
@@ -63,7 +63,7 @@ static void event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *
         case ESP_GAP_BLE_UPDATE_CONN_PARAMS_EVT:
             ESP_LOGI("BLE", "Update connection parameters");
             break;
-        case ESP_GAP_BLE_PASSKEY_REQ_EVT:
+        case ESP_GAP_BLE_PASSKEY_NOTIF_EVT: // Updated event name
             // Handle passkey request (if needed)
             break;
         case ESP_GAP_BLE_SEC_REQ_EVT:
@@ -72,11 +72,11 @@ static void event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *
         case ESP_GAP_BLE_AUTH_CMPL_EVT:
             // Handle authentication complete event
             break;
-        case  ESP_GAP_BLE_NC_REQ_EVT:
+        case ESP_GAP_BLE_NC_REQ_EVT:
             ESP_LOGI("BLE", "Connection opened");
             on_ble_ready();
             break;
-        case  ESP_GAP_BLE_NC_REQ_EVT:
+        case ESP_GAP_BLE_NC_DISC_EVT: // Updated event name
             ESP_LOGI("BLE", "Connection closed");
             break;
         default:

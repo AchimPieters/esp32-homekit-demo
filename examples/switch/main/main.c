@@ -73,10 +73,10 @@ static void wifi_init() {
 #define LED_GPIO CONFIG_ESP_LED_GPIO
 bool led_on = false;
 
-
+// switch
 #define BUTTON_GPIO CONFIG_ESP_BUTTON_GPIO
 #define RELAY_GPIO CONFIG_ESP_RELAY_GPIO
-
+// switch
 
 void led_write(bool on) {
         gpio_set_level(LED_GPIO, on ? 1 : 0);
@@ -87,7 +87,7 @@ void led_init() {
         led_write(led_on);
 }
 
-
+// switch
 void switch_on_callback(homekit_characteristic_t *_ch, homekit_value_t on, void *context);
 void button_callback(uint8_t gpio, int event); // Add parameter types for button_callback
 
@@ -100,15 +100,12 @@ homekit_characteristic_t switch_on = HOMEKIT_CHARACTERISTIC_(
         );
 
 void gpio_init() {
-        gpio_dump_io_configuration(BUTTON_GPIO, 1ULL << GPIO_NUM_0);
         gpio_set_direction(BUTTON_GPIO, GPIO_MODE_INPUT);
-        gpio_set_pull_mode(BUTTON_GPIO, GPIO_PULLUP_DISABLE);
-        gpio_set_pull_mode(BUTTON_GPIO, GPIO_PULLDOWN_ENABLE);
-        gpio_set_intr_type(BUTTON_GPIO, GPIO_INTR_DISABLE);
+        gpio_set_pull_mode(BUTTON_GPIO, GPIO_PULLUP_ONLY);
         gpio_set_direction(RELAY_GPIO, GPIO_MODE_OUTPUT);
         relay_write(switch_on.value.bool_value);
 }
-
+// switch
 
 // Accessory identification
 void accessory_identify_task(void *args) {
@@ -129,26 +126,26 @@ void accessory_identify(homekit_value_t _value) {
         ESP_LOGI("ACCESSORY_IDENTIFY", "Accessory identify");
         xTaskCreate(accessory_identify_task, "Accessory identify", 2048, NULL, 2, NULL);
 }
+// Accessory identification
 
-
-// toggle button
+// switch
 void switch_on_callback(homekit_characteristic_t *_ch, homekit_value_t on, void *context) {
         relay_write(switch_on.value.bool_value);
 }
 
 void button_task(void *pvParameter) {
         while (1) {
-                if (gpio_get_level(BUTTON_GPIO) == 0) {
-                        ESP_LOGI("TOGGLE_RELAY", "Toggling relay");
+                if (gpio_get_level(BUTTON_GPIO) == 1) {
+                        ESP_LOGI("BUTTON TOGGLE", "Button toggle");
                         switch_on.value.bool_value = !switch_on.value.bool_value;
                         relay_write(switch_on.value.bool_value);
                         homekit_characteristic_notify(&switch_on, switch_on.value);
-                        vTaskDelay(1000 / portTICK_PERIOD_MS); // Debounce the button
+                        vTaskDelay(500 / portTICK_PERIOD_MS); // Debounce the button
                 }
                 vTaskDelay(10 / portTICK_PERIOD_MS); // Delay to avoid busy-waiting
         }
 }
-
+//switch
 
 #define DEVICE_NAME "HomeKit Switch"
 #define DEVICE_MANUFACTURER "StudioPieters®"
@@ -208,6 +205,6 @@ void app_main(void) {
         led_init();
         gpio_init();
 
-        // Create a task to toggle the Relay based on button presses
+        // Create a task to toggle the LED based on button presses
         xTaskCreate(button_task, "button_task", 2048, NULL, 10, NULL);
 }
