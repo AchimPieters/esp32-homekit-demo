@@ -1,1 +1,1 @@
-COMPONENT_DEPENDS = homekit button
+COMPONENT_DEPENDS = homekit

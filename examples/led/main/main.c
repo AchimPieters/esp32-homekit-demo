@@ -20,7 +20,7 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
    for more information visit https://www.studiopieters.nl
-   
+
  **/
 
 #include <stdio.h>
@@ -78,8 +78,8 @@ bool led_on = false;
 void led_write(bool on) {
     gpio_set_level(LED_GPIO, on ? 1 : 0);
 }
-
-void led_init() {
+// All GPIO Settings
+void gpio_init() {
     gpio_set_direction(LED_GPIO, GPIO_MODE_OUTPUT);
     led_write(led_on);
 }
@@ -174,5 +174,5 @@ void app_main(void) {
     ESP_ERROR_CHECK(ret);
 
     wifi_init();
-    led_init();
+    gpio_init();
 }

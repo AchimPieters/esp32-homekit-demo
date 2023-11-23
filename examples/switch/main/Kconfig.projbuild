@@ -19,10 +19,10 @@ menu "StudioPieters"
                   The GPIO number the LED is connected to.
 
       config ESP_BUTTON_GPIO
-              int "Set the GPIO for the Button"
+              int "Set the GPIO for the Toggle Button"
               default 33
               help
-                  This the default GPIO of the Program button of an ESP board.
+                  This the default GPIO of the toggle button of an ESP board.
 
       config ESP_RELAY_GPIO
               int "Set the GPIO for the Relay"

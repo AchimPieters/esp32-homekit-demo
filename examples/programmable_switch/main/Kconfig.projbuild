@@ -12,27 +12,33 @@ menu "StudioPieters"
               help
                   WiFi password (WPA or WPA2) for the example to use.
 
-      config LED_GPIO
+      config ESP_LED_GPIO
               int "Set the GPIO for the LED"
-              default 4
+              default 2
               help
                   The GPIO number the LED is connected to.
 
-      config BUTTON_GPIO
-              int "Set the GPIO for the BUTTON"
+      config ESP_BUTTON_GPIO
+              int "Set the GPIO for the Button"
               default 33
               help
-                  The GPIO number the Button is connected to.
-                  
+                  This the default GPIO of the Program button of an ESP board.
+
+      config ESP_RELAY_GPIO
+              int "Set the GPIO for the Relay"
+              default 4
+              help
+                  The GPIO number the Relay is connected to.
+
       config ESP_SETUP_CODE
               string "HomeKit Setup Code"
-              default "338-77-883"
+              default "323-33-757"
               help
                   If you want to change the HomeKit Setup Code, you can do that here (Note:  you need to make a new QR-CODE To make it work)
 
       config ESP_SETUP_ID
               string "HomeKit Setup ID"
-              default "1QJ8"
+              default "7P7S"
               help
                    If you want to change the HomeKit Setup ID, you can do that here (Note: you need to make a new QR-CODE To make it work)
 
