@@ -1,6 +1,6 @@
 [submodule "components/homekit"]
 	path = components/homekit
 	url = https://AchimPieters@github.com/AchimPieters/esp32-homekit.git
-[submodule "esp32-button"]
-	path = esp32-button
-	url = https://AchimPieters@github.com/AchimPieters/esp32-homekit-demo.git
+[submodule "components/esp32-button"]
+	path = components/esp32-button
+	url = https://AchimPieters@github.com/AchimPieters/esp32-button.git
