@@ -18,33 +18,15 @@ menu "StudioPieters"
               help
                   The GPIO number the LED is connected to.
 
-      config ESP_BUTTON_GPIO
-              int "Set the GPIO for the Toggle Button"
-              default 33
-              help
-                  This the default GPIO of the toggle button of an ESP board.
-
-      config ESP_RELAY_GPIO
-              int "Set the GPIO for the Relay"
-              default 4
-              help
-                  The GPIO number the Relay is connected to.
-
-      config ESP_LOCK_OPEN
-              int "Set the lock open time in seconds"
-              default 5
-              help
-                  Set the Time you want the lock to stay open in seconds.
-
       config ESP_SETUP_CODE
               string "HomeKit Setup Code"
-              default "737-33-394"
+              default "338-77-883"
               help
                   If you want to change the HomeKit Setup Code, you can do that here (Note:  you need to make a new QR-CODE To make it work)
 
       config ESP_SETUP_ID
               string "HomeKit Setup ID"
-              default "L0CK"
+              default "1QJ8"
               help
                    If you want to change the HomeKit Setup ID, you can do that here (Note: you need to make a new QR-CODE To make it work)
 

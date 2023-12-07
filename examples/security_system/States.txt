@@ -1,0 +1,48 @@
+What is the Difference Between Armed and Disarmed?
+The difference between Armed and Disarmed is that various intrusion zones can trigger an alarm while the system is in an Armed state, but not in a Disarmed state. Only 24-Hour Zones are capable of triggering an alarm on a Disarmed security system. A 24-Hour Zone is always active.
+
+Arming and Disarming is arguably the most basic and routine task you will perform on your system. When you Arm your system, you are putting it into a secured state. You are basically telling your system that certain activities (e.g. a window being opened) shouldn't occur for any reason. If those events do occur while the system is in an Armed state, then the system will assume that an intrusion event is taking place. An alarm will then occur, and the proper action will be taken (e.g. alerting the central station and/or the end user).
+
+Other, more routine, activities that occur while your system is Armed, like your front door being opened, should require verification by having the user Disarm the system by entering a valid code within a certain predetermined period of time. This act of Disarming the system with a valid code entry essentially tells the system that you are authorized for access and that no further action is needed. But if you fail to Disarm within the allowed time period, then the system will assume that you are not authorized, and an alarm will occur. This delay period, usually referred to as an Entry Delay, should be no longer than what is needed to allow an authorized user to disarm the system.
+
+To better understand how a security system responds, it is necessary to discuss Response Types. These may also be referred to as Sensor Groups, depending on the system that is being used. A Response Type or the Sensor Group setting for a zone determines how the system should respond when that zone is faulted, or triggered. The Response Type or Sensor Group that you assign to a zone will usually depend on what type of sensor is being used. For example, an interior motion detection sensor should only be able to trigger an alarm on the system while the system is in an Armed state with nobody inside (aka, Armed Away). But a glass break detection sensor that indicates a window being broken should be able to trigger an immediate alarm whenever the system is Armed (whether Armed Stay or Armed Away). Thus, you would assign Response Types or Sensor Groups for these zones accordingly.
+
+To break it down a bit further, there are two (2) main Arming types used with security systems. These are Arm Stay and Arm Away. Arm Stay tells the system that there is at least one person remaining inside the building, but the system should still remain secured and on the lookout for a potential intrusion. In this mode, zones with an Interior Response Type (e.g. an interior motion sensor) won't be able to trigger an alarm, as it is likely that a person moving inside the building would activate them. But zones with with a Perimeter Response Type indicating a likely intrusion (e.g. a glass break sensor or a window sensor) will trigger an immediate alarm if activated while the system is Armed Stay. Entry/Exit Zones that are used for coming and going (e.g. your home's front door or back door) will also be active while Armed Stay. Triggering one of these zones will require you to verify authorization to the system by entering a valid code within a set delay period.
+
+Arm Stay should not be confused with the other primary Arming type, which is Armed Away. When you Arm Away, you are telling the system that nobody should be inside the building and that the system should be placed into a secured state. The big difference between Arm Away and Arm Stay is that Interior Zones are active while Armed Away. If an Interior Zone is faulted while the system is Armed Away, then the system will assume that an intrusion is taking place, as nobody is supposed to be inside the building. In most cases, activating an Interior Zone prior to activating an Entry/Exit zone while the system is Armed Away will result in an immediate alarm. Zones with Perimeter and Entry/Exit Response Types will trigger the same action whether the system is Armed Stay or Armed Away. It's only the Interior Zones that behave differently.
+
+The other common zone type you are likely to encounter is a 24-Hour Zone. This type of zone should never be faulted for any reason, unless there is a legitimate emergency. Upon activation, this zone will trigger an immediate alarm on the system, regardless of whether the system is Armed or Disarmed. You will most likely use a 24-Hour Response Type on a life-safety sensor (e.g. a smoke detector or CO detector), a panic button or medical alert button that is used to call for help, or on an emergency or fire exit door. The main types of 24-Hour Zones include 24-Hour Burglary, 24-Hour Police, 24-Hour Fire, 24-Hour Carbon Monoxide, and 24-Hour Auxiliary.
+
+We understand that this may be a lot of information to take in, so we created the following table to break it all down. Please note that we made a lot of generalizations here, and there may be more specific Response Types that may be assigned to zones. This is just a basic overview of common Response Types and how a system will respond based on its current Arming state.
+
+
+Description
+Common Examples
+Activated While Disarmed
+Activated While Armed Stay
+Activated While Armed Away
+Entry/Exit Zone
+A zone used for coming and going.	Front Door
+Back Door
+Garage Door	Fault Display on Keypad	Must Disarm within Entry Delay Period to verify authorization	Must Disarm within Entry Delay Period to verify authorization
+Interior Zone
+A security zone inside the building that should never be activated while the system is Armed Away. Activating while Armed Away indicates intrusion. This type of zone is automatically bypassed when arming in the Stay Mode.	Interior Motion Sensor
+Medicine Cabinet
+Interior Door	Fault Display on Keypad	No Action.	Immediate Alarm (Interior Follower)
+
+OR
+
+Must Disarm within Entry Delay Period to verify authorization (Interior w/ Delay)
+Perimeter Zone
+A security zone used to indicate certain intrusion. It should not be activated while the system is Armed. Will cause an alarm if triggered during an entry or exit delay period.	Window
+Glass Break Sensor	Fault Display on Keypad	Immediate Alarm	Immediate Alarm
+24-Hour Zone
+A zone used to indicate a serious emergency. It should never be activated, regardless of Arming state unless a true emergency exists.	Smoke Detector
+CO Detector
+Panic Button
+Emergency Exit
+Gas Sensor
+Heat Detector	Immediate Alarm	Immediate Alarm	Immediate Alarm
+
+
+Read more: https://www.alarmgrid.com/faq/what-is-the-difference-between-armed-and-disarmed

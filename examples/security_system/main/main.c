@@ -34,8 +34,6 @@
 #include <homekit/homekit.h>
 #include <homekit/characteristics.h>
 
-#include <button.h>
-
 // WiFi setup
 void on_wifi_ready();
 
@@ -73,31 +71,17 @@ static void wifi_init() {
         ESP_ERROR_CHECK(esp_wifi_start());
 }
 
-#define BUTTON_GPIO CONFIG_ESP_BUTTON_GPIO
-
+// LED control
 #define LED_GPIO CONFIG_ESP_LED_GPIO
 bool led_on = false;
-
-#define RELAY_GPIO CONFIG_ESP_RELAY_GPIO
-bool relay_on = false;
-
-void lock_lock();
-void lock_unlock();
 
 void led_write(bool on) {
         gpio_set_level(LED_GPIO, on ? 1 : 0);
 }
-
-void relay_write(bool on) {
-        gpio_set_level(RELAY_GPIO, on ? 1 : 0);
-}
-
+// All GPIO Settings
 void gpio_init() {
         gpio_set_direction(LED_GPIO, GPIO_MODE_OUTPUT);
         led_write(led_on);
-
-        gpio_set_direction(RELAY_GPIO, GPIO_MODE_OUTPUT);
-        relay_write(relay_on);
 }
 
 // Accessory identification
@@ -119,99 +103,51 @@ void accessory_identify(homekit_value_t _value) {
         ESP_LOGI("ACCESSORY_IDENTIFY", "Accessory identify");
         xTaskCreate(accessory_identify_task, "Accessory identify", 2048, NULL, 2, NULL);
 }
-// Accessory identification
 
+void update_state();
 
+void on_update(homekit_characteristic_t *ch, homekit_value_t value, void *context) {
+        update_state();
+}
+homekit_characteristic_t security_system_current_state = HOMEKIT_CHARACTERISTIC_(SECURITY_SYSTEM_CURRENT_STATE, 0);
+homekit_characteristic_t security_system_target_state = HOMEKIT_CHARACTERISTIC_(SECURITY_SYSTEM_TARGET_STATE, 0, .callback=HOMEKIT_CHARACTERISTIC_CALLBACK(on_update));
 
-void button_callback(button_event_t event, void *context) {
-        switch (event) {
-        case button_event_single_press:
-                ESP_LOGI("SINGLE_PRESS", "single press");
-                lock_unlock();
-                break;
-        case button_event_double_press:
-                ESP_LOGI("DOUBLE_PRESS", "Double press");
+// 0 ”Stay Arm. The home is occupied and the residents are active. e.g. morning or evenings”
+// 1 ”Away Arm. The home is unoccupied”
+// 2 ”Night Arm. The home is occupied and the residents are sleeping”
+// 3 ”Disarmed”
+// 4 ”Alarm Triggered”
 
-                break;
-        case button_event_long_press:
-                ESP_LOGI("LONG_PRESS", "Long press");
-
-                break;
-        default:
-                ESP_LOGI("UNKNOWN_BUTTON_EVENT", "unknown button event: %d", event);
+void update_state() {
+        if (security_system_current_state.value.int_value != 1 && security_system_target_state.value.int_value == 1) {
+                security_system_current_state.value = HOMEKIT_UINT8(1);
+                ESP_LOGI("SECURITY_STYSTEM_AWAY_ARMED", "Security System Away - System Armed");
+                homekit_characteristic_notify(&security_system_current_state, security_system_current_state.value);
+        }
+        else if (security_system_current_state.value.int_value != 2 && security_system_target_state.value.int_value == 2) {
+                security_system_current_state.value = HOMEKIT_UINT8(2);
+                ESP_LOGI("SECURITY_STYSTEM_NIGHT_ARMED", "Security System Night - System Armed");
+                homekit_characteristic_notify(&security_system_current_state, security_system_current_state.value);
+        }
+        else if (security_system_current_state.value.int_value != 2 && security_system_target_state.value.int_value == 3) {
+                security_system_current_state.value = HOMEKIT_UINT8(3);
+                ESP_LOGI("SECURITY_STYSTEM_DISARMED", "Security System Night - System Disarmed");
+                homekit_characteristic_notify(&security_system_current_state, security_system_current_state.value);
+        }
+        else if (security_system_current_state.value.int_value != 2 && security_system_target_state.value.int_value == 4) {
+                security_system_current_state.value = HOMEKIT_UINT8(4);
+                printf("Security System Alarm Triggered.\n");
+                ESP_LOGI("SECURITY_STYSTEM_ALARM_TRIGGER", "Security System Alarm - Alarm trigger");
+                homekit_characteristic_notify(&security_system_current_state, security_system_current_state.value);
+        }
+        else if (security_system_current_state.value.int_value != 0 && security_system_target_state.value.int_value == 0) {
+                security_system_current_state.value = HOMEKIT_UINT8(0);
+                ESP_LOGI("SECURITY_STYSTEM_ARMED", "Security System Armed - System Armed");
+                homekit_characteristic_notify(&security_system_current_state, security_system_current_state.value);
         }
 }
 
-// The current state the physical security mechanism
-// 0 ”Unsecured” This state indicates that the lock is currently unsecured or unlocked. It means that the door or lock is not currently in a locked state.
-// 1 ”Secured” This state indicates that the lock is currently secured or locked. It means that the door or lock is in a locked state, providing security.
-// 2 ”Jammed” This state indicates that the lock is jammed or unable to move freely. It suggests that there might be a physical obstruction preventing the lock from functioning correctly.
-// 3 ”Unknown” This state indicates that the current state of the lock is unknown or cannot be determined. It might be used when the HomeKit system cannot reliably ascertain the current state of the lock.
-
-typedef enum {
-        lock_state_unsecured = 0,
-        lock_state_secured = 1,
-        lock_state_jammed = 2,
-        lock_state_unknown = 3,
-} lock_state_t;
-
-homekit_characteristic_t lock_current_state = HOMEKIT_CHARACTERISTIC_(LOCK_CURRENT_STATE,lock_state_unknown,);
-
-// The target state the physical security mechanism
-// 0 ”Unsecured” This state indicates that the lock is currently unsecured or unlocked. It means that the door or lock is not currently in a locked state.
-// 1 ”Secured” This state indicates that the lock is currently secured or locked. It means that the door or lock is in a locked state, providing security.
-
-void lock_target_state_setter(homekit_value_t value);
-
-homekit_characteristic_t lock_target_state = HOMEKIT_CHARACTERISTIC_(LOCK_TARGET_STATE,lock_state_secured,.setter=lock_target_state_setter,);
-
-void lock_target_state_setter(homekit_value_t value) {
-        lock_target_state.value = value;
-        if (value.int_value == lock_state_unsecured) {
-                lock_unlock();
-        } else {
-                lock_lock();
-        }
-}
-
-void lock_lock() {
-    relay_write(0);
-    led_write(0);
-    if (lock_current_state.value.int_value != lock_state_secured) {
-        lock_current_state.value = HOMEKIT_UINT8(lock_state_secured);
-        homekit_characteristic_notify(&lock_current_state, lock_current_state.value);
-    }
-}
-
-void lock_timeout() {
-    if (lock_target_state.value.int_value != lock_state_secured) {
-        lock_target_state.value = HOMEKIT_UINT8(lock_state_secured);
-        homekit_characteristic_notify(&lock_target_state, lock_target_state.value);
-    }
-    lock_lock();
-}
-
-void lock_init() {
-    lock_current_state.value = HOMEKIT_UINT8(lock_state_secured);
-    homekit_characteristic_notify(&lock_current_state, lock_current_state.value);
-    lock_timeout();
-}
-
-void lock_unlock() {
-    relay_write(1);
-    led_write(1);
-    lock_current_state.value = HOMEKIT_UINT8(lock_state_unsecured);
-    homekit_characteristic_notify(&lock_current_state, lock_current_state.value);
-    vTaskDelay(pdMS_TO_TICKS(1000 * CONFIG_ESP_LOCK_OPEN)); // Delay
-    lock_init();
-}
-
-//vTaskDelay(pdMS_TO_TICKS(1000 * CONFIG_ESP_LOCK_OPEN)); // Delay
-void lock_control_point(homekit_value_t value) {
-        // Nothing to do here
-}
-
-#define DEVICE_NAME "HomeKit Lock Mechanism"
+#define DEVICE_NAME "HomeKit Security System"
 #define DEVICE_MANUFACTURER "StudioPieters®"
 #define DEVICE_SERIAL "NLDA4SQN1466"
 #define DEVICE_MODEL "SD466NL/A"
@@ -223,10 +159,11 @@ homekit_characteristic_t serial = HOMEKIT_CHARACTERISTIC_(SERIAL_NUMBER, DEVICE_
 homekit_characteristic_t model = HOMEKIT_CHARACTERISTIC_(MODEL, DEVICE_MODEL);
 homekit_characteristic_t revision = HOMEKIT_CHARACTERISTIC_(FIRMWARE_REVISION, FW_VERSION);
 
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverride-init"
 homekit_accessory_t *accessories[] = {
-        HOMEKIT_ACCESSORY(.id = 1, .category = homekit_accessory_category_locks, .services = (homekit_service_t*[]) {
+        HOMEKIT_ACCESSORY(.id = 1, .category = homekit_accessory_category_security_systems, .services = (homekit_service_t*[]) {
                 HOMEKIT_SERVICE(ACCESSORY_INFORMATION, .characteristics = (homekit_characteristic_t*[]) {
                         &name,
                         &manufacturer,
@@ -236,27 +173,17 @@ homekit_accessory_t *accessories[] = {
                         HOMEKIT_CHARACTERISTIC(IDENTIFY, accessory_identify),
                         NULL
                 }),
-                HOMEKIT_SERVICE(LOCK_MECHANISM, .primary=true, .characteristics=(homekit_characteristic_t*[]){
-                        HOMEKIT_CHARACTERISTIC(NAME, "Lock Mechanism"),
-                        &lock_current_state,
-                        &lock_target_state,
-                        NULL
-                }),
-                HOMEKIT_SERVICE(LOCK_MANAGEMENT, .characteristics=(homekit_characteristic_t*[]){
-                        HOMEKIT_CHARACTERISTIC(
-                                LOCK_CONTROL_POINT,
-                                .setter=lock_control_point
-                                ),
-                        HOMEKIT_CHARACTERISTIC(
-                                VERSION, "1"),
+                HOMEKIT_SERVICE(SECURITY_SYSTEM, .primary=true, .characteristics=(homekit_characteristic_t*[]) {
+                        HOMEKIT_CHARACTERISTIC(NAME, "HomeKit Security System"),
+                        &security_system_current_state,
+                        &security_system_target_state,
+
                         NULL
                 }),
                 NULL
         }),
         NULL
 };
-
-
 
 #pragma GCC diagnostic pop
 
@@ -280,18 +207,4 @@ void app_main(void) {
 
         wifi_init();
         gpio_init();
-        lock_init();
-
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Woverride-init"
-        button_config_t button_config = BUTTON_CONFIG(
-                button_active_low,
-                .max_repeat_presses=2,
-                .long_press_time=1000,
-                );
-        #pragma GCC diagnostic pop
-
-        if (button_create(BUTTON_GPIO, button_config, button_callback, NULL)) {
-                ESP_LOGI("FAILED_TO_INITIALIZE_BUTTON", "Failed to initialize button");
-        }
 }
