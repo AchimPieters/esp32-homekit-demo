@@ -47,19 +47,19 @@ menu "StudioPieters"
 
       config ESP_FAN_GPIO
               int "Set the GPIO for the Fan"
-              default 14
+              default 25
               help
                   The GPIO number the fan is connected to.
 
       config ESP_COOLER_GPIO
               int "Set the GPIO for the Cooler"
-              default 12
+              default 26
               help
                   The GPIO number the cooler is connected to.
 
       config ESP_HEATER_GPIO
                 int "Set the GPIO for the Heater"
-                default 13
+                default 27
                 help
                     The GPIO number the heater is connected to.
 

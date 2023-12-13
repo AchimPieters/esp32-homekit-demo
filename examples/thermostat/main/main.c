@@ -95,7 +95,7 @@ bool cooler_on = false;
 bool heater_on = false;
 
 #define TEMPERATURE_POLL_PERIOD 10000
-#define HEATER_FAN_DELAY 30000
+#define HEATER_FAN_DELAY 3000
 #define COOLER_FAN_DELAY 0
 
 void led_write(bool on) {
@@ -165,31 +165,32 @@ void update_state() {
                 if (current_state.value.int_value != 1) {
                         current_state.value = HOMEKIT_UINT8(1);
                         homekit_characteristic_notify(&current_state, current_state.value);
-
                         heater_write(true);
                         cooler_write(false);
                         vTaskDelay(pdMS_TO_TICKS(HEATER_FAN_DELAY));
                         fan_write(true);
+                        ESP_LOGI("HEATER_ON", "Heater On");
+
                 }
         } else if ((state == 2 && current_temperature.value.float_value > target_temperature.value.float_value) ||
                    (state == 3 && current_temperature.value.float_value > cooling_threshold.value.float_value)) {
                 if (current_state.value.int_value != 2) {
                         current_state.value = HOMEKIT_UINT8(2);
                         homekit_characteristic_notify(&current_state, current_state.value);
-
                         cooler_write(true);
                         heater_write(false);
                         vTaskDelay(pdMS_TO_TICKS(COOLER_FAN_DELAY));
                         fan_write(true);
+                        ESP_LOGI("COOLER_ON", "Cooler On");
                 }
         } else {
                 if (current_state.value.int_value != 0) {
                         current_state.value = HOMEKIT_UINT8(0);
                         homekit_characteristic_notify(&current_state, current_state.value);
-
                         cooler_write(false);
                         heater_write(false);
                         fan_write(false);
+                        ESP_LOGI("OFF", "Off");
                 }
         }
 }
@@ -206,7 +207,7 @@ void temperature_sensor_task(void *pvParameters) {
 
         while (1) {
                 if (dht_read_float_data(SENSOR_TYPE, CONFIG_ESP_TEMP_SENSOR_GPIO, &humidity_value, &temperature_value) == ESP_OK) {
-                        ESP_LOGI(TAG, "Humidity: %.1f%% Temp: %.1fC", humidity_value, temperature_value);
+                        ESP_LOGI(TAG, "Humidity: %.1f%% Temperature: %.1fC", humidity_value, temperature_value);
 
                         current_temperature.value = HOMEKIT_FLOAT(temperature_value);
                         current_humidity.value = HOMEKIT_FLOAT(humidity_value);

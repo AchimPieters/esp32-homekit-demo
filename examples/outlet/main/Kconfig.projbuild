@@ -1,0 +1,69 @@
+menu "StudioPieters"
+
+      config ESP_WIFI_SSID
+              string "WiFi SSID"
+              default "myssid"
+              help
+                  SSID (network name) for the example to connect to.
+
+      config ESP_WIFI_PASSWORD
+              string "WiFi Password"
+              default "mypassword"
+              help
+                  WiFi password (WPA or WPA2) for the example to use.
+
+      config ESP_LED_GPIO
+              int "Set the GPIO for the LED"
+              default 2
+              help
+                  The GPIO number the LED is connected to.
+
+      config ESP_BUTTON_1_GPIO
+              int "Set the GPIO for the Toggle Button 1"
+              default 34
+              help
+                  This the default GPIO of the toggle button of an ESP board.
+
+      config ESP_BUTTON_2_GPIO
+              int "Set the GPIO for the Toggle Button 2"
+              default 35
+              help
+                  This the default GPIO of the toggle button of an ESP board.
+
+      config ESP_BUTTON_3_GPIO
+              int "Set the GPIO for the Toggle Button 3 s"
+              default 36
+              help
+                  This the default GPIO of the toggle button of an ESP board.
+
+      config ESP_RELAY_1_GPIO
+              int "Set the GPIO for the Relay 1"
+              default 25
+              help
+                  The GPIO number the Relay is connected to.
+
+      config ESP_RELAY_2_GPIO
+              int "Set the GPIO for the Relay 2"
+              default 26
+              help
+                  The GPIO number the Relay is connected to.
+
+      config ESP_RELAY_3_GPIO
+              int "Set the GPIO for the Relay 3"
+              default 27
+              help
+                  The GPIO number the Relay is connected to.
+
+      config ESP_SETUP_CODE
+              string "HomeKit Setup Code"
+              default "778-33-887"
+              help
+                  If you want to change the HomeKit Setup Code, you can do that here (Note:  you need to make a new QR-CODE To make it work)
+
+      config ESP_SETUP_ID
+              string "HomeKit Setup ID"
+              default "2R9K"
+              help
+                   If you want to change the HomeKit Setup ID, you can do that here (Note: you need to make a new QR-CODE To make it work)
+
+endmenu
