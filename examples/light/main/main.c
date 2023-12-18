@@ -52,6 +52,20 @@ static void wifi_init() {
 #define LED_STRIP_GPIO CONFIG_ESP_LED_GPIO
 #define LED_STRIP_LENGTH CONFIG_ESP_STRIP_LENGTH
 
+#if defined(CONFIG_LED_MODEL_WS2812)
+#define LED_TYPE LED_MODEL_WS2812
+#endif
+#if defined(CONFIG_LED_MODEL_SK6812)
+#define LED_TYPE LED_MODEL_SK6812
+#endif
+
+#if defined(CONFIG_LED_PIXEL_FORMAT_GRB)
+#define LED_PIXEL_FORMAT LED_PIXEL_FORMAT_GRB
+#endif
+#if defined(CONFIG_LED_PIXEL_FORMAT_GRBW)
+#define LED_PIXEL_FORMAT LED_PIXEL_FORMAT_GRBW
+#endif
+
 // LED control
 led_strip_handle_t led_strip;
 
@@ -63,26 +77,30 @@ float led_saturation = 50;
 // led_strip name: led_strip | i: amount of led's on the string | Hue: 0-360 | Saturation: 0-255 | Value (led_brightness): 0-255
 // led_strip_set_pixel_hsv(led_strip, 0, 120, 255, 128);
 
-void led_write() {
+void led_write(bool on) {
         if (led_strip) {
-                for (int i = 0; i < LED_STRIP_LENGTH; i++) {
-                        ESP_ERROR_CHECK(led_strip_set_pixel_hsv(led_strip, i, led_hue, led_saturation, led_brightness));
+                if (on) {
+                        for (int i = 0; i < LED_STRIP_LENGTH; i++) {
+                                ESP_ERROR_CHECK(led_strip_set_pixel_hsv(led_strip, i, led_hue, led_saturation, led_brightness));
+                        }
+                } else {
+                        // Turn off all LEDs
+                        for (int i = 0; i < LED_STRIP_LENGTH; i++) {
+                                ESP_ERROR_CHECK(led_strip_set_pixel_hsv(led_strip, i, 0, 0, 0));
+                        }
                 }
                 ESP_ERROR_CHECK(led_strip_refresh(led_strip));
         }
 }
 
-void led_init() {
-        led_write(led_on);
-}
 
 // All GPIO Settings
 static void led_strip_init() {
         led_strip_config_t strip_config = {
                 .strip_gpio_num = LED_STRIP_GPIO,
                 .max_leds = LED_STRIP_LENGTH,
-                .led_pixel_format = LED_PIXEL_FORMAT_GRBW,
-                .led_model = LED_MODEL_SK6812,
+                .led_pixel_format = LED_PIXEL_FORMAT,
+                .led_model = LED_TYPE,
                 .flags.invert_out = false,
         };
 
@@ -127,19 +145,20 @@ void led_on_set(homekit_value_t value) {
         }
 
         led_on = value.bool_value;
-        led_write();
+        led_write(led_on);
 }
 
 homekit_value_t led_brightness_get() {
         return HOMEKIT_INT(led_brightness);
 }
+
 void led_brightness_set(homekit_value_t value) {
         if (value.format != homekit_format_int) {
                 // printf("Invalid brightness-value format: %d\n", value.format);
                 return;
         }
         led_brightness = value.int_value;
-        led_write();
+        led_write(led_on); // Pass the state to led_write
 }
 
 homekit_value_t led_hue_get() {
@@ -152,7 +171,7 @@ void led_hue_set(homekit_value_t value) {
                 return;
         }
         led_hue = value.float_value;
-        led_write();
+        led_write(led_on); // Pass the state to led_write
 }
 
 homekit_value_t led_saturation_get() {
@@ -165,9 +184,8 @@ void led_saturation_set(homekit_value_t value) {
                 return;
         }
         led_saturation = value.float_value;
-        led_write();
+        led_write(led_on); // Pass the state to led_write
 }
-
 #define DEVICE_NAME "HomeKit Light"
 #define DEVICE_MANUFACTURER "StudioPieters®"
 #define DEVICE_SERIAL "NLDA4SQN1466"
@@ -240,8 +258,6 @@ void app_main(void) {
                 ret = nvs_flash_init();
         }
         ESP_ERROR_CHECK(ret);
-
         wifi_init();
-        led_init();
         led_strip_init();
 }
