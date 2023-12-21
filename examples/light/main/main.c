@@ -6,10 +6,10 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <driver/gpio.h>
+#include <driver/ledc.h>
 #include <homekit/homekit.h>
 #include <homekit/characteristics.h>
-#include <led_strip.h>
-#include <led_strip_rmt.h>
+#include <math.h>
 
 // WiFi setup
 void on_wifi_ready();
@@ -48,83 +48,67 @@ static void wifi_init() {
         ESP_ERROR_CHECK(esp_wifi_start());
 }
 
-// LED Strip setup
-#define LED_STRIP_GPIO CONFIG_ESP_LED_GPIO
-#define LED_STRIP_LENGTH CONFIG_ESP_STRIP_LENGTH
-
-#if defined(CONFIG_LED_MODEL_WS2812)
-#define LED_TYPE LED_MODEL_WS2812
-#endif
-#if defined(CONFIG_LED_MODEL_SK6812)
-#define LED_TYPE LED_MODEL_SK6812
-#endif
-
-#if defined(CONFIG_LED_PIXEL_FORMAT_GRB)
-#define LED_PIXEL_FORMAT LED_PIXEL_FORMAT_GRB
-#endif
-#if defined(CONFIG_LED_PIXEL_FORMAT_GRBW)
-#define LED_PIXEL_FORMAT LED_PIXEL_FORMAT_GRBW
-#endif
-
 // LED control
-led_strip_handle_t led_strip;
-
+#define LED_GPIO CONFIG_ESP_LED_GPIO
 bool led_on = false;
-float led_brightness = 50;
-float led_hue = 0;
-float led_saturation = 50;
+uint32_t led_brightness = 100;  // Default brightness
 
-// led_strip name: led_strip | i: amount of led's on the string | Hue: 0-360 | Saturation: 0-255 | Value (led_brightness): 0-255
-// led_strip_set_pixel_hsv(led_strip, 0, 120, 255, 128);
+// PWM Settings
+#define LEDC_TIMER          LEDC_TIMER_0
+#define LEDC_MODE           LEDC_HIGH_SPEED_MODE
+#define LEDC_CHANNEL        LEDC_CHANNEL_0
+#define LEDC_RESOLUTION     LEDC_TIMER_13_BIT
+#define LEDC_FREQUENCY      (5000)
 
-void led_write(bool on) {
-        if (led_strip) {
-                if (on) {
-                        for (int i = 0; i < LED_STRIP_LENGTH; i++) {
-                                ESP_ERROR_CHECK(led_strip_set_pixel_hsv(led_strip, i, led_hue, led_saturation, led_brightness));
-                        }
-                } else {
-                        // Turn off all LEDs
-                        for (int i = 0; i < LED_STRIP_LENGTH; i++) {
-                                ESP_ERROR_CHECK(led_strip_set_pixel_hsv(led_strip, i, 0, 0, 0));
-                        }
-                }
-                ESP_ERROR_CHECK(led_strip_refresh(led_strip));
-        }
+// Initialize PWM
+static void pwm_init() {
+        ledc_timer_config_t ledc_timer = {
+                .duty_resolution = LEDC_RESOLUTION,
+                .freq_hz = LEDC_FREQUENCY,
+                .speed_mode = LEDC_MODE,
+                .timer_num = LEDC_TIMER,
+        };
+        ledc_timer_config(&ledc_timer);
+
+        ledc_channel_config_t ledc_channel = {
+                .channel    = LEDC_CHANNEL,
+                .duty       = 0,
+                .gpio_num   = LED_GPIO,
+                .speed_mode = LEDC_MODE,
+                .timer_sel  = LEDC_TIMER,
+        };
+        ledc_channel_config(&ledc_channel);
 }
 
+// Map the brightness linearly to the PWM duty cycle
+uint32_t map_brightness(uint32_t brightness) {
+        return (brightness * (1 << LEDC_RESOLUTION)) / 100; // Map 0-100 to the entire range of duty cycle
+}
+
+void led_write(bool on, uint32_t brightness) {
+        uint32_t mapped_brightness = on ? map_brightness(brightness) : 0;
+        ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, mapped_brightness);
+        ledc_update_duty(LEDC_MODE, LEDC_CHANNEL);
+}
 
 // All GPIO Settings
-static void led_strip_init() {
-        led_strip_config_t strip_config = {
-                .strip_gpio_num = LED_STRIP_GPIO,
-                .max_leds = LED_STRIP_LENGTH,
-                .led_pixel_format = LED_PIXEL_FORMAT,
-                .led_model = LED_TYPE,
-                .flags.invert_out = false,
-        };
-
-        led_strip_rmt_config_t rmt_config = {
-                .clk_src = RMT_CLK_SRC_DEFAULT,
-                .resolution_hz = 10 * 1000 * 1000,
-                .flags.with_dma = false,
-        };
-
-        ESP_ERROR_CHECK(led_strip_new_rmt_device(&strip_config, &rmt_config, &led_strip));
+void gpio_init() {
+        pwm_init(); // Initialize PWM for LED control
+        led_write(led_on, led_brightness);
 }
 
 // Accessory identification
 void accessory_identify_task(void *args) {
         for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 2; j++) {
-                        led_write(true);
+                        led_write(true, led_brightness);
                         vTaskDelay(pdMS_TO_TICKS(100));
-                        led_write(false);
+                        led_write(false, led_brightness);
                         vTaskDelay(pdMS_TO_TICKS(100));
                 }
                 vTaskDelay(pdMS_TO_TICKS(250));
         }
-        led_write(false);
+        led_write(led_on, led_brightness);
         vTaskDelete(NULL);
 }
 
@@ -140,12 +124,11 @@ homekit_value_t led_on_get() {
 
 void led_on_set(homekit_value_t value) {
         if (value.format != homekit_format_bool) {
-                // printf("Invalid on-value format: %d\n", value.format);
+                ESP_LOGE("led_on_set", "Invalid value format: %d", value.format);
                 return;
         }
-
         led_on = value.bool_value;
-        led_write(led_on);
+        led_write(led_on, led_brightness);
 }
 
 homekit_value_t led_brightness_get() {
@@ -154,38 +137,13 @@ homekit_value_t led_brightness_get() {
 
 void led_brightness_set(homekit_value_t value) {
         if (value.format != homekit_format_int) {
-                // printf("Invalid brightness-value format: %d\n", value.format);
+                ESP_LOGE("led_brightness_set", "Invalid value format: %d", value.format);
                 return;
         }
         led_brightness = value.int_value;
-        led_write(led_on); // Pass the state to led_write
+        led_write(led_on, led_brightness);
 }
 
-homekit_value_t led_hue_get() {
-        return HOMEKIT_FLOAT(led_hue);
-}
-
-void led_hue_set(homekit_value_t value) {
-        if (value.format != homekit_format_float) {
-                // printf("Invalid hue-value format: %d\n", value.format);
-                return;
-        }
-        led_hue = value.float_value;
-        led_write(led_on); // Pass the state to led_write
-}
-
-homekit_value_t led_saturation_get() {
-        return HOMEKIT_FLOAT(led_saturation);
-}
-
-void led_saturation_set(homekit_value_t value) {
-        if (value.format != homekit_format_float) {
-                // printf("Invalid sat-value format: %d\n", value.format);
-                return;
-        }
-        led_saturation = value.float_value;
-        led_write(led_on); // Pass the state to led_write
-}
 #define DEVICE_NAME "HomeKit Light"
 #define DEVICE_MANUFACTURER "StudioPieters®"
 #define DEVICE_SERIAL "NLDA4SQN1466"
@@ -193,7 +151,7 @@ void led_saturation_set(homekit_value_t value) {
 #define FW_VERSION "0.0.1"
 
 homekit_characteristic_t name = HOMEKIT_CHARACTERISTIC_(NAME, DEVICE_NAME);
-homekit_characteristic_t manufacturer = HOMEKIT_CHARACTERISTIC_(MANUFACTURER, DEVICE_MANUFACTURER);
+homekit_characteristic_t manufacturer = HOMEKIT_CHARACTERISTIC_(MANUFACTURER,  DEVICE_MANUFACTURER);
 homekit_characteristic_t serial = HOMEKIT_CHARACTERISTIC_(SERIAL_NUMBER, DEVICE_SERIAL);
 homekit_characteristic_t model = HOMEKIT_CHARACTERISTIC_(MODEL, DEVICE_MODEL);
 homekit_characteristic_t revision = HOMEKIT_CHARACTERISTIC_(FIRMWARE_REVISION, FW_VERSION);
@@ -214,7 +172,7 @@ homekit_accessory_t *accessories[] = {
                 HOMEKIT_SERVICE(LIGHTBULB, .primary = true, .characteristics = (homekit_characteristic_t*[]) {
                         HOMEKIT_CHARACTERISTIC(NAME, "HomeKit Light"),
                         HOMEKIT_CHARACTERISTIC(
-                                ON, true,
+                                ON, false,
                                 .getter = led_on_get,
                                 .setter = led_on_set
                                 ),
@@ -222,16 +180,6 @@ homekit_accessory_t *accessories[] = {
                                 BRIGHTNESS, 100,
                                 .getter = led_brightness_get,
                                 .setter = led_brightness_set
-                                ),
-                        HOMEKIT_CHARACTERISTIC(
-                                HUE, 0,
-                                .getter = led_hue_get,
-                                .setter = led_hue_set
-                                ),
-                        HOMEKIT_CHARACTERISTIC(
-                                SATURATION, 0,
-                                .getter = led_saturation_get,
-                                .setter = led_saturation_set
                                 ),
                         NULL
                 }),
@@ -258,6 +206,7 @@ void app_main(void) {
                 ret = nvs_flash_init();
         }
         ESP_ERROR_CHECK(ret);
+
         wifi_init();
-        led_strip_init();
+        gpio_init();
 }
