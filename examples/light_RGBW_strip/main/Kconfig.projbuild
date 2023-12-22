@@ -18,35 +18,15 @@ menu "StudioPieters"
               help
                   The GPIO number the LED is connected to.
 
-      choice LED_MODEL
-              prompt "Select chip type"
-              default LED_MODEL_WS2812
-
-              config LED_MODEL_WS2812
-                    bool "WS2812"
-              config LED_MODEL_SK6812
-                    bool "SK6812"
-              endchoice
-
       config ESP_STRIP_LENGTH
               int "Set the number of LED's of your strip"
               default 3
               help
                   The number of LED's On the connected strip.
 
-      choice LED_PIXEL_FORMAT
-              prompt "Select color"
-              default LED_PIXEL_FORMAT_GRB
-
-              config LED_PIXEL_FORMAT_GRB
-                    bool "GRB"
-              config LED_PIXEL_FORMAT_GRBW
-                    bool "GRBW"
-              endchoice
-
       config ESP_SETUP_CODE
               string "HomeKit Setup Code"
-              default "338-77-883"
+              default "227-66-772"
               help
                   If you want to change the HomeKit Setup Code, you can do that here (Note:  you need to make a new QR-CODE To make it work)
 

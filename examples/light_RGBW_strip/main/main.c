@@ -10,6 +10,7 @@
 #include <homekit/characteristics.h>
 #include <led_strip.h>
 #include <led_strip_rmt.h>
+#include <math.h>
 
 // WiFi setup
 void on_wifi_ready();
@@ -52,55 +53,92 @@ static void wifi_init() {
 #define LED_STRIP_GPIO CONFIG_ESP_LED_GPIO
 #define LED_STRIP_LENGTH CONFIG_ESP_STRIP_LENGTH
 
-#if defined(CONFIG_LED_MODEL_WS2812)
-#define LED_TYPE LED_MODEL_WS2812
-#endif
-#if defined(CONFIG_LED_MODEL_SK6812)
-#define LED_TYPE LED_MODEL_SK6812
-#endif
-
-#if defined(CONFIG_LED_PIXEL_FORMAT_GRB)
-#define LED_PIXEL_FORMAT LED_PIXEL_FORMAT_GRB
-#endif
-#if defined(CONFIG_LED_PIXEL_FORMAT_GRBW)
-#define LED_PIXEL_FORMAT LED_PIXEL_FORMAT_GRBW
-#endif
-
 // LED control
 led_strip_handle_t led_strip;
 
 bool led_on = false;
 float led_brightness = 50;
-float led_hue = 0;
-float led_saturation = 50;
+float led_hue = 180;              // hue is scaled 0 to 360
+float led_saturation = 50;      // saturation is scaled 0 to 100
 
-// led_strip name: led_strip | i: amount of led's on the string | Hue: 0-360 | Saturation: 0-255 | Value (led_brightness): 0-255
-// led_strip_set_pixel_hsv(led_strip, 0, 120, 255, 128);
+// Function to convert HSI to RGBW
+// https://blog.saikoled.com/post/44677718712/how-to-convert-from-hsi-to-rgb-white
+#define DEG_TO_RAD(X) (M_PI*(X)/180)
+
+void hsi2rgbw(float H, float S, float I, int* rgbw) {
+        int r, g, b, w;
+        float cos_h, cos_1047_h;
+        H = fmod(H, 360); // cycle H around to 0-360 degrees
+        H = M_PI * H / 180; // Convert to radians.
+        S = S > 0 ? (S < 1 ? S : 1) : 0; // clamp S and I to interval [0,1]
+        I = I > 0 ? (I < 1 ? I : 1) : 0;
+
+        if (H < 2.09439) {
+                cos_h = cos(H);
+                cos_1047_h = cos(1.047196667 - H);
+                r = S * 255 * I / 3 * (1 + cos_h / cos_1047_h);
+                g = S * 255 * I / 3 * (1 + (1 - cos_h / cos_1047_h));
+                b = 0;
+                w = 255 * (1 - S) * I;
+        } else if (H < 4.188787) {
+                H = H - 2.09439;
+                cos_h = cos(H);
+                cos_1047_h = cos(1.047196667 - H);
+                g = S * 255 * I / 3 * (1 + cos_h / cos_1047_h);
+                b = S * 255 * I / 3 * (1 + (1 - cos_h / cos_1047_h));
+                r = 0;
+                w = 255 * (1 - S) * I;
+        } else {
+                H = H - 4.188787;
+                cos_h = cos(H);
+                cos_1047_h = cos(1.047196667 - H);
+                b = S * 255 * I / 3 * (1 + cos_h / cos_1047_h);
+                r = S * 255 * I / 3 * (1 + (1 - cos_h / cos_1047_h));
+                g = 0;
+                w = 255 * (1 - S) * I;
+        }
+
+        rgbw[0] = r;
+        rgbw[1] = g;
+        rgbw[2] = b;
+        rgbw[3] = w;
+}
 
 void led_write(bool on) {
         if (led_strip) {
                 if (on) {
                         for (int i = 0; i < LED_STRIP_LENGTH; i++) {
-                                ESP_ERROR_CHECK(led_strip_set_pixel_hsv(led_strip, i, led_hue, led_saturation, led_brightness));
+                                // Initialize variables
+                                float h = led_hue;
+                                float s = led_saturation / 100.0;
+                                float v = led_brightness / 100.0;
+
+                                int rgbw[4];
+                                hsi2rgbw(h, s, v, rgbw);
+
+                                uint8_t red = rgbw[0];
+                                uint8_t green = rgbw[1];
+                                uint8_t blue = rgbw[2];
+
+                                ESP_ERROR_CHECK(led_strip_set_pixel(led_strip, i, red, green, blue));
                         }
                 } else {
                         // Turn off all LEDs
                         for (int i = 0; i < LED_STRIP_LENGTH; i++) {
-                                ESP_ERROR_CHECK(led_strip_set_pixel_hsv(led_strip, i, 0, 0, 0));
+                                ESP_ERROR_CHECK(led_strip_set_pixel(led_strip, i, 0, 0, 0));
                         }
                 }
                 ESP_ERROR_CHECK(led_strip_refresh(led_strip));
         }
 }
 
-
 // All GPIO Settings
 static void led_strip_init() {
         led_strip_config_t strip_config = {
                 .strip_gpio_num = LED_STRIP_GPIO,
                 .max_leds = LED_STRIP_LENGTH,
-                .led_pixel_format = LED_PIXEL_FORMAT,
-                .led_model = LED_TYPE,
+                .led_pixel_format = LED_PIXEL_FORMAT_GRB,
+                .led_model = LED_MODEL_WS2812,
                 .flags.invert_out = false,
         };
 
@@ -140,7 +178,6 @@ homekit_value_t led_on_get() {
 
 void led_on_set(homekit_value_t value) {
         if (value.format != homekit_format_bool) {
-                // printf("Invalid on-value format: %d\n", value.format);
                 return;
         }
 
@@ -154,11 +191,10 @@ homekit_value_t led_brightness_get() {
 
 void led_brightness_set(homekit_value_t value) {
         if (value.format != homekit_format_int) {
-                // printf("Invalid brightness-value format: %d\n", value.format);
                 return;
         }
         led_brightness = value.int_value;
-        led_write(led_on); // Pass the state to led_write
+        led_write(led_on);
 }
 
 homekit_value_t led_hue_get() {
@@ -167,11 +203,10 @@ homekit_value_t led_hue_get() {
 
 void led_hue_set(homekit_value_t value) {
         if (value.format != homekit_format_float) {
-                // printf("Invalid hue-value format: %d\n", value.format);
                 return;
         }
         led_hue = value.float_value;
-        led_write(led_on); // Pass the state to led_write
+        led_write(led_on);
 }
 
 homekit_value_t led_saturation_get() {
@@ -180,12 +215,12 @@ homekit_value_t led_saturation_get() {
 
 void led_saturation_set(homekit_value_t value) {
         if (value.format != homekit_format_float) {
-                // printf("Invalid sat-value format: %d\n", value.format);
                 return;
         }
         led_saturation = value.float_value;
-        led_write(led_on); // Pass the state to led_write
+        led_write(led_on);
 }
+
 #define DEVICE_NAME "HomeKit Light"
 #define DEVICE_MANUFACTURER "StudioPieters®"
 #define DEVICE_SERIAL "NLDA4SQN1466"
