@@ -31,8 +31,10 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <driver/gpio.h>
+#include <driver/ledc.h>
 #include <homekit/homekit.h>
 #include <homekit/characteristics.h>
+#include <math.h>
 
 // WiFi setup
 void on_wifi_ready();
@@ -78,10 +80,56 @@ bool led_on = false;
 void led_write(bool on) {
         gpio_set_level(LED_GPIO, on ? 1 : 0);
 }
+
+// FAN control
+#define FAN_GPIO CONFIG_ESP_FAN_GPIO
+bool fan_on = false;
+float fan_speed = 100;  // Default speed
+
+// PWM Settings
+#define LEDC_TIMER          LEDC_TIMER_0
+#define LEDC_MODE           LEDC_HIGH_SPEED_MODE
+#define LEDC_CHANNEL        LEDC_CHANNEL_0
+#define LEDC_RESOLUTION     LEDC_TIMER_13_BIT
+#define LEDC_FREQUENCY      (5000)
+
+// Initialize PWM
+static void pwm_init() {
+        ledc_timer_config_t ledc_timer = {
+                .duty_resolution = LEDC_RESOLUTION,
+                .freq_hz = LEDC_FREQUENCY,
+                .speed_mode = LEDC_MODE,
+                .timer_num = LEDC_TIMER,
+        };
+        ledc_timer_config(&ledc_timer);
+
+        ledc_channel_config_t ledc_channel = {
+                .channel    = LEDC_CHANNEL,
+                .duty       = 0,
+                .gpio_num   = FAN_GPIO,
+                .speed_mode = LEDC_MODE,
+                .timer_sel  = LEDC_TIMER,
+        };
+        ledc_channel_config(&ledc_channel);
+}
+
+// Map the speed linearly to the PWM duty cycle
+uint32_t map_speed(uint32_t speed) {
+        return (speed * (1 << LEDC_RESOLUTION)) / 100; // Map 0-100 to the entire range of duty cycle
+}
+
+void fan_write(bool on, uint32_t speed) {
+        uint32_t mapped_speed = on ? map_speed(speed) : 0;
+        ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, mapped_speed);
+        ledc_update_duty(LEDC_MODE, LEDC_CHANNEL);
+}
+
 // All GPIO Settings
 void gpio_init() {
         gpio_set_direction(LED_GPIO, GPIO_MODE_OUTPUT);
         led_write(led_on);
+        pwm_init(); // Initialize PWM for FAN control
+        fan_write(fan_on, fan_speed);
 }
 
 // Accessory identification
@@ -105,21 +153,34 @@ void accessory_identify(homekit_value_t _value) {
 }
 
 
-homekit_value_t led_on_get() {
-        return HOMEKIT_BOOL(led_on);
+homekit_value_t fan_on_get() {
+        return HOMEKIT_BOOL(fan_on);
 }
 
-void led_on_set(homekit_value_t value) {
+void fan_on_set(homekit_value_t value) {
         if (value.format != homekit_format_bool) {
-                ESP_LOGE("led_on_set", "Invalid value format: %d", value.format);
+                ESP_LOGE("fan_on_set", "Invalid value format: %d", value.format);
                 return;
         }
-        led_on = value.bool_value;
-        led_write(led_on);
+        fan_on = value.bool_value;
+        fan_write(fan_on, fan_speed);
+}
+
+homekit_value_t fan_speed_get() {
+        return HOMEKIT_FLOAT(fan_speed);
+}
+
+void fan_speed_set(homekit_value_t value) {
+        if (value.format != homekit_format_float) {
+                ESP_LOGE("fan_speed_set", "Invalid value format: %d", value.format);
+                return;
+        }
+        fan_speed = value.float_value;
+        fan_write(fan_on, fan_speed);
 }
 
 // HomeKit characteristics
-#define DEVICE_NAME "HomeKit LED"
+#define DEVICE_NAME "HomeKit Fan"
 #define DEVICE_MANUFACTURER "StudioPieters®"
 #define DEVICE_SERIAL "NLDA4SQN1466"
 #define DEVICE_MODEL "SD466NL/A"
@@ -131,11 +192,10 @@ homekit_characteristic_t serial = HOMEKIT_CHARACTERISTIC_(SERIAL_NUMBER, DEVICE_
 homekit_characteristic_t model = HOMEKIT_CHARACTERISTIC_(MODEL, DEVICE_MODEL);
 homekit_characteristic_t revision = HOMEKIT_CHARACTERISTIC_(FIRMWARE_REVISION, FW_VERSION);
 
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverride-init"
 homekit_accessory_t *accessories[] = {
-        HOMEKIT_ACCESSORY(.id = 1, .category = homekit_accessory_category_lighting, .services = (homekit_service_t*[]) {
+        HOMEKIT_ACCESSORY(.id = 1, .category = homekit_accessory_category_fans, .services = (homekit_service_t*[]) {
                 HOMEKIT_SERVICE(ACCESSORY_INFORMATION, .characteristics = (homekit_characteristic_t*[]) {
                         &name,
                         &manufacturer,
@@ -145,9 +205,18 @@ homekit_accessory_t *accessories[] = {
                         HOMEKIT_CHARACTERISTIC(IDENTIFY, accessory_identify),
                         NULL
                 }),
-                HOMEKIT_SERVICE(LIGHTBULB, .primary = true, .characteristics = (homekit_characteristic_t*[]) {
-                        HOMEKIT_CHARACTERISTIC(NAME, "HomeKit LED"),
-                        HOMEKIT_CHARACTERISTIC(ON, false, .getter = led_on_get, .setter = led_on_set),
+                HOMEKIT_SERVICE(FAN, .primary = true, .characteristics = (homekit_characteristic_t*[]) {
+                        HOMEKIT_CHARACTERISTIC(NAME, "HomeKit Fan"),
+                        HOMEKIT_CHARACTERISTIC(
+                                ON, false,
+                                .getter = fan_on_get,
+                                .setter = fan_on_set
+                                ),
+                        HOMEKIT_CHARACTERISTIC(
+                                ROTATION_SPEED, 100,
+                                .getter = fan_speed_get,
+                                .setter = fan_speed_set
+                                ),
                         NULL
                 }),
                 NULL
