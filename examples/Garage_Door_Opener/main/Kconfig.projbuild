@@ -1,0 +1,63 @@
+menu "StudioPieters"
+
+      config ESP_WIFI_SSID
+              string "WiFi SSID"
+              default "myssid"
+              help
+                  SSID (network name) for the example to connect to.
+
+      config ESP_WIFI_PASSWORD
+              string "WiFi Password"
+              default "mypassword"
+              help
+                  WiFi password (WPA or WPA2) for the example to use.
+
+      config ESP_LED_GPIO
+              int "Set the GPIO for the LED"
+              default 2
+              help
+                  The GPIO number the LED is connected to.
+
+      config ESP_RELAY_OPEN_GPIO
+              int "Set the GPIO for the relay to open the garage port"
+              default 17
+              help
+                  The GPIO number the relay is connected to.
+
+      config ESP_RELAY_CLOSE_GPIO
+              int "Set the GPIO for the relay to close the garage port"
+              default 18
+              help
+                The GPIO number the relay is connected to.
+
+      config ESP_REED_OPEN_GPIO
+              int "Set the GPIO for the A3144 sensor to see if the garage port is open"
+              default 22
+              help
+                The GPIO number the A3144 sensor is connected to.
+
+      config ESP_REED_CLOSE_GPIO
+              int "Set the GPIO for the A3144 sensor to see if the garage port is closed"
+              default 23
+              help
+                The GPIO number the A3144 sensor is connected to.
+
+      config ESP_DELAY
+              int "Wait for 5 seconds"
+              default 5000
+              help
+                The GPIO number the A3144 sensor is connected to.
+
+      config ESP_SETUP_CODE
+              string "HomeKit Setup Code"
+              default "338-77-883"
+              help
+                  If you want to change the HomeKit Setup Code, you can do that here (Note:  you need to make a new QR-CODE To make it work)
+
+      config ESP_SETUP_ID
+              string "HomeKit Setup ID"
+              default "1QJ8"
+              help
+                   If you want to change the HomeKit Setup ID, you can do that here (Note: you need to make a new QR-CODE To make it work)
+
+endmenu
