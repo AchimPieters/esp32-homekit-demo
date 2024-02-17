@@ -1,5 +1,4 @@
-#pragma once
-/* benchmark main.h
+/* sm4.c
  *
  * Copyright (C) 2006-2023 wolfSSL Inc.
  *
@@ -20,15 +19,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
  */
 
-/*
-# This tag is used to include this file in the ESP Component Registry:
-# __ESP_COMPONENT_SOURCE__
-*/
+#ifdef HAVE_CONFIG_H
+    #include <config.h>
+#endif
 
-void app_main(void);
+#include <wolfssl/wolfcrypt/settings.h>
 
-/* see wolfssl/wolfcrypt/benchmark/benchmark.h */
-extern void wolf_benchmark_task();
+#ifdef WOLFSSL_SM4
 
+#error "See https://github.com/wolfSSL/wolfsm for implementation of this file"
 
+#endif
 

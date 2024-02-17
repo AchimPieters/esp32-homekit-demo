@@ -2,7 +2,8 @@
 
 This is the ESP32 Version of the [wolfSSL wolfcrypt test application](https://github.com/wolfSSL/wolfssl/tree/master/wolfcrypt/test).
 
-<!-- This file is included in the ESP Registry. There should be no relative URL links. -->
+For general information on [wolfSSL examples for Espressif](../README.md), see the
+[README](https://github.com/wolfSSL/wolfssl/blob/master/IDE/Espressif/ESP-IDF/README.md) file.
 
 ## ESP Registry
 
@@ -18,7 +19,7 @@ idf.py -b 115200 flash monitor
 
 ## VisualGDB
 
-Open the VisualGDB Visual Studio Project file in the [VisualGDB directory]() and click the "Start" button.
+Open the VisualGDB Visual Studio Project file in the [VisualGDB directory](./VisualGDB/README.md) and click the "Start" button.
 No wolfSSL setup is needed. You may need to adjust your specific COM port. The default is `COM20`.
 
 ## ESP-IDF Commandline
@@ -41,18 +42,27 @@ Reminder than when building on WSL in `/mnt/c` there will be a noticeable perfor
 Example build on WSL, assuming `git clone` from `c:\workspace`:
 
 ```
-# Optionally install wolfSSL component
-# cd /mnt/c/workspace/wolfssl/IDE/Espressif/ESP-IDF
-./setup.sh
+WRK_IDF_PATH=/mnt/c/SysGCC/esp32/esp-idf/v5.1
+
+echo "Run export.sh from ${WRK_IDF_PATH}"
+. ${WRK_IDF_PATH}/export.sh
 
 # switch to test example
 cd /mnt/c/workspace/wolfssl/IDE/Espressif/ESP-IDF/examples/wolfssl_test
 
-# Pick ESP-IDF install directory, this one for v4.4.2 in VisualGDB
-. /mnt/c/SysGCC/esp32/esp-idf/v4.4.2/export.sh
+# Pick ESP-IDF install directory, this one for v5.1 in VisualGDB
+. /mnt/c/SysGCC/esp32/esp-idf/v5.1/export.sh
 
-# build and flash, in this example to COM20
-idf.py build flash -p /dev/ttyS20 -b 115200 monitor
+# set target chipset
+idf.py set-target esp32s3
+
+# erase
+idf.py erase-flash -p /dev/ttyS24 -b 115200
+
+# start with a low upload speed, then increase as found operational
+idf.py 
+# build and flash, in this example to COM24
+idf.py build flash -p /dev/ttyS24 -b 115200 monitor
 ```
 
 ## Example Output
@@ -162,5 +172,4 @@ I (136548) wolfcrypt_test: Exiting main with return code:  0
 I (136548) wolfssl_test: wolf_test_task complete success result code = 0
 ```
 
-# This tag is used to include this file in the ESP Component Registry:
-# __ESP_COMPONENT_SOURCE__
+See the README.md file in the upper level 'examples' directory for [more information about examples](../README.md).

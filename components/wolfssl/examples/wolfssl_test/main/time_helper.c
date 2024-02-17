@@ -19,11 +19,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
  */
 
-/*
-# This tag is used to include this file in the ESP Component Registry:
-# __ESP_COMPONENT_SOURCE__
-*/
-
 #include <string.h>
 #include <lwip/apps/sntp.h>
 

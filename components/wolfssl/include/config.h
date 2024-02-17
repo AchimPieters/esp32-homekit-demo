@@ -1,4 +1,4 @@
-/* config.h - dummy
+ /* config.h - dummy
  *
  * Copyright (C) 2006-2023 wolfSSL Inc.
  *
@@ -21,4 +21,5 @@
 
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
+
 #endif

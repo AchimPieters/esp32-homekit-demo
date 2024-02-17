@@ -19,11 +19,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
  */
 
-/*
-# This tag is used to include this file in the ESP Component Registry:
-# __ESP_COMPONENT_SOURCE__
-*/
-
 /* ESP-IDF */
 #include <esp_log.h>
 #include "sdkconfig.h"
@@ -34,16 +29,21 @@
 #include <wolfssl/version.h>
 #include "wolfssl/wolfcrypt/port/Espressif/esp32-crypt.h"
 #ifndef WOLFSSL_ESPIDF
-    #warning "problem with wolfSSL user_settings. Check components/wolfssl/include"
+    #warning "Problem with wolfSSL user_settings."
+    #warning "Check components/wolfssl/include"
 #endif
 
 #include <wolfssl/wolfcrypt/types.h>
 #include <wolfcrypt/benchmark/benchmark.h>
 
+/* set to 0 for one benchmark,
+** set to 1 for continous benchmark loop */
+#define BENCHMARK_LOOP 1
+
 /* check BENCH_ARGV in sdkconfig to determine need to set WOLFSSL_BENCH_ARGV */
 #ifdef CONFIG_BENCH_ARGV
-#define WOLFSSL_BENCH_ARGV CONFIG_BENCH_ARGV
-#define WOLFSSL_BENCH_ARGV_MAX_ARGUMENTS 22 /* arbitrary number of max args */
+    #define WOLFSSL_BENCH_ARGV CONFIG_BENCH_ARGV
+    #define WOLFSSL_BENCH_ARGV_MAX_ARGUMENTS 22 /* arbitrary number of max args */
 #endif
 
 /*
@@ -73,6 +73,8 @@ static const char* const TAG = "wolfssl_benchmark";
 #if defined(CUSTOM_SLOT_ALLOCATION)
 
 static byte mSlotList[ATECC_MAX_SLOT];
+
+int atmel_set_slot_allocator(atmel_slot_alloc_cb alloc, atmel_slot_dealloc_cb dealloc);
 
 /* initialize slot array */
 void my_atmel_slotInit()
@@ -190,6 +192,8 @@ int construct_argv()
 /* entry point */
 void app_main(void)
 {
+    int stack_start = 0;
+    ESP_LOGI(TAG, "---------------- wolfSSL Benchmark Example ------------");
     ESP_LOGI(TAG, "--------------------------------------------------------");
     ESP_LOGI(TAG, "--------------------------------------------------------");
     ESP_LOGI(TAG, "---------------------- BEGIN MAIN ----------------------");
@@ -223,16 +227,31 @@ void app_main(void)
     /* although wolfCrypt_Init() may be explicitly called above,
     ** note it is still always called in wolf_benchmark_task.
     */
-    wolf_benchmark_task();
-    /* wolfCrypt_Cleanup should always be called at completion,
-    ** and is called in wolf_benchmark_task().
-    */
+    stack_start = uxTaskGetStackHighWaterMark(NULL);
+
+    do {
+        ESP_LOGI(TAG, "Stack HWM: %d\n", uxTaskGetStackHighWaterMark(NULL));
+
+        wolf_benchmark_task();
+        ESP_LOGI(TAG, "Stack used: %d\n",
+                      stack_start - uxTaskGetStackHighWaterMark(NULL));
+
+        #ifdef WOLFSSL_HW_METRICS_DISABLED/* Remove _DISABLED upon #6990 Merge */
+            esp_hw_show_metrics();
+        #endif
+    } while (BENCHMARK_LOOP);
+    /* Reminder: wolfCrypt_Cleanup should always be called at completion,
+    ** and is called in wolf_benchmark_task().  */
 
 #if defined(SINGLE_THREADED)
     /* need stack monitor for single thread */
 #else
     ESP_LOGI(TAG, "Stack HWM: %d\n", uxTaskGetStackHighWaterMark(NULL));
 #endif
+
+    ESP_LOGI(TAG, "\n\nDone!\n\n"
+                  "If running from idf.py monitor, press twice: Ctrl+]");
+
     /* after the test, we'll just wait */
     while (1) {
         /* do something other than nothing to help next program/debug session*/

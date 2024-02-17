@@ -1,5 +1,5 @@
-#ifndef _TIME_HELPER_H
-/*
+/* sm3.c
+ *
  * Copyright (C) 2006-2023 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
@@ -19,19 +19,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
  */
 
-/*
-# This tag is used to include this file in the ESP Component Registry:
-# __ESP_COMPONENT_SOURCE__
-*/
-
-#ifdef __cplusplus
-extern "C" {
+#ifdef HAVE_CONFIG_H
+    #include <config.h>
 #endif
 
-int set_time(void);
+#include <wolfssl/wolfcrypt/settings.h>
 
-#ifdef __cplusplus
-} /* extern "C" */
+#ifdef WOLFSSL_SM3
+
+#error "See https://github.com/wolfSSL/wolfsm for implementation of this file"
+
 #endif
 
-#endif /* #ifndef _TIME_HELPER_H */

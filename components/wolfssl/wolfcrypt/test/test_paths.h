@@ -20,6 +20,6 @@
  */
 
 #ifndef NO_FILESYSTEM
-    #define CERT_PREFIX "/mnt/c/test/wolfssl-master/"
-    #define CERT_WRITE_TEMP_DIR "/mnt/c/test/wolfssl-master/"
+    #define CERT_PREFIX "/mnt/c/workspace/wolfssl-master/"
+    #define CERT_WRITE_TEMP_DIR "/mnt/c/workspace/wolfssl-master/"
 #endif /* NO_FILESYSTEM */
