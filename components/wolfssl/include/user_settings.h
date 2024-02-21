@@ -29,6 +29,11 @@
 
 #define WOLFSSL_ESPIDF
 
+#define WOLFCRYPT_HAVE_SRP
+#define HAVE_CHACHA
+#define HAVE_POLY1305
+#define WOLFSSL_BASE64_ENCODE
+
 /* The Espressif sdkconfig will have chipset info.
 **
 ** Possible values:
