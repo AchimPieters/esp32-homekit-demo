@@ -286,7 +286,7 @@
 
     /* Define USE_FAST_MATH and SMALL_STACK                        */
     #define ESP32_USE_RSA_PRIMITIVE
-
+    #define FP_MAX_BITS (8192 * 2)
     /* threshold for performance adjustment for HW primitive use   */
     /* X bits of G^X mod P greater than                            */
     #define EPS_RSA_EXPT_XBTIS           32
