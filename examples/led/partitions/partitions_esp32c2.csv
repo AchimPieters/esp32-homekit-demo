@@ -1,6 +1,11 @@
-# ESP-IDF Partition Table
-# Name,   Type, SubType, Offset,  Size, Flags
-nvs,      data, nvs,     0x9000,  0x5000,
-phy_init, data, phy,     0xe000,  0x1000,
-homekit,  data, homekit, 0xf000,  0x1000,
-factory,  app,  factory, 0x10000, 1M,
+# ESP-IDF Partition Table for ESP32-C2
+# Name,       Type,  SubType,  Offset,     Size,
+# partition table           0x08000,   0x1000,
+otadata,      data,   ota,      0x09000,   0x2000,
+phy_init,     data,   phy,      0x0b000,   0x1000,
+lcmcert_1,    0x65,   0x18,     0x0c000,   0x1000,
+lcmcert_2,    0x65,   0x18,     0x0d000,   0x1000,
+nvs,          data,   nvs,      0x0e000,   0x1000,
+homekit,      data,   homekit,  0x0f000,   0x1000,
+ota_1,        app,    ota_1,    0x10000,   0xa0000,
+ota_0,        app,    ota_0,    0xb0000,   0x100000,  
