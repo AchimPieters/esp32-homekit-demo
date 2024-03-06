@@ -23,7 +23,7 @@ idf.py set-target esp32
 ```
 idf.py menuconfig
 ```
-- Select `Serial falsher config` and then `Flash size (2MB)` set to `4MB`
+- Select `Serial flasher config` and then `Flash size (2MB)` set to `4MB`
 - Select `Partition table` and then `Partition Table(Single factory app, no OTA)` Set to `Custom partition table CSV`
 - Select `StudioPieters` and then `(mysid) WIFI SSID` and fill in your Wi-Fi Network name, then Select `(mypassword) WiFI Password` and fill in your Wi-Fi Network password.
 - Then press `ESC` until you are asked `Save Configuration?` and select `(Y)es`
@@ -49,7 +49,7 @@ screen /dev/tty.usbserial-01FD1166 115200
 <br>
 
 
-|                  | <sub>ESP32 Series</sub> | <sub>ESP32-C6 Series</sub> | <sub>ESP32-C3 Series</sub> | <sub>ESP32-C Series</sub> | <sub>ESP32-S3 Series</sub> | <sub>ESP32-S2 Series</sub> | <sub>ESP32-H2 Series</sub> |
+|                  | <sub>ESP32 Series</sub> | <sub>ESP32-C2 Series</sub> | <sub>ESP32-C3 Series</sub> | <sub>ESP32-C6 Series</sub> | <sub>ESP32-S2 Series</sub> | <sub>ESP32-S3 Series</sub> | <sub>ESP32-H2 Series</sub> |
 |------------------|--------------|-----------------|-----------------|----------------|-----------------|-----------------|-----------------|
 | <sub>LED</sub>              |<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/YES.svg" width="20">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/MAYBE.svg" width="20">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/MAYBE.svg" width="20">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/MAYBE.svg" width="20">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/MAYBE.svg" width="20">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/MAYBE.svg" width="20">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/NO.svg" width="20">|
 | <sub>LOCK</sub>           |<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/YES.svg" width="20">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/MAYBE.svg" width="20">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/MAYBE.svg" width="20">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/MAYBE.svg" width="20">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/MAYBE.svg" width="20">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/MAYBE.svg" width="20">|<img  style="float: right;" src="https://github.com/AchimPieters/esp32-homekit-demo/blob/main/images/NO.svg" width="20">|
