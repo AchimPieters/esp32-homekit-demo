@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2015-2022 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2015-2023 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -38,6 +38,14 @@
 #else
 #define NETIF_IPV6_MAX_NUMS 3
 #endif
+
+#if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 1, 0)
+/* CONFIG_LWIP_IPV4 was introduced in IDF v5.1 */
+/* For IDF v5.0, set CONFIG_LWIP_IPV4 to 1 by default */
+#ifndef CONFIG_LWIP_IPV4
+#define CONFIG_LWIP_IPV4 1
+#endif // CONFIG_LWIP_IPV4
+#endif // ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 1, 0)
 
 /** Number of configured interfaces */
 #if MDNS_MAX_PREDEF_INTERFACES > CONFIG_MDNS_MAX_INTERFACES
@@ -159,7 +167,7 @@
 #define PCB_STATE_IS_RUNNING(s) (s->state == PCB_RUNNING)
 
 #ifndef HOOK_MALLOC_FAILED
-#define HOOK_MALLOC_FAILED  ESP_LOGE(TAG, "Cannot allocate memory (line: %d, free heap: %d bytes)", __LINE__, esp_get_free_heap_size());
+#define HOOK_MALLOC_FAILED  ESP_LOGE(TAG, "Cannot allocate memory (line: %d, free heap: %" PRIu32 " bytes)", __LINE__, esp_get_free_heap_size());
 #endif
 
 typedef size_t mdns_if_t;
