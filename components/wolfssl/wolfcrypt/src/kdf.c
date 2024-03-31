@@ -353,17 +353,9 @@ int wc_PRF_TLS(byte* digest, word32 digLen, const byte* secret, word32 secLen,
 
     /* Extract data using HMAC, salt and input.
      * RFC 5869 - HMAC-based Extract-and-Expand Key Derivation Function (HKDF)
-     *
-     * prk      The generated pseudorandom key.
-     * salt     The salt.
-     * saltLen  The length of the salt.
-     * ikm      The input keying material.
-     * ikmLen   The length of the input keying material.
-     * digest   The type of digest to use.
-     * returns 0 on success, otherwise failure.
      */
-    int wc_Tls13_HKDF_Extract(byte* prk, const byte* salt, word32 saltLen,
-                                 byte* ikm, word32 ikmLen, int digest)
+    int wc_Tls13_HKDF_Extract_ex(byte* prk, const byte* salt, word32 saltLen,
+        byte* ikm, word32 ikmLen, int digest, void* heap, int devId)
     {
         int ret;
         word32 len = 0;
@@ -410,7 +402,15 @@ int wc_PRF_TLS(byte* digest, word32 digLen, const byte* secret, word32 secLen,
         WOLFSSL_BUFFER(ikm, ikmLen);
 #endif
 
+#if !defined(HAVE_SELFTEST) && (!defined(HAVE_FIPS) || \
+    (defined(FIPS_VERSION_GE) && FIPS_VERSION_GE(5,3)))
+        ret = wc_HKDF_Extract_ex(digest, salt, saltLen, ikm, ikmLen, prk, heap,
+            devId);
+#else
         ret = wc_HKDF_Extract(digest, salt, saltLen, ikm, ikmLen, prk);
+        (void)heap;
+        (void)devId;
+#endif
 
 #ifdef WOLFSSL_DEBUG_TLS
         WOLFSSL_MSG("  PRK");
@@ -420,27 +420,21 @@ int wc_PRF_TLS(byte* digest, word32 digLen, const byte* secret, word32 secLen,
         return ret;
     }
 
+    int wc_Tls13_HKDF_Extract(byte* prk, const byte* salt, word32 saltLen,
+                                 byte* ikm, word32 ikmLen, int digest)
+    {
+        return wc_Tls13_HKDF_Extract_ex(prk, salt, saltLen, ikm, ikmLen, digest,
+            NULL, INVALID_DEVID);
+    }
+
     /* Expand data using HMAC, salt and label and info.
-     * TLS v1.3 defines this function.
-     *
-     * okm          The generated pseudorandom key - output key material.
-     * okmLen       The length of generated pseudorandom key -
-     *              output key material.
-     * prk          The salt - pseudo-random key.
-     * prkLen       The length of the salt - pseudo-random key.
-     * protocol     The TLS protocol label.
-     * protocolLen  The length of the TLS protocol label.
-     * info         The information to expand.
-     * infoLen      The length of the information.
-     * digest       The type of digest to use.
-     * returns 0 on success, otherwise failure.
-     */
-    int wc_Tls13_HKDF_Expand_Label(byte* okm, word32 okmLen,
+     * TLS v1.3 defines this function. */
+    int wc_Tls13_HKDF_Expand_Label_ex(byte* okm, word32 okmLen,
                                  const byte* prk, word32 prkLen,
                                  const byte* protocol, word32 protocolLen,
                                  const byte* label, word32 labelLen,
                                  const byte* info, word32 infoLen,
-                                 int digest)
+                                 int digest, void* heap, int devId)
     {
         int    ret = 0;
         word32 idx = 0;
@@ -470,17 +464,23 @@ int wc_PRF_TLS(byte* digest, word32 digLen, const byte* secret, word32 secLen,
         data[idx++] = (byte)okmLen;
         /* Length of protocol | label. */
         data[idx++] = (byte)(protocolLen + labelLen);
-        /* Protocol */
-        XMEMCPY(&data[idx], protocol, protocolLen);
-        idx += protocolLen;
-        /* Label */
-        XMEMCPY(&data[idx], label, labelLen);
-        idx += labelLen;
+        if (protocolLen > 0) {
+            /* Protocol */
+            XMEMCPY(&data[idx], protocol, protocolLen);
+            idx += protocolLen;
+        }
+        if (labelLen > 0) {
+            /* Label */
+            XMEMCPY(&data[idx], label, labelLen);
+            idx += labelLen;
+        }
         /* Length of hash of messages */
         data[idx++] = (byte)infoLen;
-        /* Hash of messages */
-        XMEMCPY(&data[idx], info, infoLen);
-        idx += infoLen;
+        if (infoLen > 0) {
+            /* Hash of messages */
+            XMEMCPY(&data[idx], info, infoLen);
+            idx += infoLen;
+        }
 
     #ifdef WOLFSSL_CHECK_MEM_ZERO
         wc_MemZero_Add("wc_Tls13_HKDF_Expand_Label data", data, idx);
@@ -494,7 +494,15 @@ int wc_PRF_TLS(byte* digest, word32 digLen, const byte* secret, word32 secLen,
         WOLFSSL_MSG_EX("  Digest %d", digest);
 #endif
 
+#if !defined(HAVE_SELFTEST) && (!defined(HAVE_FIPS) || \
+    (defined(FIPS_VERSION_GE) && FIPS_VERSION_GE(5,3)))
+        ret = wc_HKDF_Expand_ex(digest, prk, prkLen, data, idx, okm, okmLen,
+            heap, devId);
+#else
         ret = wc_HKDF_Expand(digest, prk, prkLen, data, idx, okm, okmLen);
+        (void)heap;
+        (void)devId;
+#endif
 
 #ifdef WOLFSSL_DEBUG_TLS
         WOLFSSL_MSG("  OKM");
@@ -512,27 +520,22 @@ int wc_PRF_TLS(byte* digest, word32 digLen, const byte* secret, word32 secLen,
         return ret;
     }
 
+    int wc_Tls13_HKDF_Expand_Label(byte* okm, word32 okmLen,
+                                 const byte* prk, word32 prkLen,
+                                 const byte* protocol, word32 protocolLen,
+                                 const byte* label, word32 labelLen,
+                                 const byte* info, word32 infoLen,
+                                 int digest)
+    {
+        return wc_Tls13_HKDF_Expand_Label_ex(okm, okmLen, prk, prkLen, protocol,
+            protocolLen, label, labelLen, info, infoLen, digest,
+            NULL, INVALID_DEVID);
+    }
+
 #if defined(WOLFSSL_TICKET_NONCE_MALLOC) &&                                    \
     (!defined(HAVE_FIPS) || (defined(FIPS_VERSION_GE) && FIPS_VERSION_GE(5,3)))
     /* Expand data using HMAC, salt and label and info.
-     * TLS v1.3 defines this function.
-     *
-     * okm          The generated pseudorandom key - output key material.
-     * okmLen       The length of generated pseudorandom key -
-     *              output key material.
-     * prk          The salt - pseudo-random key.
-     * prkLen       The length of the salt - pseudo-random key.
-     * protocol     The TLS protocol label.
-     * protocolLen  The length of the TLS protocol label.
-     * info         The information to expand.
-     * infoLen      The length of the information.
-     * digest       The type of digest to use.
-     *
-     * This functions is very similar to wc_Tls13_HKDF_Expand_Label() but it
-     * allocate memory if the stack space usually used isn't enough.
-     *
-     * returns 0 on success, otherwise failure.
-     */
+     * TLS v1.3 defines this function. */
     int wc_Tls13_HKDF_Expand_Label_Alloc(byte* okm, word32 okmLen,
         const byte* prk, word32 prkLen, const byte* protocol,
         word32 protocolLen, const byte* label, word32 labelLen,
@@ -885,12 +888,12 @@ int wc_SSH_KDF(byte hashId, byte keyId, byte* key, word32 keySz,
  * @param [out] block    First block to encrypt.
  */
 static void wc_srtp_kdf_first_block(const byte* salt, word32 saltSz, int kdrIdx,
-        const byte* index, byte indexSz, unsigned char* block)
+        const byte* index, int indexSz, unsigned char* block)
 {
-    word32 i;
+    int i;
 
     /* XOR salt into zeroized buffer. */
-    for (i = 0; i < WC_SRTP_MAX_SALT - saltSz; i++) {
+    for (i = 0; i < WC_SRTP_MAX_SALT - (int)saltSz; i++) {
         block[i] = 0;
     }
     XMEMCPY(block + WC_SRTP_MAX_SALT - saltSz, salt, saltSz);
@@ -939,13 +942,13 @@ static int wc_srtp_kdf_derive_key(byte* block, byte indexSz, byte label,
     int i;
     int ret = 0;
     /* Calculate the number of full blocks needed for derived key. */
-    int blocks = keySz / AES_BLOCK_SIZE;
+    int blocks = (int)(keySz / AES_BLOCK_SIZE);
 
     /* XOR in label. */
     block[WC_SRTP_MAX_SALT - indexSz - 1] ^= label;
     for (i = 0; (ret == 0) && (i < blocks); i++) {
         /* Set counter. */
-        block[15] = i;
+        block[15] = (byte)i;
         /* Encrypt block into key buffer. */
         ret = wc_AesEcbEncrypt(aes, key, block, AES_BLOCK_SIZE);
         /* Reposition for more derived key. */
@@ -957,7 +960,7 @@ static int wc_srtp_kdf_derive_key(byte* block, byte indexSz, byte label,
     if ((ret == 0) && (keySz > 0)) {
         byte enc[AES_BLOCK_SIZE];
         /* Set counter. */
-        block[15] = i;
+        block[15] = (byte)i;
         /* Encrypt block into temporary. */
         ret = wc_AesEcbEncrypt(aes, enc, block, AES_BLOCK_SIZE);
         if (ret == 0) {

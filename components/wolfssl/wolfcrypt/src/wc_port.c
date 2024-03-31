@@ -36,12 +36,6 @@
     #include <wolfssl/wolfcrypt/async.h>
 #endif
 
-/* IPP header files for library initialization */
-#ifdef HAVE_FAST_RSA
-    #include <ipp.h>
-    #include <ippcp.h>
-#endif
-
 #ifdef FREESCALE_LTC_TFM
     #include <wolfssl/wolfcrypt/port/nxp/ksdk_port.h>
 #endif
@@ -125,6 +119,10 @@
 
 #if defined(WOLFSSL_HAVE_PSA)
     #include <wolfssl/wolfcrypt/port/psa/psa.h>
+#endif
+
+#if defined(HAVE_LIBOQS)
+    #include <wolfssl/wolfcrypt/port/liboqs/liboqs.h>
 #endif
 
 #if defined(FREERTOS) && defined(WOLFSSL_ESPIDF)
@@ -231,20 +229,6 @@ int wolfCrypt_Init(void)
         if (ret != 0) {
             WOLFSSL_MSG("Hw crypt mutex init failed");
             return ret;
-        }
-    #endif
-
-    /* if defined have fast RSA then initialize Intel IPP */
-    #ifdef HAVE_FAST_RSA
-        WOLFSSL_MSG("Attempting to use optimized IPP Library");
-        if ((ret = ippInit()) != ippStsNoErr) {
-            /* possible to get a CPU feature support status on optimized IPP
-              library but still use default library and see competitive speeds */
-            WOLFSSL_MSG("Warning when trying to set up optimization");
-            WOLFSSL_MSG(ippGetStatusString(ret));
-            WOLFSSL_MSG("Using default fast IPP library");
-            ret = 0;
-            (void)ret; /* suppress not read warning */
         }
     #endif
 
@@ -392,6 +376,12 @@ int wolfCrypt_Init(void)
         }
         rpcmem_init();
 #endif
+
+#if defined(HAVE_LIBOQS)
+        if ((ret = wolfSSL_liboqsInit()) != 0) {
+            return ret;
+        }
+#endif
     }
     initRefCount++;
 
@@ -502,6 +492,10 @@ int wolfCrypt_Cleanup(void)
         wc_MemZero_Free();
     #endif
     }
+
+#if defined(HAVE_LIBOQS)
+    wolfSSL_liboqsClose();
+#endif
 
     return ret;
 }
@@ -1289,18 +1283,22 @@ void wolfSSL_RefDec(wolfSSL_Ref* ref, int* isZero, int* err)
 
 #if WOLFSSL_CRYPT_HW_MUTEX
 /* Mutex for protection of cryptography hardware */
-static wolfSSL_Mutex wcCryptHwMutex;
+static wolfSSL_Mutex wcCryptHwMutex WOLFSSL_MUTEX_INITIALIZER_CLAUSE(wcCryptHwMutex);
+#ifndef WOLFSSL_MUTEX_INITIALIZER
 static int wcCryptHwMutexInit = 0;
+#endif
 
 int wolfSSL_CryptHwMutexInit(void)
 {
     int ret = 0;
+#ifndef WOLFSSL_MUTEX_INITIALIZER
     if (wcCryptHwMutexInit == 0) {
         ret = wc_InitMutex(&wcCryptHwMutex);
         if (ret == 0) {
             wcCryptHwMutexInit = 1;
         }
     }
+#endif
     return ret;
 }
 int wolfSSL_CryptHwMutexLock(void)

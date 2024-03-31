@@ -40,4 +40,4 @@ files:
 issues: https://github.com/wolfSSL/wolfssl/issues
 repository: https://github.com/wolfSSL/wolfssl.git
 url: https://www.wolfssl.com
-version: 5.6.6-Stable-Update2-ESP32
+version: 5.7.0

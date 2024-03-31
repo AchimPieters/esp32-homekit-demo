@@ -69,9 +69,9 @@ int InitCRL(WOLFSSL_CRL* crl, WOLFSSL_CERT_MANAGER* cm)
     crl->cm = cm;
     crl->crlList  = NULL;
     crl->currentEntry = NULL;
+#ifdef HAVE_CRL_MONITOR
     crl->monitors[0].path = NULL;
     crl->monitors[1].path = NULL;
-#ifdef HAVE_CRL_MONITOR
     crl->tid = INVALID_THREAD_VAL;
     crl->mfd = WOLFSSL_CRL_MFD_INIT_VAL;
     crl->setup = 0; /* thread setup done predicate */
@@ -149,6 +149,23 @@ static int InitCRL_Entry(CRL_Entry* crle, DecodedCRL* dcrl, const byte* buff,
             crle->toBeSigned = NULL;
             return -1;
         }
+
+    #ifdef WC_RSA_PSS
+        crle->sigParamsSz = dcrl->sigParamsLength;
+        if (dcrl->sigParamsLength > 0) {
+            crle->sigParams = (byte*)XMALLOC(crle->sigParamsSz, heap,
+                                             DYNAMIC_TYPE_CRL_ENTRY);
+            if (crle->sigParams== NULL) {
+                XFREE(crle->toBeSigned, heap, DYNAMIC_TYPE_CRL_ENTRY);
+                crle->toBeSigned = NULL;
+                XFREE(crle->signature, heap, DYNAMIC_TYPE_CRL_ENTRY);
+                crle->signature = NULL;
+                return -1;
+            }
+            XMEMCPY(crle->sigParams, buff + dcrl->sigParamsIndex,
+                crle->sigParamsSz);
+        }
+    #endif
         XMEMCPY(crle->toBeSigned, buff + dcrl->certBegin, crle->tbsSz);
         XMEMCPY(crle->signature, dcrl->signature, crle->signatureSz);
     #ifndef NO_SKID
@@ -206,6 +223,10 @@ static void CRL_Entry_free(CRL_Entry* crle, void* heap)
         XFREE(crle->signature, heap, DYNAMIC_TYPE_CRL_ENTRY);
     if (crle->toBeSigned != NULL)
         XFREE(crle->toBeSigned, heap, DYNAMIC_TYPE_CRL_ENTRY);
+#ifdef WC_RSA_PSS
+    if (crle->sigParams != NULL)
+        XFREE(crle->sigParams, heap, DYNAMIC_TYPE_CRL_ENTRY);
+#endif
 #if defined(OPENSSL_EXTRA)
     if (crle->issuer != NULL) {
         FreeX509Name(crle->issuer);
@@ -228,11 +249,13 @@ void FreeCRL(WOLFSSL_CRL* crl, int dynamic)
 
     tmp = crl->crlList;
     WOLFSSL_ENTER("FreeCRL");
+#ifdef HAVE_CRL_MONITOR
     if (crl->monitors[0].path)
         XFREE(crl->monitors[0].path, crl->heap, DYNAMIC_TYPE_CRL_MONITOR);
 
     if (crl->monitors[1].path)
         XFREE(crl->monitors[1].path, crl->heap, DYNAMIC_TYPE_CRL_MONITOR);
+#endif
 
     XFREE(crl->currentEntry, crl->heap, DYNAMIC_TYPE_CRL_ENTRY);
     crl->currentEntry = NULL;
@@ -337,13 +360,20 @@ static int VerifyCRLE(const WOLFSSL_CRL* crl, CRL_Entry* crle)
     }
 
     ret = VerifyCRL_Signature(&sigCtx, crle->toBeSigned, crle->tbsSz,
-            crle->signature, crle->signatureSz, crle->signatureOID, ca,
-            crl->heap);
+            crle->signature, crle->signatureSz, crle->signatureOID,
+        #ifdef WC_RSA_PSS
+            crle->sigParams, crle->sigParamsSz,
+        #else
+            NULL, 0,
+        #endif
+            ca, crl->heap);
 
-    if (ret == 0)
+    if (ret == 0) {
         crle->verified = 1;
-    else
+    }
+    else {
         crle->verified = ret;
+    }
 
     return ret;
 }
@@ -461,7 +491,8 @@ int CheckCertCRL_ex(WOLFSSL_CRL* crl, byte* issuerHash, byte* serial,
 
 #if defined(OPENSSL_ALL) && defined(WOLFSSL_CERT_GEN) && \
     (defined(WOLFSSL_CERT_REQ) || defined(WOLFSSL_CERT_EXT)) && \
-    !defined(NO_FILESYSTEM) && !defined(NO_WOLFSSL_DIR)
+    !defined(NO_FILESYSTEM) && !defined(NO_WOLFSSL_DIR) && \
+    !defined(NO_STDIO_FILESYSTEM)
     /* if not find entry in the CRL list, it looks at the folder that sets  */
     /* by LOOKUP_ctrl because user would want to use hash_dir.              */
     /* Loading <issuer-hash>.rN form CRL file if find at the folder,        */
@@ -735,18 +766,35 @@ static CRL_Entry* DupCRL_Entry(const CRL_Entry* ent, void* heap)
                                           DYNAMIC_TYPE_CRL_ENTRY);
         dupl->signature = (byte*)XMALLOC(dupl->signatureSz, heap,
                                          DYNAMIC_TYPE_CRL_ENTRY);
-        if (dupl->toBeSigned == NULL || dupl->signature == NULL) {
+    #ifdef WC_RSA_PSS
+        dupl->sigParams = (byte*)XMALLOC(dupl->sigParamsSz, heap,
+                                         DYNAMIC_TYPE_CRL_ENTRY);
+    #endif
+        if (dupl->toBeSigned == NULL || dupl->signature == NULL
+        #ifdef WC_RSA_PSS
+            || dupl->sigParams == NULL
+        #endif
+        ) {
             CRL_Entry_free(dupl, heap);
             return NULL;
         }
         XMEMCPY(dupl->toBeSigned, ent->toBeSigned, dupl->tbsSz);
         XMEMCPY(dupl->signature, ent->signature, dupl->signatureSz);
+    #ifdef WC_RSA_PSS
+        if (dupl->sigParamsSz > 0) {
+            XMEMCPY(dupl->sigParams, ent->sigParams, dupl->sigParamsSz);
+        }
+    #endif
     }
     else {
         dupl->toBeSigned = NULL;
         dupl->tbsSz = 0;
         dupl->signature = NULL;
         dupl->signatureSz = 0;
+#ifdef WC_RSA_PSS
+        dupl->sigParams = NULL;
+        dupl->sigParamsSz = 0;
+#endif
 #if !defined(NO_SKID) && !defined(NO_ASN)
         dupl->extAuthKeyIdSet = 0;
 #endif
@@ -794,6 +842,7 @@ static int DupX509_CRL(WOLFSSL_X509_CRL *dupl, const WOLFSSL_X509_CRL* crl)
         return BAD_FUNC_ARG;
     }
 
+#ifdef HAVE_CRL_MONITOR
     if (crl->monitors[0].path) {
         int pathSz = (int)XSTRLEN(crl->monitors[0].path) + 1;
         dupl->monitors[0].path = (char*)XMALLOC(pathSz, dupl->heap,
@@ -821,6 +870,7 @@ static int DupX509_CRL(WOLFSSL_X509_CRL *dupl, const WOLFSSL_X509_CRL* crl)
             return MEMORY_E;
         }
     }
+#endif
 
     dupl->crlList = DupCRL_list(crl->crlList, dupl->heap);
 #ifdef HAVE_CRL_IO

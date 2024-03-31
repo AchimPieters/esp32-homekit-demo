@@ -1545,22 +1545,10 @@ int wolfSSL_X509V3_EXT_print(WOLFSSL_BIO *out, WOLFSSL_X509_EXTENSION *ext,
                         WOLFSSL_MSG("Memory error");
                         return rc;
                     }
-                    if (sk->next) {
-                        if ((valLen = XSNPRINTF(val, len, "%*s%s,",
-                                      indent, "", str->strData))
-                            >= len) {
-                            XFREE(val, NULL, DYNAMIC_TYPE_TMP_BUFFER);
-                            return rc;
-                        }
-                    } else {
-                        if ((valLen = XSNPRINTF(val, len, "%*s%s",
-                                      indent, "", str->strData))
-                            >= len) {
-                            XFREE(val, NULL, DYNAMIC_TYPE_TMP_BUFFER);
-                            return rc;
-                        }
-                    }
-                    if ((tmpLen + valLen) >= tmpSz) {
+                    valLen = XSNPRINTF(val, len, "%*s%s", indent, "",
+                            str->strData);
+                    if ((valLen < 0) || (valLen >= len)
+                            || ((tmpLen + valLen) >= tmpSz)) {
                         XFREE(val, NULL, DYNAMIC_TYPE_TMP_BUFFER);
                         return rc;
                     }
@@ -3593,7 +3581,7 @@ WOLFSSL_X509* wolfSSL_d2i_X509(WOLFSSL_X509** x509, const unsigned char** in,
 }
 
 static WOLFSSL_X509* d2i_X509orX509REQ(WOLFSSL_X509** x509,
-                                        const byte* in, int len, int req)
+                                  const byte* in, int len, int req, void* heap)
 {
     WOLFSSL_X509 *newX509 = NULL;
     int type = req ? CERTREQ_TYPE : CERT_TYPE;
@@ -3620,12 +3608,12 @@ static WOLFSSL_X509* d2i_X509orX509REQ(WOLFSSL_X509** x509,
             return NULL;
     #endif
 
-        InitDecodedCert(cert, (byte*)in, len, NULL);
+        InitDecodedCert(cert, (byte*)in, len, heap);
     #ifdef WOLFSSL_CERT_REQ
         cert->isCSR = (byte)req;
     #endif
         if (ParseCertRelative(cert, type, 0, NULL) == 0) {
-            newX509 = wolfSSL_X509_new();
+            newX509 = wolfSSL_X509_new_ex(heap);
             if (newX509 != NULL) {
                 if (CopyDecodedToX509(newX509, cert) != 0) {
                     wolfSSL_X509_free(newX509);
@@ -3659,16 +3647,22 @@ int wolfSSL_X509_get_isCA(WOLFSSL_X509* x509)
     return isCA;
 }
 
+WOLFSSL_X509* wolfSSL_X509_d2i_ex(WOLFSSL_X509** x509, const byte* in, int len,
+    void* heap)
+{
+    return d2i_X509orX509REQ(x509, in, len, 0, heap);
+}
+
 WOLFSSL_X509* wolfSSL_X509_d2i(WOLFSSL_X509** x509, const byte* in, int len)
 {
-    return d2i_X509orX509REQ(x509, in, len, 0);
+    return wolfSSL_X509_d2i_ex(x509, in, len, NULL);
 }
 
 #ifdef WOLFSSL_CERT_REQ
 WOLFSSL_X509* wolfSSL_X509_REQ_d2i(WOLFSSL_X509** x509,
         const unsigned char* in, int len)
 {
-    return d2i_X509orX509REQ(x509, in, len, 1);
+    return d2i_X509orX509REQ(x509, in, len, 1, NULL);
 }
 #endif
 
@@ -5319,17 +5313,22 @@ WOLFSSL_X509* wolfSSL_X509_REQ_load_certificate_buffer(
 /* returns a pointer to a new WOLFSSL_X509 structure on success and NULL on
  * fail
  */
-WOLFSSL_X509* wolfSSL_X509_new(void)
+WOLFSSL_X509* wolfSSL_X509_new_ex(void* heap)
 {
     WOLFSSL_X509* x509;
 
-    x509 = (WOLFSSL_X509*)XMALLOC(sizeof(WOLFSSL_X509), NULL,
+    x509 = (WOLFSSL_X509*)XMALLOC(sizeof(WOLFSSL_X509), heap,
             DYNAMIC_TYPE_X509);
     if (x509 != NULL) {
-        InitX509(x509, 1, NULL);
+        InitX509(x509, 1, heap);
     }
 
     return x509;
+}
+
+WOLFSSL_X509* wolfSSL_X509_new(void)
+{
+    return wolfSSL_X509_new_ex(NULL);
 }
 
 WOLFSSL_ABI
@@ -7523,6 +7522,45 @@ int wolfSSL_i2d_X509(WOLFSSL_X509* x509, unsigned char** out)
     return derSz;
 }
 
+#ifdef WOLFSSL_DUAL_ALG_CERTS
+int wc_GeneratePreTBS(DecodedCert* cert, byte *der, int derSz) {
+    int ret = 0;
+    WOLFSSL_X509 *x = NULL;
+
+    if ((cert == NULL) || (der == NULL) || (derSz <= 0)) {
+        return BAD_FUNC_ARG;
+    }
+
+    x = wolfSSL_X509_new();
+    if (x == NULL) {
+        ret = MEMORY_E;
+    }
+    else {
+        ret = CopyDecodedToX509(x, cert);
+    }
+
+    if (ret == 0) {
+        /* Remove the altsigval extension. */
+        XFREE(x->altSigValDer, x->heap, DYNAMIC_TYPE_X509_EXT);
+        x->altSigValDer = NULL;
+        x->altSigValDer = 0;
+        /* Remove sigOID so it won't be encoded. */
+        x->sigOID = 0;
+        /* We now have a PreTBS. Encode it. */
+        ret = wolfssl_x509_make_der(x, 0, der, &derSz, 0);
+        if (ret == WOLFSSL_SUCCESS) {
+            ret = derSz;
+        }
+    }
+
+    if (x != NULL) {
+        wolfSSL_X509_free(x);
+    }
+
+    return ret;
+}
+#endif /* WOLFSSL_DUAL_ALG_CERTS */
+
 #ifndef NO_BIO
 /**
  * Converts the DER from bio and creates a WOLFSSL_X509 structure from it.
@@ -7571,7 +7609,7 @@ static WOLFSSL_X509* d2i_X509orX509REQ_bio(WOLFSSL_BIO* bio,
 #endif
     }
     else {
-        localX509 = wolfSSL_X509_d2i(NULL, mem, size);
+        localX509 = wolfSSL_X509_d2i_ex(NULL, mem, size, bio->heap);
     }
     if (localX509 == NULL) {
         WOLFSSL_MSG("wolfSSL_X509_d2i error");
@@ -7934,7 +7972,7 @@ WOLFSSL_API WOLFSSL_X509_CRL *wolfSSL_d2i_X509_CRL_bio(WOLFSSL_BIO *bp,
 }
 #endif
 
-#ifndef NO_FILESYSTEM
+#if !defined(NO_FILESYSTEM) && !defined(NO_STDIO_FILESYSTEM)
 WOLFSSL_X509_CRL *wolfSSL_d2i_X509_CRL_fp(XFILE fp, WOLFSSL_X509_CRL **crl)
 {
     WOLFSSL_ENTER("wolfSSL_d2i_X509_CRL_fp");
@@ -9928,6 +9966,16 @@ WOLF_STACK_OF(WOLFSSL_X509)* wolfSSL_X509_chain_up_ref(
             XMEMCPY(cert->crlInfo, x509->rawCRLInfo, x509->rawCRLInfoSz);
             cert->crlInfoSz = x509->rawCRLInfoSz;
         }
+
+    #ifdef WOLFSSL_DUAL_ALG_CERTS
+        /* We point to instance in x509 so DON'T need to be free'd. */
+        cert->sapkiDer = x509->sapkiDer;
+        cert->sapkiLen = x509->sapkiLen;
+        cert->altSigAlgDer = x509->altSigAlgDer;
+        cert->altSigAlgLen = x509->altSigAlgLen;
+        cert->altSigValDer = x509->altSigValDer;
+        cert->altSigValLen = x509->altSigValLen;
+    #endif /* WOLFSSL_DUAL_ALG_CERTS */
     #endif /* WOLFSSL_CERT_EXT */
 
     #ifdef WOLFSSL_CERT_REQ
@@ -11173,7 +11221,7 @@ err:
         pemSz = (int)(l - i);
 
         /* check calculated length */
-        if (pemSz > MAX_WOLFSSL_FILE_SIZE || pemSz < 0) {
+        if (pemSz > MAX_WOLFSSL_FILE_SIZE || pemSz <= 0) {
             WOLFSSL_MSG("PEM_read_X509_ex file size error");
             return NULL;
         }
@@ -13304,7 +13352,7 @@ static int x509GetIssuerFromCM(WOLFSSL_X509 **issuer, WOLFSSL_CERT_MANAGER* cm,
 #endif
 
     /* Use existing CA retrieval APIs that use DecodedCert. */
-    InitDecodedCert(cert, x->derCert->buffer, x->derCert->length, NULL);
+    InitDecodedCert(cert, x->derCert->buffer, x->derCert->length, cm->heap);
     if (ParseCertRelative(cert, CERT_TYPE, 0, NULL) == 0
             && !cert->selfSigned) {
     #ifndef NO_SKID
@@ -13326,8 +13374,8 @@ static int x509GetIssuerFromCM(WOLFSSL_X509 **issuer, WOLFSSL_CERT_MANAGER* cm,
 
 #ifdef WOLFSSL_SIGNER_DER_CERT
     /* populate issuer with Signer DER */
-    if (wolfSSL_X509_d2i(issuer, ca->derCert->buffer,
-            ca->derCert->length) == NULL)
+    if (wolfSSL_X509_d2i_ex(issuer, ca->derCert->buffer,
+            ca->derCert->length, cm->heap) == NULL)
         return WOLFSSL_FAILURE;
 #else
     /* Create an empty certificate as CA doesn't have a certificate. */
@@ -13422,7 +13470,8 @@ WOLFSSL_X509* wolfSSL_X509_dup(WOLFSSL_X509 *x)
         return NULL;
     }
 
-    return wolfSSL_X509_d2i(NULL, x->derCert->buffer, x->derCert->length);
+    return wolfSSL_X509_d2i_ex(NULL, x->derCert->buffer, x->derCert->length,
+        x->heap);
 }
 #endif /* OPENSSL_EXTRA || WOLFSSL_WPAS_SMALL */
 
@@ -13787,35 +13836,50 @@ void wolfSSL_X509V3_set_ctx(WOLFSSL_X509V3_CTX* ctx, WOLFSSL_X509* issuer,
 {
     int ret = WOLFSSL_SUCCESS;
     WOLFSSL_ENTER("wolfSSL_X509V3_set_ctx");
-    if (!ctx)
-        return;
+    if (!ctx) {
+        ret = WOLFSSL_FAILURE;
+        WOLFSSL_MSG("wolfSSL_X509V3_set_ctx() called with null ctx.");
+    }
 
-    /* not checking ctx->x509 for null first since app won't have initialized
-     * this X509V3_CTX before this function call */
-    ctx->x509 = wolfSSL_X509_new();
-    if (!ctx->x509)
-        return;
+    if (ret == WOLFSSL_SUCCESS && (ctx->x509 != NULL)) {
+        ret = WOLFSSL_FAILURE;
+        WOLFSSL_MSG("wolfSSL_X509V3_set_ctx() called "
+                    "with ctx->x509 already allocated.");
+    }
+
+    if (ret == WOLFSSL_SUCCESS) {
+        ctx->x509 = wolfSSL_X509_new_ex(
+            (issuer && issuer->heap) ? issuer->heap :
+            (subject && subject->heap) ? subject->heap :
+            (req && req->heap) ? req->heap :
+            NULL);
+        if (!ctx->x509) {
+            ret = WOLFSSL_FAILURE;
+            WOLFSSL_MSG("wolfSSL_X509_new_ex() failed "
+                        "in wolfSSL_X509V3_set_ctx().");
+        }
+    }
 
     /* Set parameters in ctx as long as ret == WOLFSSL_SUCCESS */
-    if (issuer)
+    if (ret == WOLFSSL_SUCCESS && issuer)
         ret = wolfSSL_X509_set_issuer_name(ctx->x509,&issuer->issuer);
 
-    if (subject && ret == WOLFSSL_SUCCESS)
+    if (ret == WOLFSSL_SUCCESS && subject)
         ret = wolfSSL_X509_set_subject_name(ctx->x509,&subject->subject);
 
-    if (req && ret == WOLFSSL_SUCCESS) {
+    if (ret == WOLFSSL_SUCCESS && req) {
         WOLFSSL_MSG("req not implemented.");
     }
 
-    if (crl && ret == WOLFSSL_SUCCESS) {
+    if (ret == WOLFSSL_SUCCESS && crl) {
         WOLFSSL_MSG("crl not implemented.");
     }
 
-    if (flag && ret == WOLFSSL_SUCCESS) {
+    if (ret == WOLFSSL_SUCCESS && flag) {
         WOLFSSL_MSG("flag not implemented.");
     }
 
-    if (!ret) {
+    if (ret != WOLFSSL_SUCCESS) {
         WOLFSSL_MSG("Error setting WOLFSSL_X509V3_CTX parameters.");
     }
 }

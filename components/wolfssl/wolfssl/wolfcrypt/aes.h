@@ -85,10 +85,14 @@ WOLFSSL_LOCAL void GHASH(Gcm* gcm, const byte* a, word32 aSz, const byte* c,
 #ifdef WOLFSSL_XILINX_CRYPT_VERSAL
 #include <wolfssl/wolfcrypt/port/xilinx/xil-versal-glue.h>
 #include <xsecure_aesclient.h>
-#define WOLFSSL_XILINX_AES_KEY_SRC XSECURE_AES_USER_KEY_0
+#if !defined(WOLFSSL_XILINX_AES_KEY_SRC)
+    #define WOLFSSL_XILINX_AES_KEY_SRC XSECURE_AES_USER_KEY_0
+#endif
 #else /* versal */
 #include <xsecure_aes.h>
-#define WOLFSSL_XILINX_AES_KEY_SRC XSECURE_CSU_AES_KEY_SRC_KUP
+#if !defined(WOLFSSL_XILINX_AES_KEY_SRC)
+    #define WOLFSSL_XILINX_AES_KEY_SRC XSECURE_CSU_AES_KEY_SRC_KUP
+#endif
 #endif /* !versal */
 #endif /* WOLFSSL_XILINX_CRYPT */
 
@@ -175,6 +179,9 @@ enum {
     AES_ENC_TYPE   = WC_CIPHER_AES,   /* cipher unique type */
     AES_ENCRYPTION = 0,
     AES_DECRYPTION = 1,
+#ifdef WC_AES_XTS_SUPPORT_SIMULTANEOUS_ENC_AND_DEC_KEYS
+    AES_ENCRYPTION_AND_DECRYPTION = 2,
+#endif
 
     AES_BLOCK_SIZE      = 16,
 
@@ -395,6 +402,9 @@ struct Aes {
 #ifdef WOLFSSL_AES_XTS
 typedef struct XtsAes {
     Aes aes;
+#ifdef WC_AES_XTS_SUPPORT_SIMULTANEOUS_ENC_AND_DEC_KEYS
+    Aes aes_decrypt;
+#endif
     Aes tweak;
 } XtsAes;
 #endif

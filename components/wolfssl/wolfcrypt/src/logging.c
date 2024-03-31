@@ -234,7 +234,9 @@ void WOLFSSL_TIME(int count)
 
 #ifdef DEBUG_WOLFSSL
 
-#if defined(FREESCALE_MQX) || defined(FREESCALE_KSDK_MQX)
+#if defined(ARDUINO)
+    /* see Arduino wolfssl.h for wolfSSL_Arduino_Serial_Print */
+#elif defined(FREESCALE_MQX) || defined(FREESCALE_KSDK_MQX)
     /* see wc_port.h for fio.h and nio.h includes */
 #elif defined(WOLFSSL_SGX)
     /* Declare sprintf for ocall */
@@ -281,9 +283,10 @@ static void wolfssl_log(const int logLevel, const char *const logMessage)
     else {
 #if defined(WOLFSSL_USER_LOG)
         WOLFSSL_USER_LOG(logMessage);
+#elif defined(ARDUINO)
+        wolfSSL_Arduino_Serial_Print(logMessage);
 #elif defined(WOLFSSL_LOG_PRINTF)
         printf("%s\n", logMessage);
-
 #elif defined(THREADX) && !defined(THREADX_NO_DC_PRINTF)
         dc_log_printf("%s\n", logMessage);
 #elif defined(WOLFSSL_DEOS)
@@ -818,7 +821,7 @@ static struct wc_error_queue* wc_current_node;
 static void* wc_error_heap;
 
 /* mutex for list operation protection */
-static wolfSSL_Mutex wc_error_mutex;
+static wolfSSL_Mutex wc_error_mutex WOLFSSL_MUTEX_INITIALIZER_CLAUSE(wc_error_mutex);
 #define ERRQ_MUTEX_INIT()      wc_InitMutex(&wc_error_mutex)
 #define ERRQ_MUTEX_FREE()      wc_FreeMutex(&wc_error_mutex)
 #define ERRQ_LOCK()            wc_LockMutex(&wc_error_mutex)
@@ -827,10 +830,12 @@ static wolfSSL_Mutex wc_error_mutex;
 /* Internal function that is called by wolfCrypt_Init() */
 int wc_LoggingInit(void)
 {
+#ifndef WOLFSSL_MUTEX_INITIALIZER
     if (ERRQ_MUTEX_INIT() != 0) {
         WOLFSSL_MSG("Bad Init Mutex");
         return BAD_MUTEX_E;
     }
+#endif
     wc_errors_count = 0;
     wc_errors          = NULL;
     wc_current_node    = NULL;
@@ -845,10 +850,12 @@ int wc_LoggingCleanup(void)
     /* clear logging entries */
     wc_ClearErrorNodes();
     /* free mutex */
+#ifndef WOLFSSL_MUTEX_INITIALIZER
     if (ERRQ_MUTEX_FREE() != 0) {
         WOLFSSL_MSG("Bad Mutex free");
         return BAD_MUTEX_E;
     }
+#endif
     return 0;
 }
 

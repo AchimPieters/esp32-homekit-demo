@@ -34,7 +34,7 @@
 
 /* wolfSSL */
 #include <wolfssl/wolfcrypt/settings.h>
-#include "user_settings.h"
+#include <wolfssl/certs_test.h>
 #include <wolfssl/ssl.h>
 
 #ifdef WOLFSSL_TRACK_MEMORY

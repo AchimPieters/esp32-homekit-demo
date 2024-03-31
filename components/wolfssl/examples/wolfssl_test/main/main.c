@@ -25,7 +25,7 @@
 
 /* wolfSSL */
 #include <wolfssl/wolfcrypt/settings.h>
-#include <user_settings.h>
+#include <wolfssl/certs_test.h>
 #include <wolfssl/version.h>
 #include <wolfssl/wolfcrypt/types.h>
 

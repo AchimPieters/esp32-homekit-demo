@@ -227,10 +227,13 @@ int esp_sha_init(WC_ESP32SHA* ctx, enum wc_HashType hash_type)
 #if defined(CONFIG_IDF_TARGET_ESP32) || \
     defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
     switch (hash_type) { /* check each wolfSSL hash type WC_[n] */
+
+        #ifndef NO_SHA
         case WC_HASH_TYPE_SHA:
             ctx->sha_type = SHA1; /* assign Espressif SHA HW type */
             ret = esp_sha_init_ctx(ctx);
             break;
+        #endif
 
         case WC_HASH_TYPE_SHA224:
         #if defined(CONFIG_IDF_TARGET_ESP32S2) || \
@@ -333,7 +336,6 @@ int esp_sha_init(WC_ESP32SHA* ctx, enum wc_HashType hash_type)
     return ret;
 }
 
-#ifndef NO_SHAx /* TODO cannot currently turn off SHA */
 /* we'll call a separate init as there's only 1 HW acceleration */
 int esp_sha_init_ctx(WC_ESP32SHA* ctx)
 {
@@ -522,6 +524,7 @@ int esp_sha_init_ctx(WC_ESP32SHA* ctx)
                     * We assume all issues handled, above. */
 } /* esp_sha_init_ctx */
 
+#ifndef NO_SHA
 /*
 ** internal SHA ctx copy for ESP HW
 */
@@ -679,7 +682,10 @@ int esp_sha256_ctx_copy(struct wc_Sha256* src, struct wc_Sha256* dst)
 } /* esp_sha256_ctx_copy */
 #endif
 
-#if defined(WOLFSSL_SHA384) || defined(WOLFSSL_SHA512)
+#if !(defined(NO_WOLFSSL_ESP32_CRYPT_HASH_SHA384) && \
+      defined(NO_WOLFSSL_ESP32_CRYPT_HASH_SHA512)    \
+     ) && \
+    (defined(WOLFSSL_SHA384) || defined(WOLFSSL_SHA512))
 /*
 ** internal sha384 ctx copy for ESP HW
 */
@@ -744,7 +750,10 @@ int esp_sha384_ctx_copy(struct wc_Sha512* src, struct wc_Sha512* dst)
 } /* esp_sha384_ctx_copy */
 #endif
 
-#if defined(WOLFSSL_SHA384) || defined(WOLFSSL_SHA512)
+#if !(defined(NO_WOLFSSL_ESP32_CRYPT_HASH_SHA384) && \
+      defined(NO_WOLFSSL_ESP32_CRYPT_HASH_SHA512)    \
+     ) && \
+    (defined(WOLFSSL_SHA384) || defined(WOLFSSL_SHA512))
 /*
 ** Internal sha512 ctx copy for ESP HW.
 ** If HW already active, fall back to SW for this ctx.
@@ -1190,7 +1199,7 @@ int esp_sha_try_hw_lock(WC_ESP32SHA* ctx)
         ESP_LOGE(TAG, "unexpected error in esp_sha_try_hw_lock.");
         return ESP_FAIL;
     }
-#else /* not ESP_FAILfined(SINGLE_THREADED) */
+#else /* not SINGLE_THREADED */
     /*
     ** there's only one SHA engine for all the hash types
     ** so when any hash is in use, no others can use it.
@@ -2013,7 +2022,7 @@ int wc_esp_digest_state(WC_ESP32SHA* ctx, byte* hash)
             pwrd1[i]     ^= pwrd1[i + 1];
         }
     }
-#endif
+#endif /* SHA512 or SHA384*/
 #endif /* not CONFIG_IDF_TARGET_ESP32S3, C3, else... */
 
     ESP_LOGV(TAG, "leave esp_digest_state");
@@ -2122,6 +2131,9 @@ int esp_sha256_digest_process(struct wc_Sha256* sha, byte blockprocess)
     }
 
     wc_esp_digest_state(&sha->ctx, (byte*)sha->digest);
+#else
+    ESP_LOGE(TAG, "Call esp_sha256_digest_process with "
+                  "NO_WOLFSSL_ESP32_CRYPT_HASH_SHA256 ");
 #endif
     ESP_LOGV(TAG, "leave esp_sha256_digest_process");
     return ret;
@@ -2130,7 +2142,10 @@ int esp_sha256_digest_process(struct wc_Sha256* sha, byte blockprocess)
 
 #endif /* NO_SHA256 */
 
-#if defined(WOLFSSL_SHA512) || defined(WOLFSSL_SHA384)
+#if !(defined(NO_WOLFSSL_ESP32_CRYPT_HASH_SHA384) && \
+      defined(NO_WOLFSSL_ESP32_CRYPT_HASH_SHA512)    \
+     ) && \
+    (defined(WOLFSSL_SHA512) || defined(WOLFSSL_SHA384))
 /*
 ** sha512 process. this is used for sha384 too.
 */
@@ -2232,14 +2247,18 @@ int esp_sha512_digest_process(struct wc_Sha512* sha, byte blockproc)
 
 #if defined(WOLFSSL_ESP32_CRYPT) && defined(WOLFSSL_HW_METRICS)
 int esp_sw_sha256_count_add(void) {
+    int ret = 0;
+#if !defined(NO_WOLFSSL_ESP32_CRYPT_HASH)
     esp_sha256_sw_fallback_usage_ct++;
-    return esp_sha256_sw_fallback_usage_ct;
+    ret = esp_sha256_sw_fallback_usage_ct;
+#endif
+    return ret;
 }
 
 int esp_hw_show_sha_metrics(void)
 {
     int ret = 0;
-#ifdef WOLFSSL_ESP32_CRYPT
+#if defined(WOLFSSL_ESP32_CRYPT) && !defined(NO_WOLFSSL_ESP32_CRYPT_HASH)
     ESP_LOGI(TAG, "--------------------------------------------------------");
     ESP_LOGI(TAG, "------------- wolfSSL ESP HW SHA Metrics----------------");
     ESP_LOGI(TAG, "--------------------------------------------------------");
@@ -2267,7 +2286,6 @@ int esp_hw_show_sha_metrics(void)
     /* no HW math, no HW math metrics */
     ret = 0;
 #endif /* HW_MATH_ENABLED */
-
 
     return ret;
 }

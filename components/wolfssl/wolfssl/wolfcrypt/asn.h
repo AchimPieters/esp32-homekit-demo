@@ -932,7 +932,11 @@ enum Misc_ASN {
     MIN_DATE_SIZE       =  12,
     MAX_DATE_SIZE       =  32,
     ASN_GEN_TIME_SZ     =  15,     /* 7 numbers * 2 + Zulu tag */
-#ifndef NO_RSA
+#ifdef HAVE_SPHINCS
+    MAX_ENCODED_SIG_SZ  = 51200,
+#elif defined(HAVE_PQC)
+    MAX_ENCODED_SIG_SZ  = 5120,
+#elif !defined(NO_RSA)
 #ifdef WOLFSSL_HAPROXY
     MAX_ENCODED_SIG_SZ  = 1024,    /* Supports 8192 bit keys */
 #else
@@ -1019,6 +1023,7 @@ enum Misc_ASN {
 #endif
     TRAILING_ZERO       = 1,       /* Used for size of zero pad */
     ASN_TAG_SZ          = 1,       /* single byte ASN.1 tag */
+    ASN_INDEF_END_SZ    = 2,       /* 0x00 0x00 at end of indef */
     MIN_VERSION_SZ      = 3,       /* Min bytes needed for GetMyVersion */
     MAX_X509_VERSION    = 3,       /* Max X509 version allowed */
     MIN_X509_VERSION    = 0,       /* Min X509 version allowed */
@@ -1124,6 +1129,7 @@ enum Block_Sum {
 
 
 enum Key_Sum {
+    ANONk             = 0,
     DSAk              = 515,
     RSAk              = 645,
     RSAPSSk           = 654,
@@ -1135,8 +1141,8 @@ enum Key_Sum {
     ED448k            = 257, /* 1.3.101.113 */
     X448k             = 255, /* 1.3.101.111 */
     DHk               = 647, /* dhKeyAgreement OID: 1.2.840.113549.1.3.1 */
-    FALCON_LEVEL1k    = 268, /* 1.3.9999.3.1 */
-    FALCON_LEVEL5k    = 271, /* 1.3.9999.3.4 */
+    FALCON_LEVEL1k    = 273, /* 1.3.9999.3.6 */
+    FALCON_LEVEL5k    = 276, /* 1.3.9999.3.9 */
     DILITHIUM_LEVEL2k = 213,    /* 1.3.6.1.4.1.2.267.7.4.4 */
     DILITHIUM_LEVEL3k = 216,    /* 1.3.6.1.4.1.2.267.7.6.5 */
     DILITHIUM_LEVEL5k = 220,    /* 1.3.6.1.4.1.2.267.7.8.7 */
@@ -1220,7 +1226,12 @@ enum Extensions_Sum {
     AKEY_PACKAGE_OID          = 1048, /* 2.16.840.1.101.2.1.2.78.5
                                         RFC 5958  - Asymmetric Key Packages */
     FASCN_OID = 419, /* 2.16.840.1.101.3.6.6 Federal PKI Policy FASC-N */
-    UPN_OID   = 265  /* 1.3.6.1.4.1.311.20.2.3 UPN */
+    UPN_OID   = 265, /* 1.3.6.1.4.1.311.20.2.3 UPN */
+#ifdef WOLFSSL_DUAL_ALG_CERTS
+    SUBJ_ALT_PUB_KEY_INFO_OID = 186, /* 2.5.29.72 subject alt public key info */
+    ALT_SIG_ALG_OID           = 187, /* 2.5.29.73 alt sig alg */
+    ALT_SIG_VAL_OID           = 188  /* 2.5.29.74 alt sig val */
+#endif
 };
 
 enum CertificatePolicy_Sum {
@@ -1925,6 +1936,11 @@ struct DecodedCert {
 #ifdef WOLFSSL_SUBJ_INFO_ACC
     byte extSubjInfoAccSet : 1;
 #endif
+#ifdef WOLFSSL_DUAL_ALG_CERTS
+    byte extSapkiSet : 1;
+    byte extAltSigAlgSet : 1;
+    byte extAltSigValSet : 1;
+#endif /* WOLFSSL_DUAL_ALG_CERTS */
 #if defined(WOLFSSL_SEP) || defined(WOLFSSL_QT)
     byte extCertPolicyCrit : 1;
 #endif
@@ -1938,6 +1954,19 @@ struct DecodedCert {
     && defined(HAVE_OID_DECODING)
     wc_UnknownExtCallback unknownExtCallback;
 #endif
+#ifdef WOLFSSL_DUAL_ALG_CERTS
+    /* Subject Alternative Public Key Info */
+    byte *sapkiDer;
+    int sapkiLen;
+    word32 sapkiOID;
+    /* Alternative Signature Algorithm */
+    byte *altSigAlgDer;
+    int altSigAlgLen;
+    word32 altSigAlgOID;
+    /* Alternative Signature Value */
+    byte *altSigValDer;
+    int altSigValLen;
+#endif /* WOLFSSL_DUAL_ALG_CERTS */
 };
 
 #if defined(WOLFSSL_SM2) && defined(WOLFSSL_SM3)
@@ -1987,6 +2016,14 @@ struct Signer {
 #if defined(WOLFSSL_RENESAS_TSIP_TLS) || defined(WOLFSSL_RENESAS_FSPSM_TLS)
     word32 cm_idx;
 #endif
+#ifdef WOLFSSL_DUAL_ALG_CERTS
+    /* The Subject Alternative Public Key Info (SAPKI) will NOT be cached.
+     * Caching of it is NOT SUPPORTED yet. */
+    byte *sapkiDer;
+    int sapkiLen;
+#endif /* WOLFSSL_DUAL_ALG_CERTS */
+    byte type;
+
     Signer* next;
 };
 
@@ -2065,6 +2102,8 @@ WOLFSSL_LOCAL int GetName(DecodedCert* cert, int nameType, int maxIdx);
 
 WOLFSSL_ASN_API int wc_BerToDer(const byte* ber, word32 berSz, byte* der,
                                 word32* derSz);
+WOLFSSL_LOCAL int StreamOctetString(const byte* inBuf, word32 inBufSz,
+    byte* out, word32* outSz, word32* idx);
 
 WOLFSSL_ASN_API void FreeAltNames(DNS_entry* altNames, void* heap);
 WOLFSSL_ASN_API DNS_entry* AltNameNew(void* heap);
@@ -2097,6 +2136,13 @@ WOLFSSL_API int wc_CheckCertSigPubKey(const byte* cert, word32 certSz,
                                       void* heap, const byte* pubKey,
                                       word32 pubKeySz, int pubKeyOID);
 #endif
+#ifdef WOLFSSL_DUAL_ALG_CERTS
+WOLFSSL_LOCAL int wc_ConfirmAltSignature(
+    const byte* buf, word32 bufSz,
+    const byte* key, word32 keySz, word32 keyOID,
+    const byte* sig, word32 sigSz, word32 sigOID,
+    void *heap);
+#endif /* WOLFSSL_DUAL_ALG_CERTS */
 #if (defined(HAVE_ED25519) && defined(HAVE_ED25519_KEY_IMPORT) || \
     (defined(HAVE_ED448) && defined(HAVE_ED448_KEY_IMPORT)))
 WOLFSSL_LOCAL int wc_CertGetPubKey(const byte* cert, word32 certSz,
@@ -2122,6 +2168,8 @@ WOLFSSL_LOCAL const byte* OidFromId(word32 id, word32 type, word32* oidSz);
 WOLFSSL_LOCAL Signer* MakeSigner(void* heap);
 WOLFSSL_LOCAL void    FreeSigner(Signer* signer, void* heap);
 WOLFSSL_LOCAL void    FreeSignerTable(Signer** table, int rows, void* heap);
+WOLFSSL_LOCAL void    FreeSignerTableType(Signer** table, int rows, byte type,
+                                          void* heap);
 #ifdef WOLFSSL_TRUST_PEER_CERT
 WOLFSSL_LOCAL void    FreeTrustedPeer(TrustedPeerCert* tp, void* heap);
 WOLFSSL_LOCAL void    FreeTrustedPeerTable(TrustedPeerCert** table, int rows,
@@ -2232,14 +2280,20 @@ WOLFSSL_LOCAL word32 SetASNExplicit(byte number, word32 len, byte* output);
 WOLFSSL_LOCAL word32 SetASNSet(word32 len, byte* output);
 
 WOLFSSL_LOCAL word32 SetLength(word32 length, byte* output);
+WOLFSSL_LOCAL word32 SetLengthEx(word32 length, byte* output, byte isIndef);
 WOLFSSL_LOCAL word32 SetSequence(word32 len, byte* output);
+WOLFSSL_LOCAL word32 SetSequenceEx(word32 len, byte* output, byte isIndef);
+WOLFSSL_LOCAL word32 SetIndefEnd(byte* output);
 WOLFSSL_LOCAL word32 SetOctetString(word32 len, byte* output);
+WOLFSSL_LOCAL word32 SetOctetStringEx(word32 len, byte* output, byte indef);
 WOLFSSL_LOCAL int SetASNInt(int len, byte firstByte, byte* output);
 WOLFSSL_LOCAL word32 SetBitString(word32 len, byte unusedBits, byte* output);
-WOLFSSL_LOCAL word32 SetImplicit(byte tag,byte number,word32 len,byte* output);
-WOLFSSL_LOCAL word32 SetExplicit(byte number, word32 len, byte* output);
+WOLFSSL_LOCAL word32 SetImplicit(byte tag,byte number,word32 len,byte* output,
+        byte isIndef);
+WOLFSSL_LOCAL word32 SetExplicit(byte number, word32 len, byte* output,
+    byte isIndef);
 WOLFSSL_LOCAL word32 SetSet(word32 len, byte* output);
-WOLFSSL_LOCAL word32 SetAlgoID(int algoOID,byte* output,int type,int curveSz);
+WOLFSSL_API word32 SetAlgoID(int algoOID, byte* output, int type, int curveSz);
 WOLFSSL_LOCAL int SetMyVersion(word32 version, byte* output, int header);
 WOLFSSL_LOCAL int SetSerialNumber(const byte* sn, word32 snSz, byte* output,
     word32 outputSz, int maxSnSz);
@@ -2547,6 +2601,10 @@ struct DecodedCRL {
     word32  sigIndex;                /* offset to start of signature     */
     word32  sigLength;               /* length of signature              */
     word32  signatureOID;            /* sum of algorithm object id       */
+#ifdef WC_RSA_PSS
+    word32  sigParamsIndex;          /* start of signature parameters    */
+    word32  sigParamsLength;         /* length of signature parameters   */
+#endif
     byte*   signature;               /* pointer into raw source, not owned */
     byte    issuerHash[SIGNER_DIGEST_SIZE]; /* issuer name hash          */
     byte    crlHash[SIGNER_DIGEST_SIZE]; /* raw crl data hash            */
@@ -2573,8 +2631,8 @@ WOLFSSL_LOCAL void InitDecodedCRL(DecodedCRL* dcrl, void* heap);
 WOLFSSL_LOCAL int VerifyCRL_Signature(SignatureCtx* sigCtx,
                                       const byte* toBeSigned, word32 tbsSz,
                                       const byte* signature, word32 sigSz,
-                                      word32 signatureOID, Signer *ca,
-                                      void* heap);
+                                      word32 signatureOID, const byte* sigParams,
+                                      int sigParamsSz, Signer *ca, void* heap);
 WOLFSSL_LOCAL int ParseCRL(RevokedCert* rcert, DecodedCRL* dcrl,
                            const byte* buff, word32 sz, int verify, void* cm);
 WOLFSSL_LOCAL void FreeDecodedCRL(DecodedCRL* dcrl);

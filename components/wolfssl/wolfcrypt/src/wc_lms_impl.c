@@ -1,4 +1,4 @@
-/* wolfssl_client main.h
+/* wc_lms_impl.c
  *
  * Copyright (C) 2006-2024 wolfSSL Inc.
  *
@@ -18,7 +18,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
  */
-#ifndef _MAIN_H_
-#define _MAIN_H_
 
+#include <wolfssl/wolfcrypt/settings.h>
+
+#ifdef WOLFSSL_HAVE_LMS
+    #error "Contact wolfSSL to get the implementation of this file"
 #endif

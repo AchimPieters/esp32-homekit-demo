@@ -120,7 +120,7 @@ int wolfSSL_GetAllocators(wolfSSL_Malloc_cb*  mf,
 }
 
 #ifdef WOLFSSL_MEM_FAIL_COUNT
-static wolfSSL_Mutex memFailMutex;
+static wolfSSL_Mutex memFailMutex WOLFSSL_MUTEX_INITIALIZER_CLAUSE(memFailMutex);
 int mem_fail_allocs = 0;
 int mem_fail_frees = 0;
 int mem_fail_cnt = 0;
@@ -128,7 +128,9 @@ int mem_fail_cnt = 0;
 void wc_MemFailCount_Init()
 {
     char* cnt;
+#ifndef WOLFSSL_MUTEX_INITIALIZER
     wc_InitMutex(&memFailMutex);
+#endif
     cnt = getenv("MEM_FAIL_CNT");
     if (cnt != NULL) {
         fprintf(stderr, "MemFailCount At: %d\n", mem_fail_cnt);
@@ -158,7 +160,9 @@ static void wc_MemFailCount_FreeMem(void)
 }
 void wc_MemFailCount_Free()
 {
+#ifndef WOLFSSL_MUTEX_INITIALIZER
     wc_FreeMutex(&memFailMutex);
+#endif
     fprintf(stderr, "MemFailCount Total: %d\n", mem_fail_allocs);
     fprintf(stderr, "MemFailCount Frees: %d\n", mem_fail_frees);
 }
@@ -196,7 +200,7 @@ static MemZero memZero[WOLFSSL_MEM_CHECK_ZERO_CACHE_LEN];
  */
 static int nextIdx = -1;
 /* Mutex to protect modifying list of addresses to check. */
-static wolfSSL_Mutex zeroMutex;
+static wolfSSL_Mutex zeroMutex WOLFSSL_MUTEX_INITIALIZER_CLAUSE(zeroMutex);
 
 /* Initialize the table of addresses and the mutex.
  */
@@ -205,7 +209,9 @@ void wc_MemZero_Init()
     /* Clear the table to more easily see what is valid. */
     XMEMSET(memZero, 0, sizeof(memZero));
     /* Initialize mutex. */
+#ifndef WOLFSSL_MUTEX_INITIALIZER
     wc_InitMutex(&zeroMutex);
+#endif
     /* Next index is first entry. */
     nextIdx = 0;
 }
@@ -215,7 +221,9 @@ void wc_MemZero_Init()
 void wc_MemZero_Free()
 {
     /* Free mutex. */
+#ifndef WOLFSSL_MUTEX_INITIALIZER
     wc_FreeMutex(&zeroMutex);
+#endif
     /* Make sure we checked all addresses. */
     if (nextIdx > 0) {
         int i;
@@ -1508,16 +1516,21 @@ THREAD_LS_T const char *wc_svr_last_file = NULL;
 THREAD_LS_T int wc_svr_last_line = -1;
 THREAD_LS_T int wc_debug_vector_registers_retval =
     WC_DEBUG_VECTOR_REGISTERS_RETVAL_INITVAL;
+#endif
 
 #ifdef DEBUG_VECTOR_REGISTER_ACCESS_FUZZING
+
+#ifdef HAVE_THREAD_LS
 
 WOLFSSL_LOCAL int SAVE_VECTOR_REGISTERS2_fuzzer(void) {
     static THREAD_LS_T struct drand48_data wc_svr_fuzzing_state;
     static THREAD_LS_T int wc_svr_fuzzing_seeded = 0;
     long result;
 
+#ifdef DEBUG_VECTOR_REGISTER_ACCESS
     if (wc_debug_vector_registers_retval)
         return wc_debug_vector_registers_retval;
+#endif
 
     if (wc_svr_fuzzing_seeded == 0) {
         long seed = WC_DEBUG_VECTOR_REGISTERS_FUZZING_SEED;
@@ -1534,9 +1547,47 @@ WOLFSSL_LOCAL int SAVE_VECTOR_REGISTERS2_fuzzer(void) {
         return 0;
 }
 
+#else /* !HAVE_THREAD_LS */
+
+/* alternate implementation useful for testing in the kernel module build, where
+ * glibc and thread-local storage are unavailable.
+ *
+ * note this is not a well-behaved PRNG, but is adequate for fuzzing purposes.
+ * the prn sequence is incompressible according to ent and xz, and does not
+ * cycle within 10M iterations with various seeds including zero, but the Chi
+ * square distribution is poor, and the unconditioned lsb bit balance is ~54%
+ * regardless of seed.
+ *
+ * deterministic only if access is single-threaded, but never degenerate.
+ */
+
+WOLFSSL_LOCAL int SAVE_VECTOR_REGISTERS2_fuzzer(void) {
+    static unsigned long prn = WC_DEBUG_VECTOR_REGISTERS_FUZZING_SEED;
+    static int balance_bit = 0;
+    unsigned long new_prn = prn ^ 0xba86943da66ee701ul; /* note this magic
+                                                         * random number is
+                                                         * bit-balanced.
+                                                         */
+
+#ifdef DEBUG_VECTOR_REGISTER_ACCESS
+    if (wc_debug_vector_registers_retval)
+        return wc_debug_vector_registers_retval;
 #endif
 
-#endif
+    /* barrel-roll using the bottom 6 bits. */
+    if (new_prn & 0x3f)
+        new_prn = (new_prn << (new_prn & 0x3f)) |
+            (new_prn >> (0x40 - (new_prn & 0x3f)));
+    prn = new_prn;
+
+    balance_bit = !balance_bit;
+
+    return ((prn & 1) ^ balance_bit) ? IO_FAILED_E : 0;
+}
+
+#endif /* !HAVE_THREAD_LS */
+
+#endif /* DEBUG_VECTOR_REGISTER_ACCESS_FUZZING */
 
 #ifdef WOLFSSL_LINUXKM
     #include "../../linuxkm/linuxkm_memory.c"

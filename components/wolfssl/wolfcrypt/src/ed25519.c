@@ -22,6 +22,12 @@
 
  /* Based On Daniel J Bernstein's ed25519 Public Domain ref10 work. */
 
+
+/* Possible Ed25519 enable options:
+ *   WOLFSSL_EDDSA_CHECK_PRIV_ON_SIGN                               Default: OFF
+ *     Check that the private key didn't change during the signing operations.
+ */
+
 #ifdef HAVE_CONFIG_H
     #include <config.h>
 #endif
@@ -32,6 +38,7 @@
 #ifdef HAVE_ED25519
 
 #include <wolfssl/wolfcrypt/ed25519.h>
+#include <wolfssl/wolfcrypt/ge_operations.h>
 #include <wolfssl/wolfcrypt/error-crypt.h>
 #include <wolfssl/wolfcrypt/hash.h>
 #ifdef NO_INLINE
@@ -304,6 +311,9 @@ int wc_ed25519_sign_msg_ex(const byte* in, word32 inLen, byte* out,
     ALIGN16 byte nonce[WC_SHA512_DIGEST_SIZE];
     ALIGN16 byte hram[WC_SHA512_DIGEST_SIZE];
     ALIGN16 byte az[ED25519_PRV_KEY_SIZE];
+#ifdef WOLFSSL_EDDSA_CHECK_PRIV_ON_SIGN
+    byte orig_k[ED25519_KEY_SIZE];
+#endif
 
     /* sanity check on arguments */
     if (in == NULL || out == NULL || outLen == NULL || key == NULL ||
@@ -330,6 +340,10 @@ int wc_ed25519_sign_msg_ex(const byte* in, word32 inLen, byte* out,
         return BUFFER_E;
     }
     *outLen = ED25519_SIG_SIZE;
+
+#ifdef WOLFSSL_EDDSA_CHECK_PRIV_ON_SIGN
+    XMEMCPY(orig_k, key->k, ED25519_KEY_SIZE);
+#endif
 
     /* step 1: create nonce to use where nonce is r in
        r = H(h_b, ... ,h_2b-1,M) */
@@ -441,6 +455,18 @@ int wc_ed25519_sign_msg_ex(const byte* in, word32 inLen, byte* out,
     sc_muladd(out + (ED25519_SIG_SIZE/2), hram, az, nonce);
 #endif
 #endif /* WOLFSSL_SE050 */
+
+#ifdef WOLFSSL_EDDSA_CHECK_PRIV_ON_SIGN
+    {
+        int  i;
+        byte c = 0;
+        for (i = 0; i < ED25519_KEY_SIZE; i++) {
+            c |= key->k[i] ^ orig_k[i];
+        }
+        ret = ctMaskGT(c, 0) & SIG_VERIFY_E;
+    }
+#endif
+
     return ret;
 }
 

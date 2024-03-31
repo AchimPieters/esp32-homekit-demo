@@ -267,6 +267,13 @@ WOLFSSL_LOCAL int wc_debug_CipherLifecycleFree(void **CipherLifecycleTag,
         ((void)(CipherLifecycleTag), (void)(heap), (void)(abort_p), 0)
 #endif
 
+#ifdef DEBUG_VECTOR_REGISTER_ACCESS_FUZZING
+    WOLFSSL_LOCAL int SAVE_VECTOR_REGISTERS2_fuzzer(void);
+    #ifndef WC_DEBUG_VECTOR_REGISTERS_FUZZING_SEED
+        #define WC_DEBUG_VECTOR_REGISTERS_FUZZING_SEED 0
+    #endif
+#endif
+
 #ifdef DEBUG_VECTOR_REGISTER_ACCESS
     WOLFSSL_API extern THREAD_LS_T int wc_svr_count;
     WOLFSSL_API extern THREAD_LS_T const char *wc_svr_last_file;
@@ -276,27 +283,29 @@ WOLFSSL_LOCAL int wc_debug_CipherLifecycleFree(void **CipherLifecycleTag,
         #define DEBUG_VECTOR_REGISTERS_EXTRA_FAIL_CLAUSE abort();
     #elif defined(DEBUG_VECTOR_REGISTERS_EXIT_ON_FAIL)
         #define DEBUG_VECTOR_REGISTERS_EXTRA_FAIL_CLAUSE exit(1);
-    #else
+    #elif !defined(DEBUG_VECTOR_REGISTERS_EXTRA_FAIL_CLAUSE)
         #define DEBUG_VECTOR_REGISTERS_EXTRA_FAIL_CLAUSE
     #endif
 
     #define SAVE_VECTOR_REGISTERS(fail_clause) {                    \
         int _svr_ret = wc_debug_vector_registers_retval;            \
         if (_svr_ret != 0) { fail_clause }                          \
-        ++wc_svr_count;                                             \
-        if (wc_svr_count > 5) {                                     \
-            fprintf(stderr,                                         \
-                    ("%s @ L%d : incr : "                           \
-                     "wc_svr_count %d (last op %s L%d)\n"),         \
-                    __FILE__,                                       \
-                    __LINE__,                                       \
-                    wc_svr_count,                                   \
-                    wc_svr_last_file,                               \
-                    wc_svr_last_line);                              \
-            DEBUG_VECTOR_REGISTERS_EXTRA_FAIL_CLAUSE                \
+        else {                                                      \
+          ++wc_svr_count;                                           \
+          if (wc_svr_count > 5) {                                   \
+              fprintf(stderr,                                       \
+                      ("%s @ L%d : incr : "                         \
+                       "wc_svr_count %d (last op %s L%d)\n"),       \
+                      __FILE__,                                     \
+                      __LINE__,                                     \
+                      wc_svr_count,                                 \
+                      wc_svr_last_file,                             \
+                      wc_svr_last_line);                            \
+              DEBUG_VECTOR_REGISTERS_EXTRA_FAIL_CLAUSE              \
+          }                                                         \
+          wc_svr_last_file = __FILE__;                              \
+          wc_svr_last_line = __LINE__;                              \
         }                                                           \
-        wc_svr_last_file = __FILE__;                                \
-        wc_svr_last_line = __LINE__;                                \
     }
 
     WOLFSSL_API extern THREAD_LS_T int wc_debug_vector_registers_retval;
@@ -320,11 +329,6 @@ WOLFSSL_LOCAL int wc_debug_CipherLifecycleFree(void **CipherLifecycleTag,
     } while (0)
 
 #ifdef DEBUG_VECTOR_REGISTER_ACCESS_FUZZING
-    #ifndef WC_DEBUG_VECTOR_REGISTERS_FUZZING_SEED
-        #define WC_DEBUG_VECTOR_REGISTERS_FUZZING_SEED 0
-    #endif
-        WOLFSSL_LOCAL int SAVE_VECTOR_REGISTERS2_fuzzer(void);
-
     #define SAVE_VECTOR_REGISTERS2(...) ({                          \
         int _svr2_val = SAVE_VECTOR_REGISTERS2_fuzzer();            \
         if (_svr2_val == 0) {                                       \
@@ -430,6 +434,11 @@ WOLFSSL_LOCAL int wc_debug_CipherLifecycleFree(void **CipherLifecycleTag,
         wc_svr_last_file = __FILE__;                                \
         wc_svr_last_line = __LINE__;                                \
     } while(0)
+
+#else /* !DEBUG_VECTOR_REGISTER_ACCESS */
+    #if !defined(SAVE_VECTOR_REGISTERS2) && defined(DEBUG_VECTOR_REGISTER_ACCESS_FUZZING)
+        #define SAVE_VECTOR_REGISTERS2(...) SAVE_VECTOR_REGISTERS2_fuzzer()
+    #endif
 #endif
 
 #ifdef __cplusplus

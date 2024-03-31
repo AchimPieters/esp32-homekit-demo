@@ -141,6 +141,7 @@ enum EncPkcs8Types {
 enum CertType {
     CERT_TYPE       = 0,
     PRIVATEKEY_TYPE,
+    ALT_PRIVATEKEY_TYPE,
     DH_PARAM_TYPE,
     DSA_PARAM_TYPE,
     CRL_TYPE,
@@ -214,8 +215,8 @@ enum Ctc_SigType {
     CTC_ED25519      = 256,
     CTC_ED448        = 257,
 
-    CTC_FALCON_LEVEL1 = 268,
-    CTC_FALCON_LEVEL5 = 271,
+    CTC_FALCON_LEVEL1 = 273,
+    CTC_FALCON_LEVEL5 = 276,
 
     CTC_DILITHIUM_LEVEL2     = 213,
     CTC_DILITHIUM_LEVEL3     = 216,
@@ -513,6 +514,19 @@ typedef struct Cert {
     byte     issRaw[sizeof(CertName)];   /* raw issuer info */
     byte     sbjRaw[sizeof(CertName)];   /* raw subject info */
 #endif
+#ifdef WOLFSSL_DUAL_ALG_CERTS
+    /* These will not point to managed buffers. They will point to buffers that
+     * are managed by others. No cleanup neccessary. */
+    /* Subject Alternative Public Key Info */
+    byte *sapkiDer;
+    int sapkiLen;
+    /* Alternative Signature Algorithm */
+    byte *altSigAlgDer;
+    int altSigAlgLen;
+    /* Alternative Signature Value */
+    byte *altSigValDer;
+    int altSigValLen;
+#endif /* WOLFSSL_DUAL_ALG_CERTS */
 #ifdef WOLFSSL_CERT_REQ
     char     challengePw[CTC_NAME_SIZE];
     char     unstructuredName[CTC_NAME_SIZE];
@@ -572,6 +586,11 @@ WOLFSSL_API int wc_SignCert_ex(int requestSz, int sType, byte* buf,
                                WC_RNG* rng);
 WOLFSSL_API int wc_SignCert(int requestSz, int sType, byte* buf, word32 buffSz,
                             RsaKey* rsaKey, ecc_key* eccKey, WC_RNG* rng);
+#ifdef WOLFSSL_DUAL_ALG_CERTS
+WOLFSSL_API int wc_MakeSigWithBitStr(byte *sig, int sigSz, int sType, byte* buf,
+                                     word32 bufSz, int keyType, void* key,
+                                     WC_RNG* rng);
+#endif
 WOLFSSL_ABI
 WOLFSSL_API int wc_MakeSelfCert(Cert* cert, byte* buf, word32 buffSz,
                                 RsaKey* key, WC_RNG* rng);
@@ -704,7 +723,6 @@ WOLFSSL_API void wc_FreeDer(DerBuffer** pDer);
 #endif
 
 #ifndef NO_RSA
-    #if !defined(HAVE_USER_RSA)
     WOLFSSL_API int wc_RsaPublicKeyDecode_ex(const byte* input, word32* inOutIdx,
         word32 inSz, const byte** n, word32* nSz, const byte** e, word32* eSz);
     /* For FIPS v1/v2 and selftest this is in rsa.h */
@@ -717,7 +735,6 @@ WOLFSSL_API void wc_FreeDer(DerBuffer** pDer);
          (! ((HAVE_FIPS_VERSION == 5) && (HAVE_FIPS_VERSION_MINOR == 0)))))
     WOLFSSL_API int wc_RsaKeyToPublicDer(RsaKey* key, byte* output, word32 inLen);
     #endif
-    #endif /* !HAVE_USER_RSA */
     WOLFSSL_API int wc_RsaPublicKeyDerSize(RsaKey* key, int with_header);
     WOLFSSL_API int wc_RsaKeyToPublicDer_ex(RsaKey* key, byte* output, word32 inLen,
         int with_header);
@@ -942,6 +959,11 @@ WOLFSSL_API int wc_GetUUIDFromCert(struct DecodedCert* cert,
 WOLFSSL_API int wc_GetFASCNFromCert(struct DecodedCert* cert,
                                     byte* fascn, word32* fascnSz);
 #endif /* WOLFSSL_FPKI */
+
+#ifdef WOLFSSL_DUAL_ALG_CERTS
+WOLFSSL_API int wc_GeneratePreTBS(struct DecodedCert* cert, byte *der,
+                                  int derSz);
+#endif
 
 #if !defined(XFPRINTF) || defined(NO_FILESYSTEM) || \
     defined(NO_STDIO_FILESYSTEM) && defined(WOLFSSL_ASN_PRINT)

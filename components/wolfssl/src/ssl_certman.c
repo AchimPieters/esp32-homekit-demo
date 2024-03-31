@@ -25,7 +25,7 @@
 
 #include <wolfssl/wolfcrypt/settings.h>
 
- #include <wolfssl/internal.h>
+#include <wolfssl/internal.h>
 
 #if !defined(WOLFSSL_SSL_CERTMAN_INCLUDED)
     #ifndef WOLFSSL_IGNORE_FILE_WARN
@@ -42,33 +42,33 @@
  * @return  A TLS method on success.
  * @return  NULL when no TLS method built into wolfSSL.
  */
-static WC_INLINE WOLFSSL_METHOD* cm_pick_method(void)
+static WC_INLINE WOLFSSL_METHOD* cm_pick_method(void* heap)
 {
     #ifndef NO_WOLFSSL_CLIENT
         #if !defined(NO_OLD_TLS) && defined(WOLFSSL_ALLOW_SSLV3)
-            return wolfSSLv3_client_method();
+            return wolfSSLv3_client_method_ex(heap);
         #elif !defined(NO_OLD_TLS) && defined(WOLFSSL_ALLOW_TLSV10)
-            return wolfTLSv1_client_method();
+            return wolfTLSv1_client_method_ex(heap);
         #elif !defined(NO_OLD_TLS)
-            return wolfTLSv1_1_client_method();
+            return wolfTLSv1_1_client_method_ex(heap);
         #elif !defined(WOLFSSL_NO_TLS12)
-            return wolfTLSv1_2_client_method();
+            return wolfTLSv1_2_client_method_ex(heap);
         #elif defined(WOLFSSL_TLS13)
-            return wolfTLSv1_3_client_method();
+            return wolfTLSv1_3_client_method_ex(heap);
         #else
             return NULL;
         #endif
     #elif !defined(NO_WOLFSSL_SERVER)
         #if !defined(NO_OLD_TLS) && defined(WOLFSSL_ALLOW_SSLV3)
-            return wolfSSLv3_server_method();
+            return wolfSSLv3_server_method_ex(heap);
         #elif !defined(NO_OLD_TLS) && defined(WOLFSSL_ALLOW_TLSV10)
-            return wolfTLSv1_server_method();
+            return wolfTLSv1_server_method_ex(heap);
         #elif !defined(NO_OLD_TLS)
-            return wolfTLSv1_1_server_method();
+            return wolfTLSv1_1_server_method_ex(heap);
         #elif !defined(WOLFSSL_NO_TLS12)
-            return wolfTLSv1_2_server_method();
+            return wolfTLSv1_2_server_method_ex(heap);
         #elif defined(WOLFSSL_TLS13)
-            return wolfTLSv1_3_server_method();
+            return wolfTLSv1_3_server_method_ex(heap);
         #else
             return NULL;
         #endif
@@ -89,11 +89,22 @@ WOLFSSL_CERT_MANAGER* wolfSSL_CertManagerNew_ex(void* heap)
     WOLFSSL_CERT_MANAGER* cm;
 
     WOLFSSL_ENTER("wolfSSL_CertManagerNew");
+    if (heap == NULL) {
+         WOLFSSL_MSG("heap param is null");
+    }
+    else {
+        /* Some systems may have heap in unexpected segments. (IRAM vs DRAM) */
+        WOLFSSL_MSG_EX("heap param = %p", heap);
+    }
+    WOLFSSL_MSG_EX("DYNAMIC_TYPE_CERT_MANAGER Allocating = %d bytes",
+                    (word32)sizeof(WOLFSSL_CERT_MANAGER));
 
     /* Allocate memory for certificate manager. */
     cm = (WOLFSSL_CERT_MANAGER*)XMALLOC(sizeof(WOLFSSL_CERT_MANAGER), heap,
         DYNAMIC_TYPE_CERT_MANAGER);
     if (cm == NULL) {
+        WOLFSSL_MSG_EX("XMALLOC failed to allocate WOLFSSL_CERT_MANAGER %d "
+                    "bytes.", (int)sizeof(WOLFSSL_CERT_MANAGER));
         err = 1;
     }
     if (!err) {
@@ -446,6 +457,31 @@ int wolfSSL_CertManagerUnloadCAs(WOLFSSL_CERT_MANAGER* cm)
     return ret;
 }
 
+int wolfSSL_CertManagerUnloadIntermediateCerts(WOLFSSL_CERT_MANAGER* cm)
+{
+    int ret = WOLFSSL_SUCCESS;
+
+    WOLFSSL_ENTER("wolfSSL_CertManagerUnloadIntermediateCerts");
+
+    /* Validate parameter. */
+    if (cm == NULL) {
+        ret = BAD_FUNC_ARG;
+    }
+    /* Lock CA table. */
+    if ((ret == WOLFSSL_SUCCESS) && (wc_LockMutex(&cm->caLock) != 0)) {
+        ret = BAD_MUTEX_E;
+    }
+    if (ret == WOLFSSL_SUCCESS) {
+        /* Dispose of CA table. */
+        FreeSignerTableType(cm->caTable, CA_TABLE_SIZE, WOLFSSL_CHAIN_CA,
+                cm->heap);
+
+        /* Unlock CA table. */
+        wc_UnLockMutex(&cm->caLock);
+    }
+
+    return ret;
+}
 
 #ifdef WOLFSSL_TRUST_PEER_CERT
 /* Unload the trusted peers table.
@@ -513,8 +549,8 @@ int wolfSSL_CertManagerLoadCABuffer_ex(WOLFSSL_CERT_MANAGER* cm,
         ret = WOLFSSL_FATAL_ERROR;
     }
     /* Allocate a temporary WOLFSSL_CTX to load with. */
-    if ((ret == WOLFSSL_SUCCESS) && ((tmp = wolfSSL_CTX_new(cm_pick_method()))
-            == NULL)) {
+    if ((ret == WOLFSSL_SUCCESS) && ((tmp =
+        wolfSSL_CTX_new_ex(cm_pick_method(cm->heap), cm->heap)) == NULL)) {
         WOLFSSL_MSG("CTX new failed");
         ret = WOLFSSL_FATAL_ERROR;
     }
@@ -574,6 +610,19 @@ void wolfSSL_CertManagerSetVerify(WOLFSSL_CERT_MANAGER* cm, VerifyCallback vc)
     }
 }
 #endif /* NO_WOLFSSL_CM_VERIFY */
+
+#if defined(WOLFSSL_CUSTOM_OID) && defined(WOLFSSL_ASN_TEMPLATE) \
+    && defined(HAVE_OID_DECODING)
+void wolfSSL_CertManagerSetUnknownExtCallback(WOLFSSL_CERT_MANAGER* cm,
+        wc_UnknownExtCallback cb)
+{
+    WOLFSSL_ENTER("wolfSSL_CertManagerSetUnknownExtCallback");
+    if (cm != NULL) {
+        cm->unknownExtCallback = cb;
+    }
+
+}
+#endif /* WOLFSSL_CUSTOM_OID && WOLFSSL_ASN_TEMPLATE && HAVE_OID_DECODING */
 
 #if !defined(NO_WOLFSSL_CLIENT) || !defined(WOLFSSL_NO_CLIENT_AUTH)
 /* Verify the certificate.
@@ -642,6 +691,12 @@ int CM_VerifyBuffer_ex(WOLFSSL_CERT_MANAGER* cm, const unsigned char* buff,
     if (ret == 0) {
         /* Create a decoded certificate with DER buffer. */
         InitDecodedCert(cert, buff, (word32)sz, cm->heap);
+
+#if defined(WOLFSSL_CUSTOM_OID) && defined(WOLFSSL_ASN_TEMPLATE) \
+    && defined(HAVE_OID_DECODING)
+        if (cm->unknownExtCallback != NULL)
+            wc_SetUnknownExtCallback(cert, cm->unknownExtCallback);
+#endif
 
         /* Parse DER into decoded certificate fields and verify signature
          * against a known CA. */
@@ -876,8 +931,8 @@ int wolfSSL_CertManagerLoadCA(WOLFSSL_CERT_MANAGER* cm, const char* file,
         ret = WOLFSSL_FATAL_ERROR;
     }
     /* Create temporary WOLFSSL_CTX. */
-    if ((ret == WOLFSSL_SUCCESS) && ((tmp = wolfSSL_CTX_new(cm_pick_method()))
-            == NULL)) {
+    if ((ret == WOLFSSL_SUCCESS) && ((tmp =
+        wolfSSL_CTX_new_ex(cm_pick_method(cm->heap), cm->heap)) == NULL)) {
         WOLFSSL_MSG("CTX new failed");
         ret = WOLFSSL_FATAL_ERROR;
     }
