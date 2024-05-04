@@ -64,6 +64,9 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
         }
 }
 
+#if defined(CONFIG_IDF_TARGET_ESP32H2)
+    /* There's no WiFi on ESP32-H2 */
+#else
 static void wifi_init() {
         ESP_ERROR_CHECK(esp_netif_init());
         ESP_ERROR_CHECK(esp_event_loop_create_default());
@@ -87,6 +90,7 @@ static void wifi_init() {
         ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
         ESP_ERROR_CHECK(esp_wifi_start());
 }
+#endif
 
 // LED control
 #define LED_GPIO CONFIG_ESP_LED_GPIO
@@ -193,6 +197,10 @@ void app_main(void) {
     #ifdef HAVE_VERSION_EXTENDED_INFO
         esp_ShowExtendedSystemInfo();
     #endif
+    #if defined(CONFIG_IDF_TARGET_ESP32H2)
+        ESP_LOGW("main", "There's no WiFi on the ESP32-H2");
+    #else
         wifi_init();
+    #endif
         gpio_init();
 }
