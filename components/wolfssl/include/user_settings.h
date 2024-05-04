@@ -1,6 +1,6 @@
 /* user_settings.h
  *
- * Copyright (C) 2006-2023 wolfSSL Inc.
+ * Copyright (C) 2006-2024 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -29,10 +29,6 @@
 
 #define WOLFSSL_ESPIDF
 
-#define WOLFCRYPT_HAVE_SRP
-#define HAVE_CHACHA
-#define HAVE_POLY1305
-#define WOLFSSL_BASE64_ENCODE
 
 /* The Espressif sdkconfig will have chipset info.
 **
@@ -173,6 +169,7 @@
 
 /* debug options */
 /* #define DEBUG_WOLFSSL */
+/* #define DEBUG_WOLFSSL_MALLOC */
 /* #define WOLFSSL_ESP32_CRYPT_DEBUG */
 /* #define WOLFSSL_ATECC508A_DEBUG          */
 
@@ -188,6 +185,16 @@
 
 /* USE_FAST_MATH is default */
 #define USE_FAST_MATH
+
+#define WOLFSSL_APPLE_HOMEKIT
+#ifdef WOLFSSL_APPLE_HOMEKIT
+    /* SRP is known to need 8K; slow on some devices */
+    #define FP_MAX_BITS (8192 * 2)
+    #define WOLFCRYPT_HAVE_SRP
+    #define HAVE_CHACHA
+    #define HAVE_POLY1305
+    #define WOLFSSL_BASE64_ENCODE
+#endif
 
 /*****      Use SP_MATH      *****/
 /* #undef USE_FAST_MATH          */
@@ -286,7 +293,6 @@
 
     /* Define USE_FAST_MATH and SMALL_STACK                        */
     #define ESP32_USE_RSA_PRIMITIVE
-    #define FP_MAX_BITS (8192 * 2)
     /* threshold for performance adjustment for HW primitive use   */
     /* X bits of G^X mod P greater than                            */
     #define EPS_RSA_EXPT_XBTIS           32
@@ -330,12 +336,12 @@
      * See: https://www.esp32.com/viewtopic.php?f=5&t=27926#:~:text=ESP8684%20is%20essentially%20ESP32%2DC2,both%20ESP32%2DC2%20and%20ESP8684. */
 
     /* wolfSSL HW Acceleration supported on ESP32-C2. Uncomment to disable: */
-    #define NO_ESP32_CRYPT
-    #define NO_WOLFSSL_ESP32_CRYPT_HASH     /* to disable all SHA HW   */
+    /* #define NO_ESP32_CRYPT */
 
-    /* These are defined automatically in esp32-crypt.h, here for clarity    */
-    #define NO_WOLFSSL_ESP32_CRYPT_HASH_SHA384    /* no SHA384 HW on C2  */
-    #define NO_WOLFSSL_ESP32_CRYPT_HASH_SHA512    /* no SHA512 HW on C2  */
+    /* These are defined automatically in esp32-crypt.h, here for clarity.
+     * No SHA384 nor SHA512 HW on C2: */
+    #define NO_WOLFSSL_ESP32_CRYPT_HASH_SHA384
+    #define NO_WOLFSSL_ESP32_CRYPT_HASH_SHA512
 
     /* There's no AES or RSA/Math accelerator on the ESP32-C2
      * Auto defined with NO_WOLFSSL_ESP32_CRYPT_RSA_PRI, for clarity: */
@@ -428,8 +434,8 @@
 */
 
 /* Pause in a loop rather than exit. */
-#define WOLFSSL_ESPIDF_ERROR_PAUSE
-
+/* #define WOLFSSL_ESPIDF_ERROR_PAUSE */
+/* #define WOLFSSL_ESP32_HW_LOCK_DEBUG */
 /* #define WOLFSSL_HW_METRICS */
 
 /* for test.c */
