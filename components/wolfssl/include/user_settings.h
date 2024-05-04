@@ -40,6 +40,7 @@
 **   CONFIG_IDF_TARGET_ESP32C3
 **   CONFIG_IDF_TARGET_ESP32C6
 */
+#define HAVE_VERSION_EXTENDED_INFO
 
 /* Optionally enable some wolfSSH settings */
 #ifdef ESP_ENABLE_WOLFSSH

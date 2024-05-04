@@ -34,6 +34,23 @@
 #include <homekit/homekit.h>
 #include <homekit/characteristics.h>
 
+/* wolfSSL (only needed for esp_ShowExtendedSystemInfo here) */
+/* Always include wolfcrypt/settings.h before any other wolfSSL file.    */
+/* Reminder: settings.h pulls in user_settings.h; don't include it here. */
+#ifdef WOLFSSL_USER_SETTINGS
+    #include <wolfssl/wolfcrypt/settings.h>
+    #ifndef WOLFSSL_ESPIDF
+        #warning "Problem with wolfSSL user_settings."
+        #warning "Check components/wolfssl/include"
+    #endif
+    #include <wolfssl/wolfcrypt/port/Espressif/esp32-crypt.h>
+#else
+    /* Define WOLFSSL_USER_SETTINGS project wide for settings.h to include   */
+    /* wolfSSL user settings in ./components/wolfssl/include/user_settings.h */
+    #error "Missing WOLFSSL_USER_SETTINGS in CMakeLists or Makefile:\
+    CFLAGS +=-DWOLFSSL_USER_SETTINGS"
+#endif
+
 // WiFi setup
 void on_wifi_ready();
 
@@ -173,7 +190,9 @@ void app_main(void) {
                 ret = nvs_flash_init();
         }
         ESP_ERROR_CHECK(ret);
-
+    #ifdef HAVE_VERSION_EXTENDED_INFO
+        esp_ShowExtendedSystemInfo();
+    #endif
         wifi_init();
         gpio_init();
 }
