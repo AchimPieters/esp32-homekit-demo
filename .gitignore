@@ -51,6 +51,7 @@ UpgradeLog.htm
 
 # VisualGDB
 **/.visualgdb
+**/*.vgdbproj.*.user
 
 # Espressif sdk config default should be saved in sdkconfig.defaults
 # we won't track the actual working sdkconfig files
@@ -67,4 +68,19 @@ UpgradeLog.htm
 /IDE/Espressif/**/dependencies.lock
 
 /components/**/.component_hash
-/examples/l**/dependencies.lock
+/examples/**/dependencies.lock
+/examples/**/CMakeLists.txt.old
+/examples/**/sdkconfig-debug
+
+# Visual Studio Code Workspace Files
+*.vscode
+*.userprefs
+*.exe
+*.dll
+.vs
+Backup
+UpgradeLog.htm
+*.aps
+*.VC.db
+*.filters
+
