@@ -216,17 +216,22 @@ WOLFSSL_API int wolfSSL_GetAllocators(wolfSSL_Malloc_cb* mf,
         byte        haFlag; /* flag used for checking handshake count */
     } WOLFSSL_HEAP_HINT;
 
+    WOLFSSL_API int wc_LoadStaticMemory_ex(WOLFSSL_HEAP_HINT** pHint,
+            unsigned int listSz, const unsigned int *sizeList,
+            const unsigned int *distList, unsigned char* buf, unsigned int sz,
+            int flag, int max);
     WOLFSSL_API int wc_LoadStaticMemory(WOLFSSL_HEAP_HINT** pHint,
             unsigned char* buf, unsigned int sz, int flag, int max);
+    WOLFSSL_API void wc_UnloadStaticMemory(WOLFSSL_HEAP_HINT* heap);
 
-    WOLFSSL_LOCAL int wolfSSL_init_memory_heap(WOLFSSL_HEAP* heap);
-    WOLFSSL_LOCAL int wolfSSL_load_static_memory(byte* buffer, word32 sz,
-                                                  int flag, WOLFSSL_HEAP* heap);
-    WOLFSSL_LOCAL int wolfSSL_GetMemStats(WOLFSSL_HEAP* heap,
+    WOLFSSL_API int wolfSSL_GetMemStats(WOLFSSL_HEAP* heap,
                                                       WOLFSSL_MEM_STATS* stats);
     WOLFSSL_LOCAL int SetFixedIO(WOLFSSL_HEAP* heap, wc_Memory** io);
     WOLFSSL_LOCAL int FreeFixedIO(WOLFSSL_HEAP* heap, wc_Memory** io);
 
+    WOLFSSL_API int wolfSSL_StaticBufferSz_ex(unsigned int listSz,
+            const unsigned int *sizeList, const unsigned int *distList,
+            byte* buffer, word32 sz, int flag);
     WOLFSSL_API int wolfSSL_StaticBufferSz(byte* buffer, word32 sz, int flag);
     WOLFSSL_API int wolfSSL_MemoryPaddingSz(void);
 #endif /* WOLFSSL_STATIC_MEMORY */
@@ -271,6 +276,9 @@ WOLFSSL_LOCAL int wc_debug_CipherLifecycleFree(void **CipherLifecycleTag,
     WOLFSSL_LOCAL int SAVE_VECTOR_REGISTERS2_fuzzer(void);
     #ifndef WC_DEBUG_VECTOR_REGISTERS_FUZZING_SEED
         #define WC_DEBUG_VECTOR_REGISTERS_FUZZING_SEED 0
+    #endif
+    #ifndef CAN_SAVE_VECTOR_REGISTERS
+        #define CAN_SAVE_VECTOR_REGISTERS() (SAVE_VECTOR_REGISTERS2_fuzzer() == 0)
     #endif
 #endif
 

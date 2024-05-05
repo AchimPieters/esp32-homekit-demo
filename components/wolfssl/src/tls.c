@@ -586,47 +586,13 @@ int MakeTlsMasterSecret(WOLFSSL* ssl)
                       ssl->specs.mac_algorithm, ssl->heap, ssl->devId);
         }
     }
+#ifdef HAVE_SECRET_CALLBACK
+    if (ret == 0 && ssl->tlsSecretCb != NULL) {
+        ret = ssl->tlsSecretCb(ssl, ssl->arrays->masterSecret,
+                SECRET_LEN, ssl->tlsSecretCtx);
+    }
+#endif /* HAVE_SECRET_CALLBACK */
     if (ret == 0) {
-    #ifdef SHOW_SECRETS
-        /* Wireshark Pre-Master-Secret Format:
-         *  CLIENT_RANDOM <clientrandom> <mastersecret>
-         */
-        const char* CLIENT_RANDOM_LABEL = "CLIENT_RANDOM";
-        int i, pmsPos = 0;
-        char pmsBuf[13 + 1 + 64 + 1 + 96 + 1 + 1];
-
-        XSNPRINTF(&pmsBuf[pmsPos], sizeof(pmsBuf) - pmsPos, "%s ",
-            CLIENT_RANDOM_LABEL);
-        pmsPos += XSTRLEN(CLIENT_RANDOM_LABEL) + 1;
-        for (i = 0; i < RAN_LEN; i++) {
-            XSNPRINTF(&pmsBuf[pmsPos], sizeof(pmsBuf) - pmsPos, "%02x",
-                ssl->arrays->clientRandom[i]);
-            pmsPos += 2;
-        }
-        XSNPRINTF(&pmsBuf[pmsPos], sizeof(pmsBuf) - pmsPos, " ");
-        pmsPos += 1;
-        for (i = 0; i < SECRET_LEN; i++) {
-            XSNPRINTF(&pmsBuf[pmsPos], sizeof(pmsBuf) - pmsPos, "%02x",
-                ssl->arrays->masterSecret[i]);
-            pmsPos += 2;
-        }
-        XSNPRINTF(&pmsBuf[pmsPos], sizeof(pmsBuf) - pmsPos, "\n");
-        pmsPos += 1;
-
-        /* print master secret */
-        puts(pmsBuf);
-
-        #if !defined(NO_FILESYSTEM) && defined(WOLFSSL_SSLKEYLOGFILE)
-        {
-            FILE* f = XFOPEN(WOLFSSL_SSLKEYLOGFILE_OUTPUT, "a");
-            if (f != XBADFILE) {
-                XFWRITE(pmsBuf, 1, pmsPos, f);
-                XFCLOSE(f);
-            }
-        }
-        #endif
-    #endif /* SHOW_SECRETS */
-
         ret = DeriveTlsKeys(ssl);
     }
 
@@ -6120,8 +6086,12 @@ static int TLSX_SupportedVersions_Write(void* data, byte* output,
 #ifdef WOLFSSL_DTLS13
     if (ssl->options.dtls) {
         tls13minor = (byte)DTLSv1_3_MINOR;
+    #ifndef WOLFSSL_NO_TLS12
         tls12minor = (byte)DTLSv1_2_MINOR;
+    #endif
+    #ifndef NO_OLD_TLS
         tls11minor = (byte)DTLS_MINOR;
+    #endif
         isDtls = 1;
     }
 #endif /* WOLFSSL_DTLS13 */
@@ -8437,7 +8407,7 @@ static int TLSX_KeyShare_ProcessPqc(WOLFSSL* ssl, KeyShareEntry* keyShareEntry)
         XMEMCPY(ssl->arrays->preMasterSecret, keyShareEntry->ke,
                 keyShareEntry->keLen);
         ssl->arrays->preMasterSz = keyShareEntry->keLen;
-        XFREE(keyShareEntry->ke, ssl->heap, DYNAMIC_TYPE_SECRET)
+        XFREE(keyShareEntry->ke, ssl->heap, DYNAMIC_TYPE_SECRET);
         keyShareEntry->ke = NULL;
         keyShareEntry->keLen = 0;
         return 0;
@@ -9583,7 +9553,7 @@ int TLSX_CKS_Parse(WOLFSSL* ssl, byte* input, word16 length,
             case WOLFSSL_CKS_SIGSPEC_EXTERNAL:
             default:
                 /* All other values (including external) are not. */
-                return WOLFSSL_NOT_IMPLEMENTED;
+                return BAD_FUNC_ARG;
         }
     }
 
@@ -9618,7 +9588,7 @@ int TLSX_CKS_Parse(WOLFSSL* ssl, byte* input, word16 length,
         for (j = 0; j < length; j++) {
             if (ssl->sigSpec[i] == input[j]) {
                 /* Got the match, set to this one. */
-                ret = wolfSSL_UseCKS(ssl, &ssl->peerSigSpec[i], 1);
+                ret = wolfSSL_UseCKS(ssl, &ssl->sigSpec[i], 1);
                 if (ret == WOLFSSL_SUCCESS) {
                     ret = TLSX_UseCKS(&ssl->extensions, ssl, ssl->heap);
                     TLSX_SetResponse(ssl, TLSX_CKS);
@@ -11212,8 +11182,10 @@ static int TLSX_ClientCertificateType_GetSize(WOLFSSL* ssl, byte msgType)
         ret = (int)(OPAQUE8_LEN + cnt * OPAQUE8_LEN);
     }
     else if (msgType == server_hello || msgType == encrypted_extensions) {
-        /* sever side */
+        /* server side */
         cnt = ssl->options.rpkState.sending_ClientCertTypeCnt;/* must be one */
+        if (cnt != 1)
+            return SANITY_MSG_E;
         ret = OPAQUE8_LEN;
     }
     else {
@@ -13570,7 +13542,7 @@ static int TLSX_GetSizeWithEch(WOLFSSL* ssl, byte* semaphore, byte msgType,
 #endif
 
 /** Tells the buffered size of extensions to be sent into the client hello. */
-int TLSX_GetRequestSize(WOLFSSL* ssl, byte msgType, word16* pLength)
+int TLSX_GetRequestSize(WOLFSSL* ssl, byte msgType, word32* pLength)
 {
     int ret = 0;
     word16 length = 0;
@@ -13800,7 +13772,7 @@ static int TLSX_WriteWithEch(WOLFSSL* ssl, byte* output, byte* semaphore,
 #endif
 
 /** Writes the extensions to be sent into the client hello. */
-int TLSX_WriteRequest(WOLFSSL* ssl, byte* output, byte msgType, word16* pOffset)
+int TLSX_WriteRequest(WOLFSSL* ssl, byte* output, byte msgType, word32* pOffset)
 {
     int ret = 0;
     word16 offset = 0;
@@ -14914,13 +14886,20 @@ int TLSX_Parse(WOLFSSL* ssl, const byte* input, word16 length, byte msgType,
     }
 
 #ifdef HAVE_EXTENDED_MASTER
-    if (IsAtLeastTLSv1_3(ssl->version) && msgType == hello_retry_request) {
+    if (IsAtLeastTLSv1_3(ssl->version) &&
+        (msgType == hello_retry_request || msgType == hello_verify_request)) {
         /* Don't change EMS status until server_hello received.
          * Second ClientHello must have same extensions.
          */
     }
     else if (!isRequest && ssl->options.haveEMS && !pendingEMS)
         ssl->options.haveEMS = 0;
+#endif
+#if defined(WOLFSSL_TLS13) && !defined(NO_PSK)
+    if (IsAtLeastTLSv1_3(ssl->version) && msgType == server_hello &&
+        IS_OFF(seenType, TLSX_ToSemaphore(TLSX_KEY_SHARE))) {
+        ssl->options.noPskDheKe = 1;
+    }
 #endif
 
     if (ret == 0)

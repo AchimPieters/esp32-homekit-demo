@@ -793,9 +793,9 @@ enum SNICbReturn {
  * functions should use this macro to fill this gap. Users who want them
  * to return the same return value as OpenSSL can define
  * WOLFSSL_ERR_CODE_OPENSSL.
- * Give item1 a variable that contains the potentially negative
+ * Give rc a variable that contains the potentially negative
  * wolfSSL-defined return value or the return value itself, and
- * give item2 the openSSL-defined return value.
+ * give fail_rc the openSSL-defined return value.
  * Note that this macro replaces only negative return values with the
  * specified value.
  * Since wolfSSL 4.7.0, the following functions use this macro:
@@ -804,11 +804,15 @@ enum SNICbReturn {
  * - wolfSSL_EVP_PKEY_cmp
  */
 #if defined(WOLFSSL_ERROR_CODE_OPENSSL)
-    #define WS_RETURN_CODE(item1,item2) \
-      (((item1) < 0) ? (int)(item2) : (int)(item1))
+    #define WS_RETURN_CODE(rc, fail_rc) \
+      (((rc) < 0) ? (int)(fail_rc) : (int)(rc))
 #else
-    #define WS_RETURN_CODE(item1,item2)  (item1)
+    #define WS_RETURN_CODE(rc, fail_rc)  (rc)
 #endif
+#define WS_RC(rc) \
+    (((rc) == 1) ? 1 : 0)
+#define WC_TO_WS_RC(ret) \
+    (((ret) == 0) ? 1 : (ret))
 
 /* Maximum master key length (SECRET_LEN) */
 #define WOLFSSL_MAX_MASTER_KEY_LENGTH 48
@@ -1361,8 +1365,13 @@ WOLFSSL_ABI WOLFSSL_API long wolfSSL_CTX_set_session_cache_mode(WOLFSSL_CTX* ctx
 #ifdef HAVE_SECRET_CALLBACK
 typedef int (*SessionSecretCb)(WOLFSSL* ssl, void* secret, int* secretSz,
                                void* ctx);
+/* This callback is used to set the master secret during resumption */
 WOLFSSL_API int  wolfSSL_set_session_secret_cb(WOLFSSL* ssl, SessionSecretCb,
                                                void*);
+typedef int (*TlsSecretCb)(WOLFSSL* ssl, void* secret, int secretSz,
+                               void* ctx);
+/* This callback is used to log the secret for TLS <= 1.2 */
+WOLFSSL_API int wolfSSL_set_secret_cb(WOLFSSL* ssl, TlsSecretCb cb, void* ctx);
 #ifdef WOLFSSL_TLS13
 typedef int (*Tls13SecretCb)(WOLFSSL* ssl, int id, const unsigned char* secret,
                              int secretSz, void* ctx);
@@ -3096,6 +3105,17 @@ WOLFSSL_API int wolfSSL_make_eap_keys(WOLFSSL* ssl, void* key, unsigned int len,
                                                const unsigned char* in, long sz, int format);
     WOLFSSL_API int wolfSSL_CTX_use_certificate_chain_buffer(WOLFSSL_CTX* ctx,
                                                     const unsigned char* in, long sz);
+#ifdef WOLFSSL_DUAL_ALG_CERTS
+    WOLFSSL_API int wolfSSL_CTX_use_AltPrivateKey_buffer(WOLFSSL_CTX* ctx,
+                                const unsigned char* in, long sz, int format);
+    WOLFSSL_API int wolfSSL_CTX_use_AltPrivateKey_id(WOLFSSL_CTX* ctx,
+                                const unsigned char* id, long sz,
+                                int devId, long keySz);
+    WOLFSSL_API int wolfSSL_CTX_use_AltPrivateKey_Id(WOLFSSL_CTX* ctx,
+                                const unsigned char* id, long sz, int devId);
+    WOLFSSL_API int wolfSSL_CTX_use_AltPrivateKey_Label(WOLFSSL_CTX* ctx,
+                                const char* label, int devId);
+#endif
 
     /* SSL versions */
     WOLFSSL_API int wolfSSL_use_certificate_buffer(WOLFSSL* ssl, const unsigned char* in,
@@ -3114,6 +3134,17 @@ WOLFSSL_API int wolfSSL_make_eap_keys(WOLFSSL* ssl, void* key, unsigned int len,
     WOLFSSL_API int wolfSSL_use_certificate_chain_buffer(WOLFSSL* ssl,
                                                const unsigned char* in, long sz);
     WOLFSSL_API int wolfSSL_UnloadCertsKeys(WOLFSSL* ssl);
+#ifdef WOLFSSL_DUAL_ALG_CERTS
+    WOLFSSL_API int wolfSSL_use_AltPrivateKey_buffer(WOLFSSL* ssl,
+                                const unsigned char* in, long sz, int format);
+    WOLFSSL_API int wolfSSL_use_AltPrivateKey_id(WOLFSSL* ssl,
+                                const unsigned char* id, long sz,
+                                int devId, long keySz);
+    WOLFSSL_API int wolfSSL_use_AltPrivateKey_Id(WOLFSSL* ssl,
+                                const unsigned char* id, long sz, int devId);
+    WOLFSSL_API int wolfSSL_use_AltPrivateKey_Label(WOLFSSL* ssl,
+                                const char* label, int devId);
+#endif
 
     #if (defined(OPENSSL_EXTRA) || defined(OPENSSL_EXTRA_X509_SMALL)) && \
         defined(KEEP_OUR_CERT)
@@ -4531,7 +4562,7 @@ WOLFSSL_API WOLFSSL_X509_NAME_ENTRY *wolfSSL_X509_NAME_get_entry(WOLFSSL_X509_NA
 WOLFSSL_API void wolfSSL_X509_NAME_ENTRY_free(WOLFSSL_X509_NAME_ENTRY* ne);
 WOLFSSL_API WOLFSSL_X509_NAME_ENTRY* wolfSSL_X509_NAME_ENTRY_new(void);
 WOLFSSL_API void wolfSSL_X509_NAME_free(WOLFSSL_X509_NAME* name);
-WOLFSSL_API char wolfSSL_CTX_use_certificate(WOLFSSL_CTX* ctx, WOLFSSL_X509* x);
+WOLFSSL_API int wolfSSL_CTX_use_certificate(WOLFSSL_CTX* ctx, WOLFSSL_X509* x);
 WOLFSSL_API int wolfSSL_CTX_add0_chain_cert(WOLFSSL_CTX* ctx, WOLFSSL_X509* x509);
 WOLFSSL_API int wolfSSL_CTX_add1_chain_cert(WOLFSSL_CTX* ctx, WOLFSSL_X509* x509);
 WOLFSSL_API int wolfSSL_add0_chain_cert(WOLFSSL* ssl, WOLFSSL_X509* x509);
@@ -4858,10 +4889,11 @@ WOLFSSL_API WOLFSSL_X509_CRL *wolfSSL_X509_OBJECT_get0_X509_CRL(WOLFSSL_X509_OBJ
 WOLFSSL_API void wolfSSL_sk_X509_pop_free(WOLF_STACK_OF(WOLFSSL_X509)* sk, void (*f) (WOLFSSL_X509*));
 #endif /* OPENSSL_EXTRA || WOLFSSL_WPAS_SMALL */
 
-#if (defined(OPENSSL_EXTRA) || defined(HAVE_CURL)) && defined(HAVE_ECC)
+#if (defined(OPENSSL_EXTRA) || defined(HAVE_CURL)) && (defined(HAVE_ECC) || \
+    defined(HAVE_CURVE25519) || defined(HAVE_CURVE448))
 WOLFSSL_API int wolfSSL_CTX_set1_curves_list(WOLFSSL_CTX* ctx, const char* names);
 WOLFSSL_API int wolfSSL_set1_curves_list(WOLFSSL* ssl, const char* names);
-#endif /* (OPENSSL_EXTRA || HAVE_CURL) && HAVE_ECC */
+#endif
 
 #if defined(OPENSSL_ALL) || \
     defined(HAVE_STUNNEL) || defined(WOLFSSL_MYSQL_COMPATIBLE) || \
@@ -4985,6 +5017,10 @@ WOLFSSL_API int wolfSSL_SSL_do_handshake(WOLFSSL *s);
 #ifdef OPENSSL_EXTRA
 WOLFSSL_API int wolfSSL_OPENSSL_init_ssl(word64 opts,
     const OPENSSL_INIT_SETTINGS *settings);
+WOLFSSL_API OPENSSL_INIT_SETTINGS* wolfSSL_OPENSSL_INIT_new(void);
+WOLFSSL_API void wolfSSL_OPENSSL_INIT_free(OPENSSL_INIT_SETTINGS* init);
+WOLFSSL_API int  wolfSSL_OPENSSL_INIT_set_config_appname(
+        OPENSSL_INIT_SETTINGS* init, char* appname);
 #endif
 #if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
 WOLFSSL_API int wolfSSL_SSL_in_init(const WOLFSSL* ssl);

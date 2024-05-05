@@ -1,6 +1,6 @@
 /* settings.h
  *
- * Copyright (C) 2006-2023 wolfSSL Inc.
+ * Copyright (C) 2006-2024 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -265,6 +265,23 @@
 /* Uncomment next line if using MAXQ108x */
 /* #define WOLFSSL_MAXQ108X */
 
+/* Check PLATFORMIO first, as it may define other known environments. */
+#ifdef PLATFORMIO
+    #ifdef ESP_PLATFORM
+        /* Turn on the wolfSSL ESPIDF flag for the PlatformIO ESP-IDF detect */
+        #define WOLFSSL_ESPIDF
+    #endif /* ESP_PLATFORM */
+
+    /* Ensure all PlatformIO boards have the wolfSSL user_setting.h enabled. */
+    #ifndef WOLFSSL_USER_SETTINGS
+        #define WOLFSSL_USER_SETTINGS
+    #endif /* WOLFSSL_USER_SETTINGS */
+
+    /* Similar to Arduino we have limited build control, so suppress warning */
+    #undef  WOLFSSL_IGNORE_FILE_WARN
+    #define WOLFSSL_IGNORE_FILE_WARN
+#endif
+
 #if defined(ARDUINO)
     /* Due to limited build control, we'll ignore file warnings. */
     /* See https://github.com/arduino/arduino-cli/issues/631     */
@@ -306,22 +323,61 @@
 
 #include <wolfssl/wolfcrypt/visibility.h>
 
-#define WOLFSSL_MAKE_FIPS_VERSION(major, minor) (((major) * 256) + (minor))
+/*------------------------------------------------------------*/
+#define WOLFSSL_MAKE_FIPS_VERSION3(major, minor, patch) \
+                                (((major) * 65536) + ((minor) * 256) + (patch))
+#define WOLFSSL_MAKE_FIPS_VERSION(major, minor) \
+                                  WOLFSSL_MAKE_FIPS_VERSION3(major, minor, 0)
+
 #if !defined(HAVE_FIPS)
-    #define WOLFSSL_FIPS_VERSION_CODE WOLFSSL_MAKE_FIPS_VERSION(0,0)
+    #define WOLFSSL_FIPS_VERSION_CODE WOLFSSL_MAKE_FIPS_VERSION3(0,0,0)
+    #define WOLFSSL_FIPS_VERSION2_CODE WOLFSSL_FIPS_VERSION_CODE
 #elif !defined(HAVE_FIPS_VERSION)
-    #define WOLFSSL_FIPS_VERSION_CODE WOLFSSL_MAKE_FIPS_VERSION(1,0)
+    #define WOLFSSL_FIPS_VERSION_CODE WOLFSSL_MAKE_FIPS_VERSION3(1,0,0)
+    #define WOLFSSL_FIPS_VERSION2_CODE WOLFSSL_FIPS_VERSION_CODE
 #elif !defined(HAVE_FIPS_VERSION_MINOR)
-    #define WOLFSSL_FIPS_VERSION_CODE WOLFSSL_MAKE_FIPS_VERSION(HAVE_FIPS_VERSION,0)
+    #define WOLFSSL_FIPS_VERSION_CODE \
+            WOLFSSL_MAKE_FIPS_VERSION3(HAVE_FIPS_VERSION,0,0)
+    #define WOLFSSL_FIPS_VERSION2_CODE WOLFSSL_FIPS_VERSION_CODE
+#elif !defined(HAVE_FIPS_VERSION_PATCH)
+    #define WOLFSSL_FIPS_VERSION_CODE \
+            WOLFSSL_MAKE_FIPS_VERSION3(HAVE_FIPS_VERSION, \
+                                       HAVE_FIPS_VERSION_MINOR, 0)
+    #define WOLFSSL_FIPS_VERSION2_CODE WOLFSSL_FIPS_VERSION_CODE
 #else
-    #define WOLFSSL_FIPS_VERSION_CODE WOLFSSL_MAKE_FIPS_VERSION(HAVE_FIPS_VERSION,HAVE_FIPS_VERSION_MINOR)
+    #define WOLFSSL_FIPS_VERSION_CODE \
+            WOLFSSL_MAKE_FIPS_VERSION3(HAVE_FIPS_VERSION,\
+                                       HAVE_FIPS_VERSION_MINOR, \
+                                       HAVE_FIPS_VERSION_PATCH)
+    #define WOLFSSL_FIPS_VERSION2_CODE \
+            WOLFSSL_MAKE_FIPS_VERSION3(HAVE_FIPS_VERSION,\
+                                       HAVE_FIPS_VERSION_MINOR, \
+                                       0)
 #endif
 
-#define FIPS_VERSION_LT(major,minor) (WOLFSSL_FIPS_VERSION_CODE < WOLFSSL_MAKE_FIPS_VERSION(major,minor))
-#define FIPS_VERSION_LE(major,minor) (WOLFSSL_FIPS_VERSION_CODE <= WOLFSSL_MAKE_FIPS_VERSION(major,minor))
-#define FIPS_VERSION_EQ(major,minor) (WOLFSSL_FIPS_VERSION_CODE == WOLFSSL_MAKE_FIPS_VERSION(major,minor))
-#define FIPS_VERSION_GE(major,minor) (WOLFSSL_FIPS_VERSION_CODE >= WOLFSSL_MAKE_FIPS_VERSION(major,minor))
-#define FIPS_VERSION_GT(major,minor) (WOLFSSL_FIPS_VERSION_CODE > WOLFSSL_MAKE_FIPS_VERSION(major,minor))
+#define FIPS_VERSION_LT(major,minor) \
+           (WOLFSSL_FIPS_VERSION2_CODE < WOLFSSL_MAKE_FIPS_VERSION(major,minor))
+#define FIPS_VERSION_LE(major,minor) \
+          (WOLFSSL_FIPS_VERSION2_CODE <= WOLFSSL_MAKE_FIPS_VERSION(major,minor))
+#define FIPS_VERSION_EQ(major,minor) \
+          (WOLFSSL_FIPS_VERSION2_CODE == WOLFSSL_MAKE_FIPS_VERSION(major,minor))
+#define FIPS_VERSION_GE(major,minor) \
+          (WOLFSSL_FIPS_VERSION2_CODE >= WOLFSSL_MAKE_FIPS_VERSION(major,minor))
+#define FIPS_VERSION_GT(major,minor) \
+           (WOLFSSL_FIPS_VERSION2_CODE > WOLFSSL_MAKE_FIPS_VERSION(major,minor))
+
+#define FIPS_VERSION3_LT(major,minor,patch) \
+    (WOLFSSL_FIPS_VERSION_CODE < WOLFSSL_MAKE_FIPS_VERSION3(major,minor,patch))
+#define FIPS_VERSION3_LE(major,minor,patch) \
+    (WOLFSSL_FIPS_VERSION_CODE <= WOLFSSL_MAKE_FIPS_VERSION3(major,minor,patch))
+#define FIPS_VERSION3_EQ(major,minor,patch) \
+    (WOLFSSL_FIPS_VERSION_CODE == WOLFSSL_MAKE_FIPS_VERSION3(major,minor,patch))
+#define FIPS_VERSION3_GE(major,minor,patch) \
+    (WOLFSSL_FIPS_VERSION_CODE >= WOLFSSL_MAKE_FIPS_VERSION3(major,minor,patch))
+#define FIPS_VERSION3_GT(major,minor,patch) \
+    (WOLFSSL_FIPS_VERSION_CODE > WOLFSSL_MAKE_FIPS_VERSION3(major,minor,patch))
+/*------------------------------------------------------------*/
+
 
 /* make sure old RNG name is used with CTaoCrypt FIPS */
 #ifdef HAVE_FIPS
@@ -332,7 +388,7 @@
          * system or other set of headers included by wolfSSL already defines
          * RNG. Examples are:
          * wolfEngine, wolfProvider and potentially other use-cases */
-        #ifndef RNG
+        #if !defined(RNG) && !defined(NO_OLD_RNGNAME)
             #define RNG WC_RNG
         #endif
     #endif
@@ -452,6 +508,9 @@
 
         /* WC_RSA_BLINDING takes up extra space! */
         #define WC_RSA_BLINDING
+
+        /* Cache Resistant features are  on by default, but has performance
+         * penalty on embedded systems. May not be needed here. Disabled: */
         #define WC_NO_CACHE_RESISTANT
     #endif /* !WOLFSSL_ESPIDF_NO_DEFAULT */
 
@@ -995,22 +1054,45 @@ extern void uITRON4_free(void *p) ;
 
 
 #ifdef FREERTOS
-    #include "FreeRTOS.h"
-    #include <task.h>
+
+    #ifdef PLATFORMIO
+        #include <freertos/FreeRTOS.h>
+        #include <freertos/task.h>
+    #else
+        #include "FreeRTOS.h"
+        #include <task.h>
+    #endif
 
     #if !defined(XMALLOC_USER) && !defined(NO_WOLFSSL_MEMORY) && \
         !defined(WOLFSSL_STATIC_MEMORY) && !defined(WOLFSSL_TRACK_MEMORY)
-        #define XMALLOC(s, h, type)  ((void)(h), (void)(type), pvPortMalloc((s)))
+
+        /* XMALLOC */
+        #if defined(WOLFSSL_ESPIDF) && \
+           (defined(DEBUG_WOLFSSL) || defined(DEBUG_WOLFSSL_MALLOC))
+            #include <wolfssl/wolfcrypt/port/Espressif/esp-sdk-lib.h>
+            #define XMALLOC(s, h, type)  \
+                           ((void)(h), (void)(type), wc_debug_pvPortMalloc( \
+                           (s), (__FILE__), (__LINE__), (__FUNCTION__) ))
+        #else
+            #define XMALLOC(s, h, type)  \
+                           ((void)(h), (void)(type), pvPortMalloc((s)))
+        #endif
+
+        /* XFREE */
         #define XFREE(p, h, type)    ((void)(h), (void)(type), vPortFree((p)))
+
+        /* XREALLOC */
         #if defined(WOLFSSL_ESPIDF)
-                /* In IDF, realloc(p, n) is equivalent to
-                 * heap_caps_realloc(p, s, MALLOC_CAP_8BIT)
-                 *  there's no pvPortRealloc available  */
-                #define XREALLOC(p, n, h, t) ((void)(h), (void)(t), realloc((p), (n)))
-        /* FreeRTOS pvPortRealloc() implementation can be found here:
-         * https://github.com/wolfSSL/wolfssl-freertos/pull/3/files */
+            /* In the Espressif EDP-IDF, realloc(p, n) is equivalent to
+             *     heap_caps_realloc(p, s, MALLOC_CAP_8BIT)
+             * There's no pvPortRealloc available:  */
+            #define XREALLOC(p, n, h, t) ((void)(h), (void)(t), realloc((p), (n)))
         #elif defined(USE_INTEGER_HEAP_MATH) || defined(OPENSSL_EXTRA)
-                #define XREALLOC(p, n, h, t) ((void)(h), (void)(t), pvPortRealloc((p), (n)))
+            /* FreeRTOS pvPortRealloc() implementation can be found here:
+             * https://github.com/wolfSSL/wolfssl-freertos/pull/3/files */
+            #define XREALLOC(p, n, h, t) ((void)(h), (void)(t), pvPortRealloc((p), (n)))
+        #else
+            /* no XREALLOC available */
         #endif
     #endif
 
@@ -2008,6 +2090,7 @@ extern void uITRON4_free(void *p) ;
     #define WOLFSSL_DH_CONST
     #define WOLFSSL_HAVE_MAX
     #define NO_WRITEV
+    #define NO_STDLIB_ISASCII
 
     #define USE_FLAT_BENCHMARK_H
     #define USE_FLAT_TEST_H
@@ -2692,7 +2775,9 @@ extern void uITRON4_free(void *p) ;
     #endif
 
     /* Enable ECC_CACHE_CURVE for ASYNC */
-    #if !defined(ECC_CACHE_CURVE)
+    #if !defined(ECC_CACHE_CURVE) && !defined(NO_ECC_CACHE_CURVE)
+        /* Enabled by default for increased async performance,
+         * but not required */
         #define ECC_CACHE_CURVE
     #endif
 #endif /* WOLFSSL_ASYNC_CRYPT */
@@ -2832,6 +2917,9 @@ extern void uITRON4_free(void *p) ;
     #endif
     #ifndef WOLFSSL_SP_DIV_WORD_HALF
         #define WOLFSSL_SP_DIV_WORD_HALF
+    #endif
+    #ifdef __PIE__
+        #define WC_NO_INTERNAL_FUNCTION_POINTERS
     #endif
 #endif
 
@@ -3194,6 +3282,13 @@ extern void uITRON4_free(void *p) ;
     #define HAVE_ONE_TIME_AUTH
 #endif
 
+/* This is checked for in configure.ac, so might want to do it in here as well.
+ */
+#if defined(HAVE_SECURE_RENEGOTIATION) && defined(HAVE_RENEGOTIATION_INDICATION)
+    #error HAVE_RENEGOTIATION_INDICATION cannot be defined together with \
+           HAVE_SECURE_RENEGOTIATION
+#endif
+
 /* Check for insecure build combination:
  * secure renegotiation   [enabled]
  * extended master secret [disabled]
@@ -3312,9 +3407,17 @@ extern void uITRON4_free(void *p) ;
 
 /* (D)TLS v1.3 requires 64-bit number wrappers as does XMSS and LMS. */
 #if defined(WOLFSSL_TLS13) || defined(WOLFSSL_DTLS_DROP_STATS) || \
-    defined(WOLFSSL_WC_XMSS) || defined(WOLFSSL_WC_LMS)
+    (defined(WOLFSSL_WC_XMSS) && (!defined(WOLFSSL_XMSS_MAX_HEIGHT) || \
+    WOLFSSL_XMSS_MAX_HEIGHT > 32)) || (defined(WOLFSSL_WC_LMS) && \
+    !defined(WOLFSSL_LMS_VERIFY_ONLY))
     #undef WOLFSSL_W64_WRAPPER
     #define WOLFSSL_W64_WRAPPER
+#endif
+
+/* wc_xmss and wc_lms require these misc.c functions. */
+#if defined(WOLFSSL_WC_XMSS) || defined(WOLFSSL_WC_LMS)
+    #undef  WOLFSSL_NO_INT_ENCODE
+    #undef  WOLFSSL_NO_INT_DECODE
 #endif
 
 /* DTLS v1.3 requires AES ECB if using AES */
@@ -3434,8 +3537,30 @@ extern void uITRON4_free(void *p) ;
 #endif
 
 /* Some final sanity checks */
+#ifdef WOLFSSL_APPLE_HOMEKIT
+    #ifndef WOLFCRYPT_HAVE_SRP
+        #error "WOLFCRYPT_HAVE_SRP is required for Apple Homekit"
+    #endif
+    #ifndef HAVE_CHACHA
+        #error "HAVE_CHACHA is required for Apple Homekit"
+    #endif
+    #ifdef  USE_FAST_MATH
+        #ifdef FP_MAX_BITS
+            #if FP_MAX_BITS < (8192 * 2)
+                #error "HomeKit FP_MAX_BITS must at least (8192 * 2)"
+            #endif
+        #else
+            #error "HomeKit FP_MAX_BITS must be assigned a value (8192 * 2)"
+        #endif
+    #endif
+#endif
+
 #if defined(WOLFSSL_ESPIDF) && defined(ARDUINO)
     #error "Found both ESPIDF and ARDUINO. Pick one."
+#endif
+
+#if defined(HAVE_FIPS) && defined(HAVE_PKCS11)
+    #error "PKCS11 not allowed with FIPS enabled (Crypto outside boundary)"
 #endif
 
 #if defined(WOLFSSL_CAAM_BLOB)
@@ -3449,6 +3574,20 @@ extern void uITRON4_free(void *p) ;
         #error "HAVE_ED25519 requires WOLFSSL_SHA512"
     #endif
 #endif
+
+/* if configure.ac turned on this feature, HAVE_ENTROPY_MEMUSE will be set,
+ * also define HAVE_WOLFENTROPY */
+#ifdef HAVE_ENTROPY_MEMUSE
+    #ifndef HAVE_WOLFENTROPY
+        #define HAVE_WOLFENTROPY
+    #endif
+#elif defined(HAVE_WOLFENTROPY)
+    /* else if user_settings.h only defined HAVE_WOLFENTROPY
+     * also define HAVE_ENTROPY_MEMUSE */
+    #ifndef HAVE_ENTROPY_MEMUSE
+        #define HAVE_ENTROPY_MEMUSE
+    #endif
+#endif /* HAVE_ENTROPY_MEMUSE */
 
 #ifdef __cplusplus
     }   /* extern "C" */

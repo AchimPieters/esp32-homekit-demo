@@ -430,6 +430,9 @@ typedef struct w64wrapper {
 
     #define XELEM_CNT(x) (sizeof((x))/sizeof(*(x)))
 
+    #define WC_SAFE_SUM_WORD32(in1, in2, out) ((in2) <= 0xffffffffU - (in1) ? \
+                ((out) = (in1) + (in2), 1) : ((out) = 0xffffffffU, 0))
+
     /* idea to add global alloc override by Moises Guimaraes  */
     /* default to libc stuff */
     /* XREALLOC is used once in normal math lib, not in fast math lib */
@@ -1632,6 +1635,9 @@ typedef struct w64wrapper {
     #endif
     #ifndef SAVE_VECTOR_REGISTERS2
         #define SAVE_VECTOR_REGISTERS2() 0
+    #endif
+    #ifndef CAN_SAVE_VECTOR_REGISTERS
+        #define CAN_SAVE_VECTOR_REGISTERS() 1
     #endif
     #ifndef WC_DEBUG_SET_VECTOR_REGISTERS_RETVAL
         #define WC_DEBUG_SET_VECTOR_REGISTERS_RETVAL(x) WC_DO_NOTHING

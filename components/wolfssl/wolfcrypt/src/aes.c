@@ -39,15 +39,13 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
 
 /* Tip: Locate the software cipher modes by searching for "Software AES" */
 
-#if defined(HAVE_FIPS) && \
-    defined(HAVE_FIPS_VERSION) && (HAVE_FIPS_VERSION >= 2)
-
+#if FIPS_VERSION3_GE(2,0,0)
     /* set NO_WRAPPERS before headers, use direct internal f()s not wrappers */
     #define FIPS_NO_WRAPPERS
 
     #ifdef USE_WINDOWS_API
-        #pragma code_seg(".fipsA$g")
-        #pragma const_seg(".fipsB$g")
+        #pragma code_seg(".fipsA$b")
+        #pragma const_seg(".fipsB$b")
     #endif
 #endif
 
@@ -112,6 +110,15 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
 #ifdef _MSC_VER
     /* 4127 warning constant while(1)  */
     #pragma warning(disable: 4127)
+#endif
+
+#if FIPS_VERSION3_GE(6,0,0)
+    const unsigned int wolfCrypt_FIPS_aes_ro_sanity[2] =
+                                                     { 0x1a2b3c4d, 0x00000002 };
+    int wolfCrypt_FIPS_AES_sanity(void)
+    {
+        return 0;
+    }
 #endif
 
 /* Define AES implementation includes and functions */
@@ -1908,6 +1915,7 @@ static word32 GetTable8_4(const byte* t, byte o0, byte o1, byte o2, byte o3)
      ((word32)(t)[o2] <<  8) | ((word32)(t)[o3] <<  0))
 #endif
 
+#ifndef HAVE_CUDA
 /* Encrypt a block using AES.
  *
  * @param [in]  aes       AES object.
@@ -1922,7 +1930,7 @@ static void AesEncrypt_C(Aes* aes, const byte* inBlock, byte* outBlock,
     word32 t0, t1, t2, t3;
     const word32* rk;
 
-#ifdef WC_AES_C_DYNAMIC_FALLBACK
+#ifdef WC_C_DYNAMIC_FALLBACK
     rk = aes->key_C_fallback;
 #else
     rk = aes->key;
@@ -2208,6 +2216,11 @@ static void AesEncryptBlocks_C(Aes* aes, const byte* in, byte* out, word32 sz)
     }
 }
 #endif
+#else
+extern void AesEncrypt_C(Aes* aes, const byte* inBlock, byte* outBlock,
+        word32 r);
+extern void AesEncryptBlocks_C(Aes* aes, const byte* in, byte* out, word32 sz);
+#endif /* HAVE_CUDA */
 
 #else
 
@@ -2703,6 +2716,7 @@ static void bs_encrypt(bs_word* state, bs_word* rk, word32 r)
     bs_inv_transpose(state, trans);
 }
 
+#ifndef HAVE_CUDA
 /* Encrypt a block using AES.
  *
  * @param [in]  aes       AES object.
@@ -2754,6 +2768,11 @@ static void AesEncryptBlocks_C(Aes* aes, const byte* in, byte* out, word32 sz)
     }
 }
 #endif
+#else
+extern void AesEncrypt_C(Aes* aes, const byte* inBlock, byte* outBlock,
+        word32 r);
+extern void AesEncryptBlocks_C(Aes* aes, const byte* in, byte* out, word32 sz);
+#endif /* HAVE_CUDA */
 
 #endif /* !WC_AES_BITSLICED */
 
@@ -2926,7 +2945,7 @@ static void AesDecrypt_C(Aes* aes, const byte* inBlock, byte* outBlock,
     word32 t0, t1, t2, t3;
     const word32* rk;
 
-#ifdef WC_AES_C_DYNAMIC_FALLBACK
+#ifdef WC_C_DYNAMIC_FALLBACK
     rk = aes->key_C_fallback;
 #else
     rk = aes->key;
@@ -4066,7 +4085,7 @@ static WARN_UNUSED_RESULT int wc_AesDecrypt(
  */
 static void AesSetKey_C(Aes* aes, const byte* key, word32 keySz, int dir)
 {
-#ifdef WC_AES_C_DYNAMIC_FALLBACK
+#ifdef WC_C_DYNAMIC_FALLBACK
     word32* rk = aes->key_C_fallback;
 #else
     word32* rk = aes->key;
@@ -4227,7 +4246,7 @@ static void AesSetKey_C(Aes* aes, const byte* key, word32 keySz, int dir)
     if (dir == AES_DECRYPTION) {
         unsigned int j;
 
-#ifdef WC_AES_C_DYNAMIC_FALLBACK
+#ifdef WC_C_DYNAMIC_FALLBACK
         rk = aes->key_C_fallback;
 #else
         rk = aes->key;
@@ -4436,11 +4455,11 @@ static void AesSetKey_C(Aes* aes, const byte* key, word32 keySz, int dir)
         if (ret != 0)
             return ret;
 
-#ifdef WC_AES_C_DYNAMIC_FALLBACK
+#ifdef WC_C_DYNAMIC_FALLBACK
 #ifdef NEED_AES_TABLES
         AesSetKey_C(aes, userKey, keylen, dir);
 #endif /* NEED_AES_TABLES */
-#endif /* WC_AES_C_DYNAMIC_FALLBACK */
+#endif /* WC_C_DYNAMIC_FALLBACK */
 
     #ifdef WOLFSSL_AESNI
         aes->use_aesni = 0;
@@ -4469,13 +4488,13 @@ static void AesSetKey_C(Aes* aes, const byte* key, word32 keySz, int dir)
                 if (ret == 0)
                     aes->use_aesni = 1;
                 else {
-#ifdef WC_AES_C_DYNAMIC_FALLBACK
+#ifdef WC_C_DYNAMIC_FALLBACK
                     ret = 0;
 #endif
                 }
                 return ret;
             } else {
-#ifdef WC_AES_C_DYNAMIC_FALLBACK
+#ifdef WC_C_DYNAMIC_FALLBACK
                 return 0;
 #else
                 return ret;
@@ -4661,7 +4680,7 @@ int wc_AesSetIV(Aes* aes, const byte* iv)
 
 #ifdef WOLFSSL_AESNI
 
-#ifdef WC_AES_C_DYNAMIC_FALLBACK
+#ifdef WC_C_DYNAMIC_FALLBACK
 
 #define VECTOR_REGISTERS_PUSH { \
         int orig_use_aesni = aes->use_aesni;                         \
@@ -6144,7 +6163,7 @@ int wc_AesCbcEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
                 return BAD_FUNC_ARG;
             }
 
-            return wc_AesSetKeyLocal(aes, key, len, iv, dir, 0);
+            return wc_AesSetKey(aes, key, len, iv, dir);
         }
 
     #endif /* NEED_AES_CTR_SOFT */
@@ -6381,7 +6400,7 @@ int wc_AesGcmSetKey(Aes* aes, const byte* key, word32 len)
     if (!((len == 16) || (len == 24) || (len == 32)))
         return BAD_FUNC_ARG;
 
-    if (aes == NULL) {
+    if (aes == NULL || key == NULL) {
 #ifdef WOLFSSL_IMX6_CAAM_BLOB
         ForceZero(local, sizeof(local));
 #endif
@@ -11863,7 +11882,7 @@ static WARN_UNUSED_RESULT int wc_AesFeedbackCFB1(
     }
 
     if (ret == 0) {
-        if (bit > 0 && bit < 7) {
+        if (bit >= 0 && bit < 7) {
             out[0] = cur;
         }
     }
@@ -12350,7 +12369,7 @@ int wc_AesXtsSetKeyNoInit(XtsAes* aes, const byte* key, word32 len, int dir)
 
 #ifdef WOLFSSL_AESNI
     if (ret == 0) {
-        /* With WC_AES_C_DYNAMIC_FALLBACK, the main and tweak keys could have
+        /* With WC_C_DYNAMIC_FALLBACK, the main and tweak keys could have
          * conflicting _aesni status, but the AES-XTS asm implementations need
          * them to all be AESNI.  If any aren't, disable AESNI on all.
          */
@@ -12363,7 +12382,7 @@ int wc_AesXtsSetKeyNoInit(XtsAes* aes, const byte* key, word32 len, int dir)
               (dir == AES_ENCRYPTION_AND_DECRYPTION))
              && (aes->aes_decrypt.use_aesni != aes->tweak.use_aesni)))
         {
-        #ifdef WC_AES_C_DYNAMIC_FALLBACK
+        #ifdef WC_C_DYNAMIC_FALLBACK
             aes->aes.use_aesni = 0;
             aes->aes_decrypt.use_aesni = 0;
             aes->tweak.use_aesni = 0;
@@ -12373,7 +12392,7 @@ int wc_AesXtsSetKeyNoInit(XtsAes* aes, const byte* key, word32 len, int dir)
         }
     #else /* !WC_AES_XTS_SUPPORT_SIMULTANEOUS_ENC_AND_DEC_KEYS */
         if (aes->aes.use_aesni != aes->tweak.use_aesni) {
-        #ifdef WC_AES_C_DYNAMIC_FALLBACK
+        #ifdef WC_C_DYNAMIC_FALLBACK
             aes->aes.use_aesni = 0;
             aes->tweak.use_aesni = 0;
         #else
@@ -12695,6 +12714,14 @@ int wc_AesXtsEncrypt(XtsAes* xaes, byte* out, const byte* in, word32 sz,
 
     aes = &xaes->aes;
 
+/* FIPS TODO: SP800-38E - Restrict data unit to 2^20 blocks per key. A block is
+ * AES_BLOCK_SIZE or 16-bytes (128-bits). So each key may only be used to
+ * protect up to 1,048,576 blocks of AES_BLOCK_SIZE (16,777,216 bytes or
+ * 134,217,728-bits) Add helpful printout and message along with BAD_FUNC_ARG
+ * return whenever sz / AES_BLOCK_SIZE > 1,048,576 or equal to that and sz is
+ * not a sequence of complete blocks.
+ */
+
     if (aes->keylen == 0) {
         WOLFSSL_MSG("wc_AesXtsEncrypt called with unset encryption key.");
         return BAD_FUNC_ARG;
@@ -12711,19 +12738,8 @@ int wc_AesXtsEncrypt(XtsAes* xaes, byte* out, const byte* in, word32 sz,
 
     {
 #ifdef WOLFSSL_AESNI
-#ifdef WC_AES_C_DYNAMIC_FALLBACK
-        int orig_use_aesni = aes->use_aesni;
-#endif
-
-        if (aes->use_aesni && ((ret = SAVE_VECTOR_REGISTERS2()) != 0)) {
-#ifdef WC_AES_C_DYNAMIC_FALLBACK
-            aes->use_aesni = 0;
-            xaes->tweak.use_aesni = 0;
-#else
-            return ret;
-#endif
-        }
         if (aes->use_aesni) {
+            SAVE_VECTOR_REGISTERS(return _svr_ret;);
 #if defined(HAVE_INTEL_AVX1)
             if (IS_INTEL_AVX1(intel_flags)) {
                 AES_XTS_encrypt_avx1(in, out, sz, i,
@@ -12741,23 +12757,13 @@ int wc_AesXtsEncrypt(XtsAes* xaes, byte* out, const byte* in, word32 sz,
                                       (int)aes->rounds);
                 ret = 0;
             }
+            RESTORE_VECTOR_REGISTERS();
         }
         else
 #endif
         {
             ret = AesXtsEncrypt_sw(xaes, out, in, sz, i);
         }
-
-#ifdef WOLFSSL_AESNI
-        if (aes->use_aesni)
-            RESTORE_VECTOR_REGISTERS();
-#ifdef WC_AES_C_DYNAMIC_FALLBACK
-        else if (orig_use_aesni) {
-            aes->use_aesni = orig_use_aesni;
-            xaes->tweak.use_aesni = orig_use_aesni;
-        }
-#endif
-#endif
     }
 
     return ret;
@@ -12923,6 +12929,14 @@ int wc_AesXtsDecrypt(XtsAes* xaes, byte* out, const byte* in, word32 sz,
     aes = &xaes->aes;
 #endif
 
+/* FIPS TODO: SP800-38E - Restrict data unit to 2^20 blocks per key. A block is
+ * AES_BLOCK_SIZE or 16-bytes (128-bits). So each key may only be used to
+ * protect up to 1,048,576 blocks of AES_BLOCK_SIZE (16,777,216 bytes or
+ * 134,217,728-bits) Add helpful printout and message along with BAD_FUNC_ARG
+ * return whenever sz / AES_BLOCK_SIZE > 1,048,576 or equal to that and sz is
+ * not a sequence of complete blocks.
+ */
+
     if (aes->keylen == 0) {
         WOLFSSL_MSG("wc_AesXtsDecrypt called with unset decryption key.");
         return BAD_FUNC_ARG;
@@ -12939,19 +12953,8 @@ int wc_AesXtsDecrypt(XtsAes* xaes, byte* out, const byte* in, word32 sz,
 
     {
 #ifdef WOLFSSL_AESNI
-#ifdef WC_AES_C_DYNAMIC_FALLBACK
-        int orig_use_aesni = aes->use_aesni;
-#endif
-
-        if (aes->use_aesni && ((ret = SAVE_VECTOR_REGISTERS2() != 0))) {
-#ifdef WC_AES_C_DYNAMIC_FALLBACK
-            aes->use_aesni = 0;
-            xaes->tweak.use_aesni = 0;
-#else
-            return ret;
-#endif
-        }
         if (aes->use_aesni) {
+            SAVE_VECTOR_REGISTERS(return _svr_ret;);
 #if defined(HAVE_INTEL_AVX1)
             if (IS_INTEL_AVX1(intel_flags)) {
                 AES_XTS_decrypt_avx1(in, out, sz, i,
@@ -12969,23 +12972,13 @@ int wc_AesXtsDecrypt(XtsAes* xaes, byte* out, const byte* in, word32 sz,
                                       (int)aes->rounds);
                 ret = 0;
             }
+            RESTORE_VECTOR_REGISTERS();
         }
         else
 #endif
         {
             ret = AesXtsDecrypt_sw(xaes, out, in, sz, i);
         }
-
-#ifdef WOLFSSL_AESNI
-        if (aes->use_aesni)
-            RESTORE_VECTOR_REGISTERS();
-#ifdef WC_AES_C_DYNAMIC_FALLBACK
-        else if (orig_use_aesni) {
-            aes->use_aesni = orig_use_aesni;
-            xaes->tweak.use_aesni = orig_use_aesni;
-        }
-#endif
-#endif
 
         return ret;
     }
