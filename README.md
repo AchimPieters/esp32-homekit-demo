@@ -126,6 +126,22 @@ Your safety is your own responsibility, including proper use of equipment and sa
 <sub><sup>-------------------------------------------------------------------------------------------------------------------------------------</sup></sub>
 <br>
 
+<b>WOLFSSL</b>
+
+<img  style="float: right;" src="https://github.com/AchimPieters/ESP32-SmartPlug/blob/main/images/apple_logo.png" width="10">
+
+<b><sup>GPLv2</sup></b>
+
+<sub>wolfSSL (formerly known as CyaSSL) and wolfCrypt are either licensed for use under the GPLv2 (or at your option any later version) or a standard commercial license. For our users who cannot use wolfSSL under GPLv2 (or any later version), a commercial license to wolfSSL and wolfCrypt is available.</sub>
+
+<sub>See the LICENSE.txt, visit wolfssl.com/license, contact us at licensing@wolfssl.com or call +1 425 245 8247</sub>
+
+<sub>View Commercial Support Options: wolfssl.com/products/support-and-maintenance</sub>
+
+<br>
+<sub><sup>-------------------------------------------------------------------------------------------------------------------------------------</sup></sub>
+<br>
+
 <b>ORIGINAL PROJECT</b>
 
 <b><sup>MIT LICENCE</sup></b>
