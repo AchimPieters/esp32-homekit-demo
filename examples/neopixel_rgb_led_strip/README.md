@@ -1,12 +1,12 @@
-# Example for `LED`
+# Example for `LED STRIP`
 
 ## What it does
 
-It's a "Hello World" example for the HomeKit Demo. It is a code to turn ON and OFF an LED connected to an ESP Module.
+Based on a NEO-Pixel WS2812, RGB LED strip. ON/OFF, Brightness, HUE and Saturation.
 
 ## Wiring
 
-Connect `LED` pin to the following pin:
+Connect `LED STRIP` pin to the following pin:
 
 | Name | Description | Defaults |
 |------|-------------|----------|
@@ -17,5 +17,6 @@ Connect `LED` pin to the following pin:
 ## Notes
 
 - Choose your GPIO number under `StudioPieters` in `menuconfig`. The default is `2` (On an ESP32 WROOM 32D).
+- Choose your strip length under `StudioPieters` in `menuconfig`. The default is `3`.
 - Set your `WiFi SSID` and `WiFi Password` under `StudioPieters` in `menuconfig`.
 - Optional: You can change `HomeKit Setup Code` and `HomeKit Setup ID` under `StudioPieters` in `menuconfig`. (Note:  you need to make a new QR-CODE To make it work)

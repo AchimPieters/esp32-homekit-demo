@@ -1,3 +1,28 @@
+/**
+
+   Copyright 2024 Achim Pieters | StudioPieters®
+
+   Permission is hereby granted, free of charge, to any person obtaining a copy
+   of this software and associated documentation files (the "Software"), to deal
+   in the Software without restriction, including without limitation the rights
+   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   copies of the Software, and to permit persons to whom the Software is
+   furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in all
+   copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+   WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+   for more information visit https://www.studiopieters.nl
+
+ **/
+
 #include <stdio.h>
 #include <esp_wifi.h>
 #include <esp_event.h>
@@ -8,291 +33,239 @@
 #include <driver/gpio.h>
 #include <homekit/homekit.h>
 #include <homekit/characteristics.h>
-#include <led_strip.h>
-#include <led_strip_rmt.h>
+#include <driver/ledc.h>
 #include <math.h>
 
 // WiFi setup
 void on_wifi_ready();
 
 static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
-        if (event_base == WIFI_EVENT && (event_id == WIFI_EVENT_STA_START || event_id == WIFI_EVENT_STA_DISCONNECTED)) {
-                ESP_LOGI("WIFI_EVENT", "STA start");
-                esp_wifi_connect();
-        } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
-                ESP_LOGI("IP_EVENT", "WiFI ready");
-                on_wifi_ready();
-        }
+    if (event_base == WIFI_EVENT && (event_id == WIFI_EVENT_STA_START || event_id == WIFI_EVENT_STA_DISCONNECTED)) {
+        ESP_LOGI("WIFI_EVENT", "STA start");
+        esp_wifi_connect();
+    } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
+        ESP_LOGI("IP_EVENT", "WiFI ready");
+        on_wifi_ready();
+    }
 }
 
 static void wifi_init() {
-        ESP_ERROR_CHECK(esp_netif_init());
-        ESP_ERROR_CHECK(esp_event_loop_create_default());
-        esp_netif_create_default_wifi_sta();
+    ESP_ERROR_CHECK(esp_netif_init());
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+    esp_netif_create_default_wifi_sta();
 
-        ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
-        ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL));
 
-        wifi_init_config_t wifi_init_config = WIFI_INIT_CONFIG_DEFAULT();
-        ESP_ERROR_CHECK(esp_wifi_init(&wifi_init_config));
-        ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
+    wifi_init_config_t wifi_init_config = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_wifi_init(&wifi_init_config));
+    ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
 
-        wifi_config_t wifi_config = {
-                .sta = {
-                        .ssid = CONFIG_ESP_WIFI_SSID,
-                        .password = CONFIG_ESP_WIFI_PASSWORD,
-                },
-        };
+    wifi_config_t wifi_config = {
+        .sta = {
+            .ssid = CONFIG_ESP_WIFI_SSID,
+            .password = CONFIG_ESP_WIFI_PASSWORD,
+        },
+    };
 
-        ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-        ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
-        ESP_ERROR_CHECK(esp_wifi_start());
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+    ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
+    ESP_ERROR_CHECK(esp_wifi_start());
 }
 
-// LED Strip setup
-#define LED_STRIP_GPIO CONFIG_ESP_LED_GPIO
-#define LED_STRIP_LENGTH CONFIG_ESP_STRIP_LENGTH
+// RGB LED control
+#define LED_RED_GPIO    21
+#define LED_GREEN_GPIO  22
+#define LED_BLUE_GPIO   23
 
-// LED control
-led_strip_handle_t led_strip;
+void led_write(uint8_t red, uint8_t green, uint8_t blue) {
+    ledc_set_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, red);
+    ledc_update_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0);
 
-bool led_on = false;
-float led_brightness = 50;
-float led_hue = 180;              // hue is scaled 0 to 360
-float led_saturation = 50;      // saturation is scaled 0 to 100
+    ledc_set_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, green);
+    ledc_update_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1);
 
-// Function to convert HSI to RGBW
-// https://blog.saikoled.com/post/44677718712/how-to-convert-from-hsi-to-rgb-white
-#define DEG_TO_RAD(X) (M_PI*(X)/180)
+    ledc_set_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_2, blue);
+    ledc_update_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_2);
+}
 
-void hsi2rgbw(float H, float S, float I, int* rgbw) {
-        int r, g, b, w;
-        float cos_h, cos_1047_h;
-        H = fmod(H, 360); // cycle H around to 0-360 degrees
-        H = M_PI * H / 180; // Convert to radians.
-        S = S > 0 ? (S < 1 ? S : 1) : 0; // clamp S and I to interval [0,1]
-        I = I > 0 ? (I < 1 ? I : 1) : 0;
+void gpio_init() {
+    gpio_set_direction(LED_RED_GPIO, GPIO_MODE_OUTPUT);
+    gpio_set_direction(LED_GREEN_GPIO, GPIO_MODE_OUTPUT);
+    gpio_set_direction(LED_BLUE_GPIO, GPIO_MODE_OUTPUT);
 
-        if (H < 2.09439) {
-                cos_h = cos(H);
-                cos_1047_h = cos(1.047196667 - H);
-                r = S * 255 * I / 3 * (1 + cos_h / cos_1047_h);
-                g = S * 255 * I / 3 * (1 + (1 - cos_h / cos_1047_h));
-                b = 0;
-                w = 255 * (1 - S) * I;
-        } else if (H < 4.188787) {
-                H = H - 2.09439;
-                cos_h = cos(H);
-                cos_1047_h = cos(1.047196667 - H);
-                g = S * 255 * I / 3 * (1 + cos_h / cos_1047_h);
-                b = S * 255 * I / 3 * (1 + (1 - cos_h / cos_1047_h));
-                r = 0;
-                w = 255 * (1 - S) * I;
-        } else {
-                H = H - 4.188787;
-                cos_h = cos(H);
-                cos_1047_h = cos(1.047196667 - H);
-                b = S * 255 * I / 3 * (1 + cos_h / cos_1047_h);
-                r = S * 255 * I / 3 * (1 + (1 - cos_h / cos_1047_h));
-                g = 0;
-                w = 255 * (1 - S) * I;
+    ledc_timer_config_t ledc_timer = {
+        .duty_resolution = LEDC_TIMER_8_BIT,
+        .freq_hz = 5000,
+        .speed_mode = LEDC_HIGH_SPEED_MODE,
+        .timer_num = LEDC_TIMER_0
+    };
+    ledc_timer_config(&ledc_timer);
+
+    ledc_channel_config_t ledc_channel[3] = {
+        {
+            .channel    = LEDC_CHANNEL_0,
+            .duty       = 0,
+            .gpio_num   = LED_RED_GPIO,
+            .speed_mode = LEDC_HIGH_SPEED_MODE,
+            .timer_sel  = LEDC_TIMER_0
+        },
+        {
+            .channel    = LEDC_CHANNEL_1,
+            .duty       = 0,
+            .gpio_num   = LED_GREEN_GPIO,
+            .speed_mode = LEDC_HIGH_SPEED_MODE,
+            .timer_sel  = LEDC_TIMER_0
+        },
+        {
+            .channel    = LEDC_CHANNEL_2,
+            .duty       = 0,
+            .gpio_num   = LED_BLUE_GPIO,
+            .speed_mode = LEDC_HIGH_SPEED_MODE,
+            .timer_sel  = LEDC_TIMER_0
         }
-
-        rgbw[0] = r;
-        rgbw[1] = g;
-        rgbw[2] = b;
-        rgbw[3] = w;
+    };
+    for (int i = 0; i < 3; i++) {
+        ledc_channel_config(&ledc_channel[i]);
+    }
 }
 
-void led_write(bool on) {
-        if (led_strip) {
-                if (on) {
-                        for (int i = 0; i < LED_STRIP_LENGTH; i++) {
-                                // Initialize variables
-                                float h = led_hue;
-                                float s = led_saturation / 100.0;
-                                float v = led_brightness / 100.0;
-
-                                int rgbw[4];
-                                hsi2rgbw(h, s, v, rgbw);
-
-                                uint8_t red = rgbw[0];
-                                uint8_t green = rgbw[1];
-                                uint8_t blue = rgbw[2];
-
-                                ESP_ERROR_CHECK(led_strip_set_pixel(led_strip, i, red, green, blue));
-                        }
-                } else {
-                        // Turn off all LEDs
-                        for (int i = 0; i < LED_STRIP_LENGTH; i++) {
-                                ESP_ERROR_CHECK(led_strip_set_pixel(led_strip, i, 0, 0, 0));
-                        }
-                }
-                ESP_ERROR_CHECK(led_strip_refresh(led_strip));
-        }
-}
-
-// All GPIO Settings
-static void led_strip_init() {
-        led_strip_config_t strip_config = {
-                .strip_gpio_num = LED_STRIP_GPIO,
-                .max_leds = LED_STRIP_LENGTH,
-                .led_pixel_format = LED_PIXEL_FORMAT_GRB,
-                .led_model = LED_MODEL_WS2812,
-                .flags.invert_out = false,
-        };
-
-        led_strip_rmt_config_t rmt_config = {
-                .clk_src = RMT_CLK_SRC_DEFAULT,
-                .resolution_hz = 10 * 1000 * 1000,
-                .flags.with_dma = false,
-        };
-
-        ESP_ERROR_CHECK(led_strip_new_rmt_device(&strip_config, &rmt_config, &led_strip));
-}
-
-// Accessory identification
 void accessory_identify_task(void *args) {
-        for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 2; j++) {
-                        led_write(true);
-                        vTaskDelay(pdMS_TO_TICKS(100));
-                        led_write(false);
-                        vTaskDelay(pdMS_TO_TICKS(100));
-                }
-                vTaskDelay(pdMS_TO_TICKS(250));
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 2; j++) {
+            led_write(255, 255, 255);
+            vTaskDelay(pdMS_TO_TICKS(100));
+            led_write(0, 0, 0);
+            vTaskDelay(pdMS_TO_TICKS(100));
         }
-        led_write(false);
-        vTaskDelete(NULL);
+        vTaskDelay(pdMS_TO_TICKS(250));
+    }
+    led_write(255, 255, 255);
+    vTaskDelete(NULL);
 }
 
 void accessory_identify(homekit_value_t _value) {
-        ESP_LOGI("ACCESSORY_IDENTIFY", "Accessory identify");
-        xTaskCreate(accessory_identify_task, "Accessory identify", 2048, NULL, 2, NULL);
+    xTaskCreate(accessory_identify_task, "Accessory identify", 2048, NULL, 2, NULL);
 }
 
-// HomeKit characteristics
-homekit_value_t led_on_get() {
-        return HOMEKIT_BOOL(led_on);
+// sRGB gamma correction
+float gamma_correction(float value) {
+    if (value <= 0.0031308) {
+        return 12.92 * value;
+    } else {
+        return 1.055 * powf(value, 1.0 / 2.4) - 0.055;
+    }
 }
 
-void led_on_set(homekit_value_t value) {
-        if (value.format != homekit_format_bool) {
-                return;
-        }
+// Convert HSB (Hue, Saturation, Brightness) to RGB (Red, Green, Blue)
+void hsb_to_rgb(float hue, float saturation, float brightness, uint8_t *red, uint8_t *green, uint8_t *blue) {
+    float hue_prime = fmodf(hue / 360.0, 1.0) * 6.0;
+    float chroma = brightness * saturation;
+    float x = chroma * (1 - fabsf(fmodf(hue_prime, 2) - 1));
 
-        led_on = value.bool_value;
-        led_write(led_on);
+    float r1, g1, b1;
+
+    if (hue_prime >= 0 && hue_prime < 1) {
+        r1 = chroma;
+        g1 = x;
+        b1 = 0;
+    } else if (hue_prime >= 1 && hue_prime < 2) {
+        r1 = x;
+        g1 = chroma;
+        b1 = 0;
+    } else if (hue_prime >= 2 && hue_prime < 3) {
+        r1 = 0;
+        g1 = chroma;
+        b1 = x;
+    } else if (hue_prime >= 3 && hue_prime < 4) {
+        r1 = 0;
+        g1 = x;
+        b1 = chroma;
+    } else if (hue_prime >= 4 && hue_prime < 5) {
+        r1 = x;
+        g1 = 0;
+        b1 = chroma;
+    } else {
+        r1 = chroma;
+        g1 = 0;
+        b1 = x;
+    }
+
+    float m = brightness - chroma;
+
+    *red = gamma_correction(r1 + m) * 255;
+    *green = gamma_correction(g1 + m) * 255;
+    *blue = gamma_correction(b1 + m) * 255;
 }
 
-homekit_value_t led_brightness_get() {
-        return HOMEKIT_INT(led_brightness);
+// HomeKit characteristics for RGB color control
+homekit_characteristic_t hue = HOMEKIT_CHARACTERISTIC_(HUE, 0);
+homekit_characteristic_t saturation = HOMEKIT_CHARACTERISTIC_(SATURATION, 0);
+homekit_characteristic_t brightness = HOMEKIT_CHARACTERISTIC_(BRIGHTNESS, 100);
+
+void hue_setter(homekit_value_t value) {
+    uint8_t red, green, blue;
+    hsb_to_rgb(value.float_value, saturation.value.float_value, brightness.value.float_value, &red, &green, &blue);
+    led_write(red, green, blue);
 }
 
-void led_brightness_set(homekit_value_t value) {
-        if (value.format != homekit_format_int) {
-                return;
-        }
-        led_brightness = value.int_value;
-        led_write(led_on);
+void saturation_setter(homekit_value_t value) {
+    uint8_t red, green, blue;
+    hsb_to_rgb(hue.value.float_value, value.float_value, brightness.value.float_value, &red, &green, &blue);
+    led_write(red, green, blue);
 }
 
-homekit_value_t led_hue_get() {
-        return HOMEKIT_FLOAT(led_hue);
+void brightness_setter(homekit_value_t value) {
+    uint8_t red, green, blue;
+    hsb_to_rgb(hue.value.float_value, saturation.value.float_value, value.float_value, &red, &green, &blue);
+    led_write(red, green, blue);
 }
 
-void led_hue_set(homekit_value_t value) {
-        if (value.format != homekit_format_float) {
-                return;
-        }
-        led_hue = value.float_value;
-        led_write(led_on);
-}
-
-homekit_value_t led_saturation_get() {
-        return HOMEKIT_FLOAT(led_saturation);
-}
-
-void led_saturation_set(homekit_value_t value) {
-        if (value.format != homekit_format_float) {
-                return;
-        }
-        led_saturation = value.float_value;
-        led_write(led_on);
-}
-
-#define DEVICE_NAME "HomeKit Light"
-#define DEVICE_MANUFACTURER "StudioPieters®"
-#define DEVICE_SERIAL "NLDA4SQN1466"
-#define DEVICE_MODEL "SD466NL/A"
-#define FW_VERSION "0.0.1"
-
-homekit_characteristic_t name = HOMEKIT_CHARACTERISTIC_(NAME, DEVICE_NAME);
-homekit_characteristic_t manufacturer = HOMEKIT_CHARACTERISTIC_(MANUFACTURER, DEVICE_MANUFACTURER);
-homekit_characteristic_t serial = HOMEKIT_CHARACTERISTIC_(SERIAL_NUMBER, DEVICE_SERIAL);
-homekit_characteristic_t model = HOMEKIT_CHARACTERISTIC_(MODEL, DEVICE_MODEL);
-homekit_characteristic_t revision = HOMEKIT_CHARACTERISTIC_(FIRMWARE_REVISION, FW_VERSION);
-
+// HomeKit accessory definition
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverride-init"
 homekit_accessory_t *accessories[] = {
-        HOMEKIT_ACCESSORY(.id = 1, .category = homekit_accessory_category_lighting, .services = (homekit_service_t*[]) {
-                HOMEKIT_SERVICE(ACCESSORY_INFORMATION, .characteristics = (homekit_characteristic_t*[]) {
-                        &name,
-                        &manufacturer,
-                        &serial,
-                        &model,
-                        &revision,
-                        HOMEKIT_CHARACTERISTIC(IDENTIFY, accessory_identify),
-                        NULL
-                }),
-                HOMEKIT_SERVICE(LIGHTBULB, .primary = true, .characteristics = (homekit_characteristic_t*[]) {
-                        HOMEKIT_CHARACTERISTIC(NAME, "HomeKit Light"),
-                        HOMEKIT_CHARACTERISTIC(
-                                ON, true,
-                                .getter = led_on_get,
-                                .setter = led_on_set
-                                ),
-                        HOMEKIT_CHARACTERISTIC(
-                                BRIGHTNESS, 100,
-                                .getter = led_brightness_get,
-                                .setter = led_brightness_set
-                                ),
-                        HOMEKIT_CHARACTERISTIC(
-                                HUE, 0,
-                                .getter = led_hue_get,
-                                .setter = led_hue_set
-                                ),
-                        HOMEKIT_CHARACTERISTIC(
-                                SATURATION, 0,
-                                .getter = led_saturation_get,
-                                .setter = led_saturation_set
-                                ),
-                        NULL
-                }),
-                NULL
+    HOMEKIT_ACCESSORY(.id = 1, .category = homekit_accessory_category_lighting, .services = (homekit_service_t*[]) {
+        HOMEKIT_SERVICE(ACCESSORY_INFORMATION, .characteristics = (homekit_characteristic_t*[]) {
+            HOMEKIT_CHARACTERISTIC(NAME, "HomeKit LED"),
+            HOMEKIT_CHARACTERISTIC(MANUFACTURER, "StudioPieters®"),
+            HOMEKIT_CHARACTERISTIC(SERIAL_NUMBER, "NLDA4SQN1466"),
+            HOMEKIT_CHARACTERISTIC(MODEL, "SD466NL/A"),
+            HOMEKIT_CHARACTERISTIC(FIRMWARE_REVISION, "0.0.1"),
+            HOMEKIT_CHARACTERISTIC(IDENTIFY, accessory_identify),
+            NULL
+        }),
+        HOMEKIT_SERVICE(LIGHTBULB, .primary = true, .characteristics = (homekit_characteristic_t*[]) {
+            HOMEKIT_CHARACTERISTIC(NAME, "HomeKit LED"),
+            &hue,
+            &saturation,
+            &brightness,
+            NULL
         }),
         NULL
+    }),
+    NULL
 };
 #pragma GCC diagnostic pop
 
 homekit_server_config_t config = {
-        .accessories = accessories,
-        .password = CONFIG_ESP_SETUP_CODE,
-        .setupId = CONFIG_ESP_SETUP_ID,
+    .accessories = accessories,
+    .password = CONFIG_ESP_SETUP_CODE,
+    .setupId = CONFIG_ESP_SETUP_ID,
 };
 
 void on_wifi_ready() {
-        homekit_server_init(&config);
+    homekit_server_init(&config);
 }
 
 void app_main(void) {
-        esp_err_t ret = nvs_flash_init();
-        if (ret == ESP_ERR_NVS_NO_FREE_PAGES) {
-                ESP_ERROR_CHECK(nvs_flash_erase());
-                ret = nvs_flash_init();
-        }
-        ESP_ERROR_CHECK(ret);
-        wifi_init();
-        led_strip_init();
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES) {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
+
+    wifi_init();
+    gpio_init();
 }
