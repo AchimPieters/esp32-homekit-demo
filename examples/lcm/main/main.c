@@ -123,7 +123,7 @@ void led_on_set(homekit_value_t value) {
 #define DEVICE_MANUFACTURER "StudioPieters®"
 #define DEVICE_SERIAL "NLDA4SQN1466"
 #define DEVICE_MODEL "SD466NL/A"
-#define FW_VERSION "0.0.1"
+#define FW_VERSION "0.0.0"
 
 homekit_characteristic_t name = HOMEKIT_CHARACTERISTIC_(NAME, DEVICE_NAME);
 homekit_characteristic_t manufacturer = HOMEKIT_CHARACTERISTIC_(MANUFACTURER,  DEVICE_MANUFACTURER);
@@ -163,8 +163,6 @@ homekit_server_config_t config = {
 };
 
 void on_wifi_ready() {
-        homekit_server_init(&config);
-}
 
 void app_main(void) {
         esp_err_t ret = nvs_flash_init();
