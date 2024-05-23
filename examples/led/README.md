@@ -12,7 +12,21 @@ Connect `LED` pin to the following pin:
 |------|-------------|----------|
 | `CONFIG_ESP_LED_GPIO` | GPIO number for `LED` pin | "2" Default |
 
+## Requirements
 
+This project uses the wolfSSL Managed Component. Version `5.7.1-Preview2e` or later must be used.
+
+See: https://components.espressif.com/components/wolfssl/wolfssl/versions/5.7.1-preview2e
+
+Currently, a preview release is available, and can be installed like this:
+
+```
+idf.py add-dependency "wolfssl/wolfssl^5.7.1-preview2e"
+```
+
+To enable support for Apple HomeKit, be sure to check the respective box in `idf.py menuconfig`.
+
+The local `sdkconfig.defaults` has been edited to enable the wolfSSL support for Apple HomeKit by default.
 
 ## Notes
 

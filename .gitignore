@@ -68,4 +68,4 @@ UpgradeLog.htm
 
 /components/**/.component_hash
 /examples/l**/dependencies.lock
-/examples/led/managed_components/wolfssl__wolfssl
+/**/managed_components/**
