@@ -34,6 +34,23 @@
 #include <homekit/homekit.h>
 #include <homekit/characteristics.h>
 
+/* wolfSSL (only needed for esp_ShowExtendedSystemInfo here) */
+/* Always include wolfcrypt/settings.h before any other wolfSSL file.    */
+/* Reminder: settings.h pulls in user_settings.h; don't include it here. */
+#ifdef WOLFSSL_USER_SETTINGS
+    #include <wolfssl/wolfcrypt/settings.h>
+    #ifndef WOLFSSL_ESPIDF
+        #warning "Problem with wolfSSL user_settings."
+        #warning "Check components/wolfssl/include"
+    #endif
+    #include <wolfssl/wolfcrypt/port/Espressif/esp32-crypt.h>
+#else
+    /* Define WOLFSSL_USER_SETTINGS project wide for settings.h to include   */
+    /* wolfSSL user settings in ./components/wolfssl/include/user_settings.h */
+    #error "Missing WOLFSSL_USER_SETTINGS in CMakeLists or Makefile:\
+    CFLAGS +=-DWOLFSSL_USER_SETTINGS"
+#endif
+
 // WiFi setup
 void on_wifi_ready();
 
@@ -47,6 +64,9 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
         }
 }
 
+#if defined(CONFIG_IDF_TARGET_ESP32H2)
+    /* There's no WiFi on ESP32-H2 */
+#else
 static void wifi_init() {
         ESP_ERROR_CHECK(esp_netif_init());
         ESP_ERROR_CHECK(esp_event_loop_create_default());
@@ -70,6 +90,7 @@ static void wifi_init() {
         ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
         ESP_ERROR_CHECK(esp_wifi_start());
 }
+#endif
 
 // LED control
 #define LED_GPIO CONFIG_ESP_LED_GPIO
@@ -173,7 +194,13 @@ void app_main(void) {
                 ret = nvs_flash_init();
         }
         ESP_ERROR_CHECK(ret);
-
+    #ifdef HAVE_VERSION_EXTENDED_INFO
+        esp_ShowExtendedSystemInfo();
+    #endif
+    #if defined(CONFIG_IDF_TARGET_ESP32H2)
+        ESP_LOGW("main", "There's no WiFi on the ESP32-H2");
+    #else
         wifi_init();
+    #endif
         gpio_init();
 }
