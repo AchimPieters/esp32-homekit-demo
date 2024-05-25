@@ -23,8 +23,6 @@ idf.py set-target esp32
 ```
 idf.py menuconfig
 ```
-- Select `Serial flasher config` and then `Flash size (2MB)` set to `4MB`
-- Select `Partition table` and then `Partition Table(Single factory app, no OTA)` Set to `Custom partition table CSV`
 - Select `StudioPieters` and then `(mysid) WIFI SSID` and fill in your Wi-Fi Network name, then Select `(mypassword) WiFI Password` and fill in your Wi-Fi Network password.
 - Then press `ESC` until you are asked `Save Configuration?` and select `(Y)es`
 ```

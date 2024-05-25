@@ -14,10 +14,6 @@ Connect `LED` pin to the following pin:
 
 ## Requirements
 
-This project uses the wolfSSL Managed Component. Version `5.7.1-Preview2e` or later must be used.
-
-See: https://components.espressif.com/components/wolfssl/wolfssl/versions/5.7.1-preview2e
-
 Currently, a preview release is available, and can be installed like this:
 
 ```
