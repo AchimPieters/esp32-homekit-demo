@@ -1,1 +1,8 @@
+#
+# StudioPieters
+#
 
+#
+# wolfSSL settings
+#
+CONFIG_WOLFSSL_APPLE_HOMEKIT=y
