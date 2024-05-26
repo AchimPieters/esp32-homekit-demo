@@ -1,6 +1,6 @@
 ## IDF Component Manager Manifest File
 dependencies:
-  gojimmypi/mywolfssl: "^5.7.1-preview2f1"
+  wolfssl/wolfssl: "^5.7.1-preview2e"
   ## Required IDF version
   idf:
     version: ">=4.1.0"

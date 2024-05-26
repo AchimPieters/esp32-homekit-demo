@@ -68,3 +68,4 @@ UpgradeLog.htm
 
 /components/**/.component_hash
 /examples/l**/dependencies.lock
+/**/managed_components/**
