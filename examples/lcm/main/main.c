@@ -34,6 +34,9 @@
 #include <homekit/homekit.h>
 #include <homekit/characteristics.h>
 
+// Life Cycle Manager
+#include "lcm_api.h"
+
 // WiFi setup
 void on_wifi_ready();
 

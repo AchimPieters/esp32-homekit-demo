@@ -1,6 +1,10 @@
-# ESP-IDF Partition Table
-# Name,   Type, SubType, Offset,  Size,   Flags
-nvs,      data, nvs,     0x9000,  0x5000,
-phy_init, data, phy,     0xe000,  0x1000,
-homekit,  data, homekit, 0xf000,  0x1000,
-factory,  app,  factory, 0x10000, 0x110000,
+# Name,     Type,  SubType,  Offset,     Size,    Flags
+# partition table            0x8000,	   0x1000,
+otadata,    data,	 ota,	     0x9000,	   0x2000,
+phy_init,	  data,	 phy,	     0xb000,	   0x1000,
+lcmcert_1,	0x65,	 0x18,	   0xc000,	   0x1000,
+lcmcert_2,	0x65,	 0x18,	   0xd000,	   0x1000,
+nvs,	      data,	 nvs,	     0xe000,	   0x11000,
+homekit,	  data,	 homekit,  0x1f000,	   0x1000,
+ota_1,	    app,	 ota_1,	   0x20000,	   0x140000,
+ota_0,	    app,	 ota_0,	   0x160000,	 0x240000,

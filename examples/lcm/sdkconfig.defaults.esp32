@@ -44,9 +44,3 @@ CONFIG_PARTITION_TABLE_FILENAME="partitions/partitions_esp32.csv"
 CONFIG_PARTITION_TABLE_OFFSET=0x8000
 CONFIG_PARTITION_TABLE_MD5=y
 # end of Partition Table
-
-# This file is part of HomeACcessoryKid/lcm-api repository
-# copy this to your project file or activate BOOTLOADER_CUSTOM_RESERVE_RTC with SIZE=4 with idf.py menuconfig
-CONFIG_BOOTLOADER_RESERVE_RTC_SIZE=0x10
-CONFIG_BOOTLOADER_CUSTOM_RESERVE_RTC=y
-CONFIG_BOOTLOADER_CUSTOM_RESERVE_RTC_SIZE=0x04

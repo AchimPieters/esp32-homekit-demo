@@ -1,5 +1,9 @@
-# This file is part of HomeACcessoryKid/lcm-api repository
-# copy this to your project file or activate BOOTLOADER_CUSTOM_RESERVE_RTC with SIZE=4 with idf.py menuconfig
-CONFIG_BOOTLOADER_RESERVE_RTC_SIZE=0x10
-CONFIG_BOOTLOADER_CUSTOM_RESERVE_RTC=y
-CONFIG_BOOTLOADER_CUSTOM_RESERVE_RTC_SIZE=0x04
+#
+# StudioPieters
+#
+
+
+#
+# wolfSSL settings
+#
+CONFIG_WOLFSSL_APPLE_HOMEKIT=y
