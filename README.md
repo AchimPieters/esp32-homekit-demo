@@ -40,7 +40,7 @@ esptool.py -p /dev/tty.usbserial-01FD1166 -b 460800 --before default_reset --aft
 ```
 - Replace `/dev/tty.usbserial-01FD1166` with your USB port.
 ```
-screen /dev/tty.usbserial-01FD1166 115200
+screen /dev/tty.usbserial-01FD1166 74880
 ```
 - Replace `/dev/tty.usbserial-01FD1166` with your USB port.
 

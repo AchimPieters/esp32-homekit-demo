@@ -20,13 +20,13 @@ menu "StudioPieters"
 
       config ESP_BUTTON_GPIO
               int "Set the GPIO for the Toggle Button"
-              default 33
+              default 10
               help
                   This the default GPIO of the toggle button of an ESP board.
 
       config ESP_RELAY_GPIO
               int "Set the GPIO for the Relay"
-              default 4
+              default 18
               help
                   The GPIO number the Relay is connected to.
 
