@@ -17,7 +17,9 @@ Connect `LED` pin to the following pin:
 | `CONFIG_ESP_REED_CLOSE_GPIO` | GPIO number for `REED CLOSE` pin | "23" Default |
 | `CONFIG_ESP_DELAY` | Delay for `MAX_DOOR_OPERATION_TIME` | "5000" Default |
 
+## Scheme
 
+![alt text](./scheme.png)
 
 ## Notes
 

@@ -1,16 +1,25 @@
-# Example for `LED`
+# Example for `Aubess Power Monitor Switch`
 
 ## What it does
 
-It's a "Hello World" example for the HomeKit Demo. It is a code to turn ON and OFF an LED connected to an ESP Module.
+It's a example for the Aubess Power Monitor Switch module. It is a code to turn ON and OFF Power through HomeKit and a wall switch, Its also capable of monitoring its power consumption.
 
 ## Wiring
 
-Connect `LED` pin to the following pin:
+Connect `Aubess Power Monitor Switch` pin to the following pin:
 
 | Name | Description | Defaults |
 |------|-------------|----------|
-| `CONFIG_ESP_LED_GPIO` | GPIO number for `LED` pin | "2" Default |
+| `CONFIG_ESP_LED_GPIO` | GPIO number for `LED` pin | "7" Default |
+| `CONFIG_ESP_Button_GPIO` | GPIO number for `BUTTON` pin | "10" Default |
+| `CONFIG_ESP_942RX_GPIO` | GPIO number for `942RX` pin | "RXD" Default |
+| `CONFIG_ESP_942TX_GPIO` | GPIO number for `942TX` pin | "TXD" Default |
+| `CONFIG_ESP_Wall_switch_GPIO` | GPIO number for `Wall switch` pin | "5" Default |
+| `CONFIG_ESP_Relay_GPIO` | GPIO number for `Relay` pin | "4" Default |
+
+## Scheme
+
+![alt text](./scheme.png)
 
 ## Requirements
 

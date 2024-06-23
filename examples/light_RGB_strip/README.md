@@ -14,6 +14,10 @@ Connect `RED LED'S`, `GREEN LED'S` and `BLUE LED'S` pin to the following pin:
 | `CONFIG_ESP_GREEN_LED_GPIO` | GPIO number for `GREEN LED'S` pin | "26" Default |
 | `CONFIG_ESP_BLUE_LED_GPIO` | GPIO number for `BLUE LED'S` pin | "27" Default |
 
+## Scheme
+
+![alt text](./scheme.png)
+
 ## Notes
 
 - Choose your GPIO's numbers under `StudioPieters` in `menuconfig`. The default is `25` for the RED LED'S,`26` for the GREEN LED'S adn `27` for the RED LED'S (On an ESP32 WROOM 32D).

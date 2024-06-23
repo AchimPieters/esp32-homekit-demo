@@ -14,7 +14,9 @@ Connect `Window Covering` pin to the following pin:
 | `ESP_MOTOR_UP_GPIO` | GPIO number for `MOTOR UP` pin | "17" Default |
 | `ESP_MOTOR_DOWN_GPIO` | GPIO number for `MOTOR DOWN` pin | "18" Default |
 
+## Scheme
 
+![alt text](./scheme.png)
 
 ## Notes
 

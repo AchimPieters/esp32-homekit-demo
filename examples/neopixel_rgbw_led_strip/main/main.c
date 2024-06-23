@@ -1,16 +1,41 @@
-#include <stdio.h>
-#include <esp_wifi.h>
-#include <esp_event.h>
-#include <esp_log.h>
-#include <nvs_flash.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
-#include <driver/gpio.h>
-#include <homekit/homekit.h>
-#include <homekit/characteristics.h>
-#include <led_strip.h>
-#include <led_strip_rmt.h>
-#include <math.h>
+/**
+
+   Copyright 2024 Achim Pieters | StudioPieters®
+
+   Permission is hereby granted, free of charge, to any person obtaining a copy
+   of this software and associated documentation files (the "Software"), to deal
+   in the Software without restriction, including without limitation the rights
+   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   copies of the Software, and to permit persons to whom the Software is
+   furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in all
+   copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+   WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+   for more information visit https://www.studiopieters.nl
+
+ **/
+
+ #include <stdio.h>
+ #include <esp_wifi.h>
+ #include <esp_event.h>
+ #include <esp_log.h>
+ #include <nvs_flash.h>
+ #include <freertos/FreeRTOS.h>
+ #include <freertos/task.h>
+ #include <driver/gpio.h>
+ #include <homekit/homekit.h>
+ #include <homekit/characteristics.h>
+ #include <led_strip.h>
+ #include <led_strip_rmt.h>
+ #include <math.h>
 
 // WiFi setup
 void on_wifi_ready();
@@ -50,27 +75,27 @@ static void wifi_init() {
 }
 
 // LED Strip setup
-#define LED_STRIP_GPIO CONFIG_ESP_LED_GPIO
-#define LED_STRIP_LENGTH CONFIG_ESP_STRIP_LENGTH
+ #define LED_STRIP_GPIO CONFIG_ESP_LED_GPIO
+ #define LED_STRIP_LENGTH CONFIG_ESP_STRIP_LENGTH
 
 // LED control
 led_strip_handle_t led_strip;
 
 bool led_on = false;
 float led_brightness = 50;
-float led_hue = 180;              // hue is scaled 0 to 360
-float led_saturation = 50;      // saturation is scaled 0 to 100
+float led_hue = 180;               // hue is scaled 0 to 360
+float led_saturation = 50;       // saturation is scaled 0 to 100
 
 // Function to convert HSI to RGBW
 // https://blog.saikoled.com/post/44677718712/how-to-convert-from-hsi-to-rgb-white
-#define DEG_TO_RAD(X) (M_PI*(X)/180)
+ #define DEG_TO_RAD(X) (M_PI*(X)/180)
 
 void hsi2rgbw(float H, float S, float I, int* rgbw) {
         int r, g, b, w;
         float cos_h, cos_1047_h;
-        H = fmod(H, 360); // cycle H around to 0-360 degrees
-        H = M_PI * H / 180; // Convert to radians.
-        S = S > 0 ? (S < 1 ? S : 1) : 0; // clamp S and I to interval [0,1]
+        H = fmod(H, 360);  // cycle H around to 0-360 degrees
+        H = M_PI * H / 180;  // Convert to radians.
+        S = S > 0 ? (S < 1 ? S : 1) : 0;  // clamp S and I to interval [0,1]
         I = I > 0 ? (I < 1 ? I : 1) : 0;
 
         if (H < 2.09439) {
@@ -119,13 +144,14 @@ void led_write(bool on) {
                                 uint8_t red = rgbw[0];
                                 uint8_t green = rgbw[1];
                                 uint8_t blue = rgbw[2];
+                                uint8_t white = rgbw[3];
 
-                                ESP_ERROR_CHECK(led_strip_set_pixel(led_strip, i, red, green, blue));
+                                ESP_ERROR_CHECK(led_strip_set_pixel_rgbw(led_strip, i, red, green, blue, white));
                         }
                 } else {
                         // Turn off all LEDs
                         for (int i = 0; i < LED_STRIP_LENGTH; i++) {
-                                ESP_ERROR_CHECK(led_strip_set_pixel(led_strip, i, 0, 0, 0));
+                                ESP_ERROR_CHECK(led_strip_set_pixel_rgbw(led_strip, i, 0, 0, 0, 0));
                         }
                 }
                 ESP_ERROR_CHECK(led_strip_refresh(led_strip));
@@ -137,8 +163,8 @@ static void led_strip_init() {
         led_strip_config_t strip_config = {
                 .strip_gpio_num = LED_STRIP_GPIO,
                 .max_leds = LED_STRIP_LENGTH,
-                .led_pixel_format = LED_PIXEL_FORMAT_GRB,
-                .led_model = LED_MODEL_WS2812,
+                .led_pixel_format = LED_PIXEL_FORMAT_GRBW,  // Pixel format of your LED strip
+                .led_model = LED_MODEL_SK6812,  // LED strip model
                 .flags.invert_out = false,
         };
 
@@ -221,11 +247,11 @@ void led_saturation_set(homekit_value_t value) {
         led_write(led_on);
 }
 
-#define DEVICE_NAME "HomeKit Light"
-#define DEVICE_MANUFACTURER "StudioPieters®"
-#define DEVICE_SERIAL "NLDA4SQN1466"
-#define DEVICE_MODEL "SD466NL/A"
-#define FW_VERSION "0.0.1"
+ #define DEVICE_NAME "HomeKit RGBW Light"
+ #define DEVICE_MANUFACTURER "StudioPieters®"
+ #define DEVICE_SERIAL "NLDA4SQN1466"
+ #define DEVICE_MODEL "SD466NL/A"
+ #define FW_VERSION "0.0.1"
 
 homekit_characteristic_t name = HOMEKIT_CHARACTERISTIC_(NAME, DEVICE_NAME);
 homekit_characteristic_t manufacturer = HOMEKIT_CHARACTERISTIC_(MANUFACTURER, DEVICE_MANUFACTURER);
@@ -233,8 +259,8 @@ homekit_characteristic_t serial = HOMEKIT_CHARACTERISTIC_(SERIAL_NUMBER, DEVICE_
 homekit_characteristic_t model = HOMEKIT_CHARACTERISTIC_(MODEL, DEVICE_MODEL);
 homekit_characteristic_t revision = HOMEKIT_CHARACTERISTIC_(FIRMWARE_REVISION, FW_VERSION);
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Woverride-init"
+ #pragma GCC diagnostic push
+ #pragma GCC diagnostic ignored "-Woverride-init"
 homekit_accessory_t *accessories[] = {
         HOMEKIT_ACCESSORY(.id = 1, .category = homekit_accessory_category_lighting, .services = (homekit_service_t*[]) {
                 HOMEKIT_SERVICE(ACCESSORY_INFORMATION, .characteristics = (homekit_characteristic_t*[]) {
@@ -247,7 +273,7 @@ homekit_accessory_t *accessories[] = {
                         NULL
                 }),
                 HOMEKIT_SERVICE(LIGHTBULB, .primary = true, .characteristics = (homekit_characteristic_t*[]) {
-                        HOMEKIT_CHARACTERISTIC(NAME, "HomeKit Light"),
+                        HOMEKIT_CHARACTERISTIC(NAME, "HomeKit RGBW Light"),
                         HOMEKIT_CHARACTERISTIC(
                                 ON, true,
                                 .getter = led_on_get,
@@ -274,7 +300,7 @@ homekit_accessory_t *accessories[] = {
         }),
         NULL
 };
-#pragma GCC diagnostic pop
+ #pragma GCC diagnostic pop
 
 homekit_server_config_t config = {
         .accessories = accessories,

@@ -13,7 +13,9 @@ Connect `FAN` pin to the following pin:
 | `CONFIG_ESP_LED_GPIO` | GPIO number for `LED` pin | "2" Default |
 | `CONFIG_ESP_FAN_GPIO` | GPIO number for `FAN` pin | "33" Default |
 
+## Scheme
 
+![alt text](./scheme.png)
 
 ## Notes
 

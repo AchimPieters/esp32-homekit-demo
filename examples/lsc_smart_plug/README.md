@@ -20,6 +20,9 @@ Connect `LED` pin to the following pin:
 | `CONFIG_ESP_RED_LED_GPIO` | GPIO number for `RED_LED` pin | "7" Default |
 | `CONFIG_ESP_BLUE_LED_GPIO` | GPIO number for `BLUE_LED` pin | "4" Default |
 
+## Scheme
+
+![alt text](./scheme.png)
 
 ## Requirements
 

@@ -12,7 +12,9 @@ Connect `LIGHT` pin to the following pin:
 |------|-------------|----------|
 | `CONFIG_ESP_LED_GPIO` | GPIO number for `LED` pin | "2" Default |
 
+## Scheme
 
+![alt text](./scheme.png)
 
 ## Notes
 

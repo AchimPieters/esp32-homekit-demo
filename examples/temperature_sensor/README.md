@@ -12,6 +12,10 @@ Connect `DATA` pin to the following pin:
 |------|-------------|----------|
 | `CONFIG_EXAMPLE_DATA_GPIO` | GPIO number for `DATA` pin | "4" for `esp8266` and `esp32c3`, "17" for `esp32`, `esp32s2`, and `esp32s3` |
 
+## Scheme
+
+![alt text](./scheme.png)
+
 ## Notes
 
 - Choose your GPIO number under `StudioPieters` in `menuconfig`. The default is `2` (On an ESP32 WROOM 32D).

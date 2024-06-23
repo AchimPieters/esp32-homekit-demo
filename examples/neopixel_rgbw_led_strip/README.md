@@ -1,4 +1,4 @@
-# Example for `LED STRIP`
+# Example for `RGBW LED STRIP`
 
 ## What it does
 
@@ -6,13 +6,15 @@ Based on a NEO-Pixel SK6812, RGBW LED strip. ON/OFF, Brightness, HUE, Color temp
 
 ## Wiring
 
-Connect `LED STRIP` pin to the following pin:
+Connect `RGBW LED STRIP` pin to the following pin:
 
 | Name | Description | Defaults |
 |------|-------------|----------|
 | `CONFIG_ESP_LED_GPIO` | GPIO number for `LED` pin | "2" Default |
 
+## Scheme
 
+![alt text](./scheme.png)
 
 ## Notes
 

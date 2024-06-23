@@ -1,4 +1,4 @@
-# Example for `LED STRIP`
+# Example for `RGB LED STRIP`
 
 ## What it does
 
@@ -6,13 +6,15 @@ Based on a NEO-Pixel WS2812, RGB LED strip. ON/OFF, Brightness, HUE and Saturati
 
 ## Wiring
 
-Connect `LED STRIP` pin to the following pin:
+Connect `RGB LED STRIP` pin to the following pin:
 
 | Name | Description | Defaults |
 |------|-------------|----------|
 | `CONFIG_ESP_LED_GPIO` | GPIO number for `LED` pin | "2" Default |
 
+## Scheme
 
+![alt text](./scheme.png)
 
 ## Notes
 

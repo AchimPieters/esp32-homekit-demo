@@ -12,6 +12,10 @@ Connect `LED` pin to the following pin:
 |------|-------------|----------|
 | `CONFIG_ESP_LED_GPIO` | GPIO number for `LED` pin | "2" Default |
 
+## Scheme
+
+![alt text](./scheme.png)
+
 ## Requirements
 
 Currently, a preview release is available, and can be installed like this:

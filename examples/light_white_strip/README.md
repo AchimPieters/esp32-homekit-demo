@@ -14,6 +14,10 @@ Connect `COLD LED'S` and `WARM LED'S` pin to the following pin:
 | `CONFIG_ESP_WW_LED_GPIO` | GPIO number for `WARM LED'S` pin | "26" Default |
 |
 
+## Scheme
+
+![alt text](./scheme.png)
+
 ## Notes
 
 - Choose your GPIO's numbers under `StudioPieters` in `menuconfig`. The default is `25` for the COLD LED'S and `26` for the WARM LED'S (On an ESP32 WROOM 32D).
