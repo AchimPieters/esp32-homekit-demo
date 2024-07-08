@@ -14,13 +14,13 @@ menu "StudioPieters"
 
       config ESP_LED_GPIO
               int "Set the GPIO for the LED"
-              default 2
+              default 5
               help
                   The GPIO number the LED is connected to.
 
       config ESP_STRIP_LENGTH
               int "Set the number of LED's of your strip"
-              default 3
+              default 240
               help
                   The number of LED's On the connected strip.
 
