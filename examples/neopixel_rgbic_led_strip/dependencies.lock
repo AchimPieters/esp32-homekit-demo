@@ -1,0 +1,21 @@
+dependencies:
+  espressif/led_strip:
+    component_hash: fc66f8544851132555bc668475f7b68acd6a211c8075db5ce1951cbfa27dfb88
+    source:
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 2.5.4
+  idf:
+    component_hash: null
+    source:
+      type: idf
+    version: 5.4.0
+  wolfssl/wolfssl:
+    component_hash: dfa324078ad654c244e3a1b637b727c5666063cd7befca87ff2935d6b1399b91
+    source:
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 5.7.1-preview2e
+manifest_hash: e4b385a78aebff71a501f3c4ada3f9f4e3845c0b1c81aad48df8c750f540355b
+target: esp32
+version: 1.0.0
