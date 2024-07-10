@@ -1,270 +1,38 @@
 #include <stdio.h>
-#include <esp_wifi.h>
-#include <esp_event.h>
-#include <esp_log.h>
-#include <nvs_flash.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-#include <driver/gpio.h>
-#include <homekit/homekit.h>
-#include <homekit/characteristics.h>
-#include <ws2811.h>  // Assuming ws2811.h is the correct header for the library
-#include <math.h>
+#include <ws2811_led_strip.h>
 
-// WiFi setup
-void on_wifi_ready();
+#define LED_STRIP_LENGTH 240
 
-static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
-    if (event_base == WIFI_EVENT && (event_id == WIFI_EVENT_STA_START || event_id == WIFI_EVENT_STA_DISCONNECTED)) {
-        ESP_LOGI("WIFI_EVENT", "STA start");
-        esp_wifi_connect();
-    } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
-        ESP_LOGI("IP_EVENT", "WiFI ready");
-        on_wifi_ready();
-    }
-}
+void app_main(void)
+{
+    led_strip_t *strip = led_strip_init(RMT_CHANNEL_0, GPIO_NUM_5, LED_STRIP_LENGTH);
 
-static void wifi_init() {
-    ESP_ERROR_CHECK(esp_netif_init());
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
-    esp_netif_create_default_wifi_sta();
-
-    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
-    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL));
-
-    wifi_init_config_t wifi_init_config = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK(esp_wifi_init(&wifi_init_config));
-    ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
-
-    wifi_config_t wifi_config = {
-        .sta = {
-            .ssid = CONFIG_ESP_WIFI_SSID,
-            .password = CONFIG_ESP_WIFI_PASSWORD,
-        },
-    };
-
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-    ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
-    ESP_ERROR_CHECK(esp_wifi_start());
-}
-
-// LED Strip setup
-#define LED_STRIP_GPIO CONFIG_ESP_LED_GPIO
-#define LED_STRIP_LENGTH CONFIG_ESP_STRIP_LENGTH
-
-// LED control
-ws2811_t led_strip;
-
-bool led_on = false;
-float led_brightness = 50;
-float led_hue = 180;               // hue is scaled 0 to 360
-float led_saturation = 50;         // saturation is scaled 0 to 100
-
-// Function to convert HSI to RGBW
-// https://blog.saikoled.com/post/44677718712/how-to-convert-from-hsi-to-rgb-white
-#define DEG_TO_RAD(X) (M_PI*(X)/180)
-
-void hsi2rgbw(float H, float S, float I, int* rgbw) {
-    int r, g, b, w;
-    float cos_h, cos_1047_h;
-    H = fmod(H, 360);  // cycle H around to 0-360 degrees
-    H = M_PI * H / 180;  // Convert to radians.
-    S = S > 0 ? (S < 1 ? S : 1) : 0;  // clamp S and I to interval [0,1]
-    I = I > 0 ? (I < 1 ? I : 1) : 0;
-
-    if (H < 2.09439) {
-        cos_h = cos(H);
-        cos_1047_h = cos(1.047196667 - H);
-        r = S * 255 * I / 3 * (1 + cos_h / cos_1047_h);
-        g = S * 255 * I / 3 * (1 + (1 - cos_h / cos_1047_h));
-        b = 0;
-        w = 255 * (1 - S) * I;
-    } else if (H < 4.188787) {
-        H = H - 2.09439;
-        cos_h = cos(H);
-        cos_1047_h = cos(1.047196667 - H);
-        g = S * 255 * I / 3 * (1 + cos_h / cos_1047_h);
-        b = S * 255 * I / 3 * (1 + (1 - cos_h / cos_1047_h));
-        r = 0;
-        w = 255 * (1 - S) * I;
-    } else {
-        H = H - 4.188787;
-        cos_h = cos(H);
-        cos_1047_h = cos(1.047196667 - H);
-        b = S * 255 * I / 3 * (1 + cos_h / cos_1047_h);
-        r = S * 255 * I / 3 * (1 + (1 - cos_h / cos_1047_h));
-        g = 0;
-        w = 255 * (1 - S) * I;
+    if (!strip) {
+        printf("Failed to initialize LED strip\n");
+        return;
     }
 
-    rgbw[0] = r;
-    rgbw[1] = g;
-    rgbw[2] = b;
-    rgbw[3] = w;
-}
-
-void led_write(bool on) {
-    if (led_strip) {
-        if (on) {
-            for (int i = 0; i < LED_STRIP_LENGTH; i++) {
-                // Initialize variables
-                float h = led_hue;
-                float s = led_saturation / 100.0;
-                float v = led_brightness / 100.0;
-
-                int rgbw[4];
-                hsi2rgbw(h, s, v, rgbw);
-
-                uint8_t red = rgbw[0];
-                uint8_t green = rgbw[1];
-                uint8_t blue = rgbw[2];
-
-                ws2811_set_pixel(&led_strip, i, red, green, blue);
-            }
-        } else {
-            // Turn off all LEDs
-            for (int i = 0; i < LED_STRIP_LENGTH; i++) {
-                ws2811_set_pixel(&led_strip, i, 0, 0, 0);
-            }
+    while (1) {
+        for (int i = 0; i < LED_STRIP_LENGTH; i++) {
+            led_strip_set_pixel(strip, i, 255, 0, 0);  // Red
         }
-        ws2811_show(&led_strip);
-    }
-}
+        led_strip_refresh(strip);
+        vTaskDelay(pdMS_TO_TICKS(1000));
 
-// All GPIO Settings
-void led_strip_init() {
-    ws2811_config_t config = {
-        .gpio_num = LED_STRIP_GPIO,
-        .length = LED_STRIP_LENGTH,
-        .rmt_channel = RMT_CHANNEL_0,
-    };
-
-    ws2811_init(&led_strip, &config);
-}
-
-// Accessory identification
-void accessory_identify_task(void *args) {
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 2; j++) {
-            led_write(true);
-            vTaskDelay(pdMS_TO_TICKS(100));
-            led_write(false);
-            vTaskDelay(pdMS_TO_TICKS(100));
+        for (int i = 0; i < LED_STRIP_LENGTH; i++) {
+            led_strip_set_pixel(strip, i, 0, 255, 0);  // Green
         }
-        vTaskDelay(pdMS_TO_TICKS(250));
-    }
-    led_write(false);
-    vTaskDelete(NULL);
-}
+        led_strip_refresh(strip);
+        vTaskDelay(pdMS_TO_TICKS(1000));
 
-void accessory_identify(homekit_value_t _value) {
-    ESP_LOGI("ACCESSORY_IDENTIFY", "Accessory identify");
-    xTaskCreate(accessory_identify_task, "Accessory identify", 2048, NULL, 2, NULL);
-}
-
-// HomeKit characteristics
-homekit_value_t led_on_get() {
-    return HOMEKIT_BOOL(led_on);
-}
-
-void led_on_set(homekit_value_t value) {
-    if (value.format != homekit_format_bool) {
-        return;
+        for (int i = 0; i < LED_STRIP_LENGTH; i++) {
+            led_strip_set_pixel(strip, i, 0, 0, 255);  // Blue
+        }
+        led_strip_refresh(strip);
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 
-    led_on = value.bool_value;
-    led_write(led_on);
-}
-
-homekit_value_t led_brightness_get() {
-    return HOMEKIT_INT(led_brightness);
-}
-
-void led_brightness_set(homekit_value_t value) {
-    if (value.format != homekit_format_int) {
-        return;
-    }
-    led_brightness = value.int_value;
-    led_write(led_on);
-}
-
-homekit_value_t led_hue_get() {
-    return HOMEKIT_FLOAT(led_hue);
-}
-
-void led_hue_set(homekit_value_t value) {
-    if (value.format != homekit_format_float) {
-        return;
-    }
-    led_hue = value.float_value;
-    led_write(led_on);
-}
-
-homekit_value_t led_saturation_get() {
-    return HOMEKIT_FLOAT(led_saturation);
-}
-
-void led_saturation_set(homekit_value_t value) {
-    if (value.format != homekit_format_float) {
-        return;
-    }
-    led_saturation = value.float_value;
-    led_write(led_on);
-}
-
-#define DEVICE_NAME "HomeKit RGB Light"
-#define DEVICE_MANUFACTURER "StudioPieters®"
-#define DEVICE_SERIAL "0012345"
-#define FW_VERSION "1.0"
-
-homekit_accessory_t *accessories[] = {
-    HOMEKIT_ACCESSORY(
-        .id = 1,
-        .category = homekit_accessory_category_lightbulb,
-        .services = (homekit_service_t *[]){
-            HOMEKIT_SERVICE(
-                ACCESSORY_INFORMATION,
-                .characteristics = (homekit_characteristic_t *[]){
-                    HOMEKIT_CHARACTERISTIC(NAME, DEVICE_NAME),
-                    HOMEKIT_CHARACTERISTIC(MANUFACTURER, DEVICE_MANUFACTURER),
-                    HOMEKIT_CHARACTERISTIC(SERIAL_NUMBER, DEVICE_SERIAL),
-                    HOMEKIT_CHARACTERISTIC(MODEL, "MyLight"),
-                    HOMEKIT_CHARACTERISTIC(FIRMWARE_REVISION, FW_VERSION),
-                    HOMEKIT_CHARACTERISTIC(IDENTIFY, accessory_identify),
-                    NULL}),
-            HOMEKIT_SERVICE(
-                LIGHTBULB,
-                .primary = true,
-                .characteristics = (homekit_characteristic_t *[]){
-                    HOMEKIT_CHARACTERISTIC(NAME, "RGB LED Strip"),
-                    HOMEKIT_CHARACTERISTIC(
-                        ON, true,
-                        .getter = led_on_get,
-                        .setter = led_on_set),
-                    HOMEKIT_CHARACTERISTIC(
-                        BRIGHTNESS, 100,
-                        .getter = led_brightness_get,
-                        .setter = led_brightness_set),
-                    HOMEKIT_CHARACTERISTIC(
-                        HUE, 0,
-                        .getter = led_hue_get,
-                        .setter = led_hue_set),
-                    HOMEKIT_CHARACTERISTIC(
-                        SATURATION, 0,
-                        .getter = led_saturation_get,
-                        .setter = led_saturation_set),
-                    NULL}),
-            NULL}),
-    NULL};
-
-homekit_server_config_t config = {.accessories = accessories, .password = "111-11-111"};
-
-void on_wifi_ready() {
-    homekit_server_init(&config);
-}
-
-void app_main() {
-    ESP_ERROR_CHECK(nvs_flash_init());
-    wifi_init();
-    led_strip_init();
+    led_strip_free(strip);
 }
