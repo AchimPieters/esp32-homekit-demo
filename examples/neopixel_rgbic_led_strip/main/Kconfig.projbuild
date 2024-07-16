@@ -14,7 +14,7 @@ menu "StudioPieters"
 
       config ESP_LED_GPIO
               int "Set the GPIO for the LED"
-              default 2
+              default 5
               help
                   The GPIO number the LED is connected to.
 
@@ -23,6 +23,18 @@ menu "StudioPieters"
               default 3
               help
                   The number of LED's On the connected strip.
+
+      config ESP_COLD_WHITE_GPIO
+              int "Set the GPIO for the warm white LED"
+              default 18
+              help
+                  Generally, GPIOs like GPIO18, GPIO19, GPIO21, GPIO22, GPIO23, and GPIO25-27 are commonly used with the ledc driver.
+
+      config ESP_WARM_WHITE_GPIO
+              int "Set the GPIO for the cold white LED"
+              default 19
+              help
+                  Generally, GPIOs like GPIO18, GPIO19, GPIO21, GPIO22, GPIO23, and GPIO25-27 are commonly used with the ledc driver.
 
       config ESP_SETUP_CODE
               string "HomeKit Setup Code"
