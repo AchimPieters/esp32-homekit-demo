@@ -32,7 +32,7 @@ menu "StudioPieters"
 
        config ESP_TEMP_SENSOR_GPIO
               int "Data GPIO number"
-              default 4 if IDF_TARGET_ESP8266 || IDF_TARGET_ESP32C3
+              default 4 if IDF_TARGET_ESP8266 || IDF_TARGET_ESP32C3 || IDF_TARGET_ESP32C2 || IDF_TARGET_ESP32C6
               default 17 if IDF_TARGET_ESP32 || IDF_TARGET_ESP32S2 || IDF_TARGET_ESP32S3
               help
                 GPIO number connected to DATA pin

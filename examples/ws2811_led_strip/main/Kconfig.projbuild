@@ -20,7 +20,7 @@ menu "StudioPieters"
 
       config ESP_STRIP_LENGTH
               int "Set the number of LED's of your strip"
-              default 3
+              default 240
               help
                   The number of LED's On the connected strip.
 

@@ -1,26 +1,3 @@
-/**
-   Copyright 2024 Achim Pieters | StudioPieters®
-
-   Permission is hereby granted, free of charge, to any person obtaining a copy
-   of this software and associated documentation files (the "Software"), to deal
-   in the Software without restriction, including without limitation the rights
-   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-   copies of the Software, and to permit persons to whom the Software is
-   furnished to do so, subject to the following conditions:
-
-   The above copyright notice and this permission notice shall be included in all
-   copies or substantial portions of the Software.
-
-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-   FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
-   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-   WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-   for more information visit https://www.studiopieters.nl
- **/
-
 #include <stdio.h>
 #include <esp_wifi.h>
 #include <esp_event.h>
@@ -44,7 +21,7 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
         ESP_LOGI("WIFI_EVENT", "STA start");
         esp_wifi_connect();
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
-        ESP_LOGI("IP_EVENT", "WiFi ready");
+        ESP_LOGI("IP_EVENT", "WiFI ready");
         on_wifi_ready();
     }
 }
@@ -76,56 +53,68 @@ static void wifi_init() {
 // LED Strip setup
 #define LED_STRIP_GPIO CONFIG_ESP_LED_GPIO
 #define LED_STRIP_LENGTH CONFIG_ESP_STRIP_LENGTH
-
-// GPIO for Warm and Cold White LEDs
-#define GPIO_WARM_WHITE 18
-#define GPIO_COLD_WHITE 19
+#define WARM_WHITE_GPIO 18
+#define COLD_WHITE_GPIO 19
 
 // LED control
 led_strip_handle_t led_strip;
 
 bool led_on = false;
 float led_brightness = 50;
-float led_hue = 180;               // hue is scaled 0 to 360
-float led_saturation = 50;         // saturation is scaled 0 to 100
-uint32_t color_temperature = 2700; // default color temperature in Kelvin
+float led_hue = 180;          // hue is scaled 0 to 360
+float led_saturation = 50;    // saturation is scaled 0 to 100
 
-// Function to convert Kelvin to Mirek scale
-uint32_t kelvin_to_mirek(uint32_t kelvin) {
-    return 1000000 / kelvin;
+// LEDC setup for PWM
+#define LEDC_TIMER              LEDC_TIMER_0
+#define LEDC_MODE               LEDC_LOW_SPEED_MODE
+#define LEDC_WARM_WHITE_CHANNEL LEDC_CHANNEL_0
+#define LEDC_COLD_WHITE_CHANNEL LEDC_CHANNEL_1
+#define LEDC_DUTY_RESOLUTION    LEDC_TIMER_13_BIT
+#define LEDC_FREQUENCY          5000
+
+void ledc_init() {
+    ledc_timer_config_t ledc_timer = {
+        .speed_mode       = LEDC_MODE,
+        .timer_num        = LEDC_TIMER,
+        .duty_resolution  = LEDC_DUTY_RESOLUTION,
+        .freq_hz          = LEDC_FREQUENCY,
+        .clk_cfg          = LEDC_AUTO_CLK,
+    };
+    ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
+
+    ledc_channel_config_t ledc_channel_warm_white = {
+        .speed_mode     = LEDC_MODE,
+        .channel        = LEDC_WARM_WHITE_CHANNEL,
+        .timer_sel      = LEDC_TIMER,
+        .intr_type      = LEDC_INTR_DISABLE,
+        .gpio_num       = WARM_WHITE_GPIO,
+        .duty           = 0,
+        .hpoint         = 0,
+    };
+    ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel_warm_white));
+
+    ledc_channel_config_t ledc_channel_cold_white = {
+        .speed_mode     = LEDC_MODE,
+        .channel        = LEDC_COLD_WHITE_CHANNEL,
+        .timer_sel      = LEDC_TIMER,
+        .intr_type      = LEDC_INTR_DISABLE,
+        .gpio_num       = COLD_WHITE_GPIO,
+        .duty           = 0,
+        .hpoint         = 0,
+    };
+    ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel_cold_white));
 }
 
-// Function to adjust LED temperature by controlling warm and cold white LEDs
-void adjust_led_temperature(uint32_t kelvin) {
-    uint32_t warm_duty = 0;
-    uint32_t cold_duty = 0;
-
-    if (kelvin <= 4000) {
-        // Warmer temperatures, more warm white
-        warm_duty = (4000 - kelvin) * 1023 / 1300;
-        cold_duty = 0;
-    } else {
-        // Colder temperatures, more cold white
-        cold_duty = (kelvin - 4000) * 1023 / 2500;
-        warm_duty = 0;
-    }
-
-    ledc_set_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, warm_duty);
-    ledc_set_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, cold_duty);
-    ledc_update_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0);
-    ledc_update_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1);
-}
-
-// Function to convert HSI to RGBW
+// Function to convert HSI to RGB and adjust warm and cold white
 // https://blog.saikoled.com/post/44677718712/how-to-convert-from-hsi-to-rgb-white
-#define DEG_TO_RAD(X) (M_PI * (X) / 180)
+#define DEG_TO_RAD(X) (M_PI*(X)/180)
 
-void hsi2rgbw(float H, float S, float I, int *rgbw) {
-    int r, g, b, w;
+void hsi2rgbw(float H, float S, float I, int* rgbw) {
+    int r, g, b, w_warm, w_cold;
     float cos_h, cos_1047_h;
-    H = fmod(H, 360); // cycle H around to 0-360 degrees
-    H = M_PI * H / 180; // Convert to radians.
-    S = S > 0 ? (S < 1 ? S : 1) : 0; // clamp S and I to interval [0,1]
+    H = fmod(H, 360);  // cycle H around to 0-360 degrees
+    H = M_PI * H / 180;  // Convert to radians.
+    S = S > 0 ? (S < 1 ? S : 1) : 0;  // clamp S and I to interval [0,1]
     I = I > 0 ? (I < 1 ? I : 1) : 0;
 
     if (H < 2.09439) {
@@ -134,7 +123,6 @@ void hsi2rgbw(float H, float S, float I, int *rgbw) {
         r = S * 255 * I / 3 * (1 + cos_h / cos_1047_h);
         g = S * 255 * I / 3 * (1 + (1 - cos_h / cos_1047_h));
         b = 0;
-        w = 255 * (1 - S) * I;
     } else if (H < 4.188787) {
         H = H - 2.09439;
         cos_h = cos(H);
@@ -142,7 +130,6 @@ void hsi2rgbw(float H, float S, float I, int *rgbw) {
         g = S * 255 * I / 3 * (1 + cos_h / cos_1047_h);
         b = S * 255 * I / 3 * (1 + (1 - cos_h / cos_1047_h));
         r = 0;
-        w = 255 * (1 - S) * I;
     } else {
         H = H - 4.188787;
         cos_h = cos(H);
@@ -150,13 +137,19 @@ void hsi2rgbw(float H, float S, float I, int *rgbw) {
         b = S * 255 * I / 3 * (1 + cos_h / cos_1047_h);
         r = S * 255 * I / 3 * (1 + (1 - cos_h / cos_1047_h));
         g = 0;
-        w = 255 * (1 - S) * I;
     }
+
+    float intensity_warm = (1.0 - S) * I * 255;
+    float intensity_cold = intensity_warm;  // For now, balance both whites equally
+
+    w_warm = intensity_warm * 0.85; // Scale to 85% for warm
+    w_cold = intensity_cold * 0.15; // Scale to 15% for cold
 
     rgbw[0] = r;
     rgbw[1] = g;
     rgbw[2] = b;
-    rgbw[3] = w;
+    rgbw[3] = w_warm;
+    rgbw[4] = w_cold;
 }
 
 void led_write(bool on) {
@@ -168,21 +161,34 @@ void led_write(bool on) {
                 float s = led_saturation / 100.0;
                 float v = led_brightness / 100.0;
 
-                int rgbw[4];
+                int rgbw[5];
                 hsi2rgbw(h, s, v, rgbw);
 
                 uint8_t red = rgbw[0];
                 uint8_t green = rgbw[1];
                 uint8_t blue = rgbw[2];
-                uint8_t white = rgbw[3];
+                uint8_t white_warm = rgbw[3];
+                uint8_t white_cold = rgbw[4];
 
-                ESP_ERROR_CHECK(led_strip_set_pixel_rgbw(led_strip, i, red, green, blue, white));
+                ESP_ERROR_CHECK(led_strip_set_pixel_rgbw(led_strip, i, red, green, blue, 0));
+
+                // Set warm and cold white using LEDC
+                ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_WARM_WHITE_CHANNEL, white_warm));
+                ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, LEDC_WARM_WHITE_CHANNEL));
+
+                ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_COLD_WHITE_CHANNEL, white_cold));
+                ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, LEDC_COLD_WHITE_CHANNEL));
             }
         } else {
             // Turn off all LEDs
             for (int i = 0; i < LED_STRIP_LENGTH; i++) {
                 ESP_ERROR_CHECK(led_strip_set_pixel_rgbw(led_strip, i, 0, 0, 0, 0));
             }
+            ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_WARM_WHITE_CHANNEL, 0));
+            ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, LEDC_WARM_WHITE_CHANNEL));
+
+            ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_COLD_WHITE_CHANNEL, 0));
+            ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, LEDC_COLD_WHITE_CHANNEL));
         }
         ESP_ERROR_CHECK(led_strip_refresh(led_strip));
     }
@@ -193,8 +199,8 @@ static void led_strip_init() {
     led_strip_config_t strip_config = {
         .strip_gpio_num = LED_STRIP_GPIO,
         .max_leds = LED_STRIP_LENGTH,
-        .led_pixel_format = LED_PIXEL_FORMAT_GRBW, // Pixel format of your LED strip
-        .led_model = LED_MODEL_SK6812, // LED strip model
+        .led_pixel_format = LED_PIXEL_FORMAT_GRBW,  // Pixel format of your LED strip
+        .led_model = LED_MODEL_SK6812,  // LED strip model
         .flags.invert_out = false,
     };
 
@@ -205,38 +211,6 @@ static void led_strip_init() {
     };
 
     ESP_ERROR_CHECK(led_strip_new_rmt_device(&strip_config, &rmt_config, &led_strip));
-}
-
-// LEDC setup for warm and cold white control
-static void ledc_init() {
-    ledc_timer_config_t ledc_timer = {
-        .speed_mode = LEDC_HIGH_SPEED_MODE,
-        .duty_resolution = LEDC_TIMER_10_BIT,
-        .timer_num = LEDC_TIMER_0,
-        .freq_hz = 5000,
-        .clk_cfg = LEDC_AUTO_CLK
-    };
-    ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
-
-    ledc_channel_config_t warm_channel = {
-        .channel    = LEDC_CHANNEL_0,
-        .duty       = 0,
-        .gpio_num   = GPIO_WARM_WHITE,
-        .speed_mode = LEDC_HIGH_SPEED_MODE,
-        .hpoint     = 0,
-        .timer_sel  = LEDC_TIMER_0
-    };
-    ESP_ERROR_CHECK(ledc_channel_config(&warm_channel));
-
-    ledc_channel_config_t cold_channel = {
-        .channel    = LEDC_CHANNEL_1,
-        .duty       = 0,
-        .gpio_num   = GPIO_COLD_WHITE,
-        .speed_mode = LEDC_HIGH_SPEED_MODE,
-        .hpoint     = 0,
-        .timer_sel  = LEDC_TIMER_0
-    };
-    ESP_ERROR_CHECK(ledc_channel_config(&cold_channel));
 }
 
 // Accessory identification
@@ -309,20 +283,6 @@ void led_saturation_set(homekit_value_t value) {
     led_write(led_on);
 }
 
-homekit_value_t color_temperature_get() {
-    return HOMEKIT_UINT32(kelvin_to_mirek(color_temperature));
-}
-
-void color_temperature_set(homekit_value_t value) {
-    if (value.format != homekit_format_uint32) {
-        return;
-    }
-    uint32_t mirek_value = value.uint32_value;
-    color_temperature = 1000000 / mirek_value;
-
-    adjust_led_temperature(color_temperature);
-}
-
 #define DEVICE_NAME "HomeKit RGBW Light"
 #define DEVICE_MANUFACTURER "StudioPieters®"
 #define DEVICE_SERIAL "NLDA4SQN1466"
@@ -370,11 +330,6 @@ homekit_accessory_t *accessories[] = {
                 .getter = led_saturation_get,
                 .setter = led_saturation_set
             ),
-            HOMEKIT_CHARACTERISTIC(
-                COLOR_TEMPERATURE, 140,  // 140 is an example value for 2700K
-                .getter = color_temperature_get,
-                .setter = color_temperature_set
-            ),
             NULL
         }),
         NULL
@@ -400,8 +355,7 @@ void app_main(void) {
         ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
-
     wifi_init();
     led_strip_init();
-    ledc_init();
+    ledc_init(); // Initialize LEDC for PWM control
 }

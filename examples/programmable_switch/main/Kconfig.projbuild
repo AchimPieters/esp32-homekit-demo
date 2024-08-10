@@ -20,15 +20,10 @@ menu "StudioPieters"
 
       config ESP_BUTTON_GPIO
               int "Set the GPIO for the Button"
-              default 33
+              default 4 if IDF_TARGET_ESP8266 || IDF_TARGET_ESP32C3 || IDF_TARGET_ESP32C2 || IDF_TARGET_ESP32C6
+              default 17 if IDF_TARGET_ESP32 || IDF_TARGET_ESP32S2 || IDF_TARGET_ESP32S3
               help
                   This the default GPIO of the Program button of an ESP board.
-
-      config ESP_RELAY_GPIO
-              int "Set the GPIO for the Relay"
-              default 4
-              help
-                  The GPIO number the Relay is connected to.
 
       config ESP_SETUP_CODE
               string "HomeKit Setup Code"

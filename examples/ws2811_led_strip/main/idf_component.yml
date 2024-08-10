@@ -1,6 +1,6 @@
 ## IDF Component Manager Manifest File
 dependencies:
-  wolfssl/wolfssl: "^5.7.1-preview2e"
+  espressif/led_strip: "^2.5.4"
   ## Required IDF version
   idf:
     version: ">=4.1.0"
