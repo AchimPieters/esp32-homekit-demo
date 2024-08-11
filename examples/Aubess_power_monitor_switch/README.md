@@ -1,3 +1,5 @@
+# WORK IN PROGRESS
+
 # Example for `Aubess Power Monitor Switch`
 
 ## What it does

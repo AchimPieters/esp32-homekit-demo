@@ -1,3 +1,5 @@
+# WORK IN PROGRESS
+
 # Example for `LSC Smart Power Plug`
 
 ## What it does

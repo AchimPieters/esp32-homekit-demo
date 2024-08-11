@@ -1,3 +1,5 @@
+# WORK IN PROGRESS
+
 # Example for `RGBW LED STRIP`
 
 ## What it does
