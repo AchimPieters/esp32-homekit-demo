@@ -1153,7 +1153,7 @@ WOLFSSL_API int  wolfSSL_CTX_set1_sigalgs_list(WOLFSSL_CTX* ctx,
 WOLFSSL_API int  wolfSSL_set1_sigalgs_list(WOLFSSL* ssl, const char* list);
 #endif
 WOLFSSL_ABI WOLFSSL_API WOLFSSL* wolfSSL_new(WOLFSSL_CTX* ctx);
-WOLFSSL_API WOLFSSL_CTX* wolfSSL_get_SSL_CTX(WOLFSSL* ssl);
+WOLFSSL_API WOLFSSL_CTX* wolfSSL_get_SSL_CTX(const WOLFSSL* ssl);
 WOLFSSL_API WOLFSSL_X509_VERIFY_PARAM* wolfSSL_CTX_get0_param(WOLFSSL_CTX* ctx);
 WOLFSSL_API WOLFSSL_X509_VERIFY_PARAM* wolfSSL_get0_param(WOLFSSL* ssl);
 WOLFSSL_API int wolfSSL_CTX_set1_param(WOLFSSL_CTX* ctx, WOLFSSL_X509_VERIFY_PARAM *vpm);
@@ -1249,6 +1249,7 @@ WOLFSSL_API unsigned int wolfSSL_SESSION_get_max_early_data(const WOLFSSL_SESSIO
 WOLFSSL_ABI WOLFSSL_API void wolfSSL_CTX_free(WOLFSSL_CTX* ctx);
 WOLFSSL_ABI WOLFSSL_API void wolfSSL_free(WOLFSSL* ssl);
 WOLFSSL_ABI WOLFSSL_API int  wolfSSL_shutdown(WOLFSSL* ssl);
+WOLFSSL_API int wolfSSL_SendUserCanceled(WOLFSSL* ssl);
 WOLFSSL_API int  wolfSSL_send(WOLFSSL* ssl, const void* data, int sz, int flags);
 WOLFSSL_API int  wolfSSL_recv(WOLFSSL* ssl, void* data, int sz, int flags);
 
@@ -1681,6 +1682,11 @@ WOLFSSL_API int  wolfSSL_set_session_id_context(WOLFSSL* ssl, const unsigned cha
 WOLFSSL_API void wolfSSL_set_connect_state(WOLFSSL* ssl);
 WOLFSSL_API void wolfSSL_set_accept_state(WOLFSSL* ssl);
 WOLFSSL_API int  wolfSSL_session_reused(WOLFSSL* ssl);
+#ifdef OPENSSL_EXTRA
+/* using unsigned char instead of uint8_t here to avoid stdint include */
+WOLFSSL_API unsigned char wolfSSL_SESSION_get_max_fragment_length(
+                                                      WOLFSSL_SESSION* session);
+#endif
 WOLFSSL_API int wolfSSL_SESSION_up_ref(WOLFSSL_SESSION* session);
 WOLFSSL_API WOLFSSL_SESSION* wolfSSL_SESSION_dup(WOLFSSL_SESSION* session);
 WOLFSSL_API WOLFSSL_SESSION* wolfSSL_SESSION_new(void);
@@ -2576,7 +2582,8 @@ enum { /* ssl Constants */
     WOLFSSL_FAILURE         =  0,   /* for some functions */
     WOLFSSL_SUCCESS         =  1,
 
-/* WOLFSSL_SHUTDOWN_NOT_DONE is returned by wolfSSL_shutdown when the other end
+/* WOLFSSL_SHUTDOWN_NOT_DONE is returned by wolfSSL_shutdown and
+ * wolfSSL_SendUserCanceled when the other end
  * of the connection has yet to send its close notify alert as part of the
  * bidirectional shutdown. To complete the shutdown, either keep calling
  * wolfSSL_shutdown until it returns WOLFSSL_SUCCESS or call wolfSSL_read until
@@ -3811,7 +3818,6 @@ WOLFSSL_API void* wolfSSL_CTX_GetHeap(WOLFSSL_CTX* ctx, WOLFSSL* ssl);
 /* SNI types */
 enum {
     WOLFSSL_SNI_HOST_NAME = 0,
-    WOLFSSL_SNI_HOST_NAME_OUTER = 0,
 };
 
 WOLFSSL_ABI WOLFSSL_API int wolfSSL_UseSNI(WOLFSSL* ssl, unsigned char type,
@@ -3916,6 +3922,7 @@ WOLFSSL_API int wolfSSL_ALPN_FreePeerProtocol(WOLFSSL* ssl, char **list);
 
 /* Fragment lengths */
 enum {
+    WOLFSSL_MFL_DISABLED = 0,
     WOLFSSL_MFL_2_9  = 1, /*  512 bytes */
     WOLFSSL_MFL_2_10 = 2, /* 1024 bytes */
     WOLFSSL_MFL_2_11 = 3, /* 2048 bytes */
@@ -4873,14 +4880,17 @@ typedef int (*CallbackSniRecv)(WOLFSSL *ssl, int *ret, void* exArg);
 
 WOLFSSL_API void wolfSSL_CTX_set_servername_callback(WOLFSSL_CTX* ctx,
         CallbackSniRecv cb);
-WOLFSSL_API int wolfSSL_CTX_set_tlsext_servername_callback(WOLFSSL_CTX* ctx,
-        CallbackSniRecv cb);
 
 WOLFSSL_API int  wolfSSL_CTX_set_servername_arg(WOLFSSL_CTX* ctx, void* arg);
 #endif
 
-#if defined(OPENSSL_ALL) || defined(HAVE_STUNNEL) || defined(WOLFSSL_NGINX) \
-    || defined(WOLFSSL_HAPROXY) || defined(OPENSSL_EXTRA) || defined(HAVE_LIGHTY)
+#if defined(OPENSSL_ALL) || defined(HAVE_STUNNEL) || defined(WOLFSSL_NGINX) || \
+    defined(WOLFSSL_HAPROXY) || defined(OPENSSL_EXTRA) || defined(HAVE_LIGHTY)
+
+#ifdef HAVE_SNI
+WOLFSSL_API int wolfSSL_CTX_set_tlsext_servername_callback(WOLFSSL_CTX* ctx,
+        CallbackSniRecv cb);
+#endif
 
 WOLFSSL_API void wolfSSL_ERR_remove_thread_state(void* pid);
 
@@ -5197,6 +5207,7 @@ WOLFSSL_API int wolfSSL_i2a_ASN1_OBJECT(WOLFSSL_BIO *bp, WOLFSSL_ASN1_OBJECT *a)
 WOLFSSL_API int wolfSSL_i2d_ASN1_OBJECT(WOLFSSL_ASN1_OBJECT *a, unsigned char **pp);
 WOLFSSL_API void SSL_CTX_set_tmp_dh_callback(WOLFSSL_CTX *ctx, WOLFSSL_DH *(*dh) (WOLFSSL *ssl, int is_export, int keylength));
 WOLFSSL_API WOLF_STACK_OF(SSL_COMP) *SSL_COMP_get_compression_methods(void);
+WOLFSSL_API const char* wolfSSL_COMP_get_name(const void* comp);
 WOLFSSL_API int wolfSSL_X509_STORE_load_locations(WOLFSSL_X509_STORE *str, const char *file, const char *dir);
 WOLFSSL_API int wolfSSL_X509_STORE_add_crl(WOLFSSL_X509_STORE *ctx, WOLFSSL_X509_CRL *x);
 WOLFSSL_API int wolfSSL_sk_SSL_CIPHER_num(const WOLF_STACK_OF(WOLFSSL_CIPHER)* p);
@@ -5366,6 +5377,247 @@ WOLFSSL_API int wolfSSL_dtls_cid_get_tx(WOLFSSL* ssl, unsigned char* buffer,
 #define DTLS1_VERSION                    0xFEFF
 #define DTLS1_2_VERSION                  0xFEFD
 #define DTLS1_3_VERSION                  0xFEFC
+
+/* These minimums where determined whilst referencing their RFC specs. The
+ * values represent the minimum sizes of the data types in the required struct
+ * for the `extension_data` field. A length of 0 was assumed when necassary.
+ *
+ * Documents Used for the respective extension:
+ *  - https://datatracker.ietf.org/doc/html/rfc6066
+ *      - Server Name Indication (SNI)
+ *      - Maximum Fragment Length Negotiation (MFL)
+ *      - Trusted CA Indication (TCA)
+ *      - Certificate Status Request (CSR)
+ *      - Truncate HMAC (THM)
+ *  - https://datatracker.ietf.org/doc/html/rfc8446
+ *      - Early Data Indication (EDI)
+ *      - Pre-Shared Key (PSK)
+ *      - Pre-Shared Key Exchange Modes (PKM)
+ *      - Key Share (KS)
+ *      - Post-Handshake Authentication (PHA)
+ *      - Signature Algorithms (SA)
+ *      - Signature Algorithms Certificate (SAC)
+ *      - Support Groups (EC)
+ *      - Cookie (CKE)
+ *      - Supported Versions (SV)
+ *      - Certificate Authorities (CAN)
+ *  - https://datatracker.ietf.org/doc/html/rfc6961
+ *      - Certificate Status Request v2 (CSR2)
+ *  - https://datatracker.ietf.org/doc/rfc9146/
+ *      - Connection Identifier (CID)
+ *  - https://datatracker.ietf.org/doc/rfc7301/
+ *      - Application-Layer Protocol Negotiation (ALPN)
+ *  - https://datatracker.ietf.org/doc/html/rfc3711
+ *      - Secure Real-time Transport Protocol (SRTP)
+ *  - https://datatracker.ietf.org/doc/html/rfc7366
+ *      - Encrypt Then Mac (ETM)
+ *  - https://datatracker.ietf.org/doc/html/rfc7250
+ *      - Client Certificate Type (CCT)
+ *      - Server Certificate Type (SCT)
+ *  - https://datatracker.ietf.org/doc/draft-ietf-tls-esni/
+ *      - Encrypted Client Hello (ECH)
+ *  - https://datatracker.ietf.org/doc/html/rfc5746
+ *      - Secure Renegotiation (SCR)
+ *  - https://datatracker.ietf.org/doc/rfc4492/
+ *      - Point Frame (PF)
+ *  - https://datatracker.ietf.org/doc/rfc9000/
+ *      - QUIC (QTP)
+ *  - https://datatracker.ietf.org/doc/html/rfc5077
+ *      - Session Ticket (STK)
+ * Example:
+ *  For `WOLFSSL_CSR_MIN_SIZE_CLIENT = 5`, 5 was determined by looking at the
+ * struct below defined in its respective RFC.
+ * The below struct for `CertificateStatusRequest` is made up of the types:
+ *      `CertificateStatusType` is an enum with a max value of 255, thus its
+ *          length is 1 byte.
+ *      `OCSPStatusRequest` is a struct of the following:
+ *          - `responder_id_list`: which is 2 bytes
+ *          - `request_extensions`: which is 2 bytes
+ *      This then gives the minimum size/length of 5 bytes for this extension
+ *          for the client
+ *  struct {
+ *      CertificateStatusType status_type;
+ *      select (status_type) {
+ *          case ocsp: OCSPStatusRequest;
+ *      } request;
+ *  } CertificateStatusRequest;
+ *  enum { ocsp(1), (255) } CertificateStatusType;
+ *  struct {
+ *      ResponderID responder_id_list<0..2^16-1>;
+ *      Extensions  request_extensions;
+ *    } OCSPStatusRequest;
+ *    opaque ResponderID<1..2^16-1>;
+ *    opaque Extensions<0..2^16-1>;
+ */
+
+#ifndef WOLFSSL_SNI_MIN_SIZE_CLIENT
+    #define WOLFSSL_SNI_MIN_SIZE_CLIENT   4
+#endif
+#ifndef WOLFSSL_SNI_MIN_SIZE_SERVER
+    #define WOLFSSL_SNI_MIN_SIZE_SERVER   0
+#endif
+#ifndef WOLFSSL_EDI_MIN_SIZE_CLIENT
+    #define WOLFSSL_EDI_MIN_SIZE_CLIENT   0
+#endif
+#ifndef WOLFSSL_EDI_MIN_SIZE_SERVER
+    #define WOLFSSL_EDI_MIN_SIZE_SERVER   0
+#endif
+#ifndef WOLFSSL_TCA_MIN_SIZE_CLIENT
+    #define WOLFSSL_TCA_MIN_SIZE_CLIENT   2
+#endif
+#ifndef WOLFSSL_TCA_MIN_SIZE_SERVER
+    #define WOLFSSL_TCA_MIN_SIZE_SERVER   0
+#endif
+#ifndef WOLFSSL_CSR_MIN_SIZE_CLIENT
+    #define WOLFSSL_CSR_MIN_SIZE_CLIENT   5
+#endif
+#ifndef WOLFSSL_CSR_MIN_SIZE_SERVER
+    #define WOLFSSL_CSR_MIN_SIZE_SERVER   0
+#endif
+#ifndef WOLFSSL_PKM_MIN_SIZE_CLIENT
+    #define WOLFSSL_PKM_MIN_SIZE_CLIENT   1
+#endif
+#ifndef WOLFSSL_PKM_MIN_SIZE_SERVER
+    #define WOLFSSL_PKM_MIN_SIZE_SERVER   0
+#endif
+#ifndef WOLFSSL_CSR2_MIN_SIZE_CLIENT
+    #define WOLFSSL_CSR2_MIN_SIZE_CLIENT  7
+#endif
+#ifndef WOLFSSL_CSR2_MIN_SIZE_SERVER
+    #define WOLFSSL_CSR2_MIN_SIZE_SERVER  0
+#endif
+#ifndef WOLFSSL_CID_MIN_SIZE_CLIENT
+    #define WOLFSSL_CID_MIN_SIZE_CLIENT   1
+#endif
+#ifndef WOLFSSL_CID_MIN_SIZE_SERVER
+    #define WOLFSSL_CID_MIN_SIZE_SERVER   1
+#endif
+#ifndef WOLFSSL_ALPN_MIN_SIZE_CLIENT
+    #define WOLFSSL_ALPN_MIN_SIZE_CLIENT  2
+#endif
+#ifndef WOLFSSL_ALPN_MIN_SIZE_SERVER
+    #define WOLFSSL_ALPN_MIN_SIZE_SERVER  2
+#endif
+#ifndef WOLFSSL_SRTP_MIN_SIZE_CLIENT
+    #define WOLFSSL_SRTP_MIN_SIZE_CLIENT  3
+#endif
+#ifndef WOLFSSL_SRTP_MIN_SIZE_SERVER
+    #define WOLFSSL_SRTP_MIN_SIZE_SERVER  3
+#endif
+#ifndef WOLFSSL_KS_MIN_SIZE_CLIENT
+    #define WOLFSSL_KS_MIN_SIZE_CLIENT    1
+#endif
+#ifndef WOLFSSL_KS_MIN_SIZE_SERVER
+    #define WOLFSSL_KS_MIN_SIZE_SERVER    1
+#endif
+#ifndef WOLFSSL_ETM_MIN_SIZE_CLIENT
+    #define WOLFSSL_ETM_MIN_SIZE_CLIENT   0
+#endif
+#ifndef WOLFSSL_ETM_MIN_SIZE_SERVER
+    #define WOLFSSL_ETM_MIN_SIZE_SERVER   0
+#endif
+#ifndef WOLFSSL_PSK_MIN_SIZE_CLIENT
+    #define WOLFSSL_PSK_MIN_SIZE_CLIENT   2
+#endif
+#ifndef WOLFSSL_PSK_MIN_SIZE_SERVER
+    #define WOLFSSL_PSK_MIN_SIZE_SERVER   2
+#endif
+#ifndef WOLFSSL_CCT_MIN_SIZE_CLIENT
+    #define WOLFSSL_CCT_MIN_SIZE_CLIENT   1
+#endif
+#ifndef WOLFSSL_CCT_MIN_SIZE_SERVER
+    #define WOLFSSL_CCT_MIN_SIZE_SERVER   1
+#endif
+#ifndef WOLFSSL_SCT_MIN_SIZE_CLIENT
+    #define WOLFSSL_SCT_MIN_SIZE_CLIENT   1
+#endif
+#ifndef WOLFSSL_SCT_MIN_SIZE_SERVER
+    #define WOLFSSL_SCT_MIN_SIZE_SERVER   1
+#endif
+#ifndef WOLFSSL_PHA_MIN_SIZE_CLIENT
+    #define WOLFSSL_PHA_MIN_SIZE_CLIENT   0
+#endif
+#ifndef WOLFSSL_PHA_MIN_SIZE_SERVER
+    #define WOLFSSL_PHA_MIN_SIZE_SERVER   0
+#endif
+#ifndef WOLFSSL_THM_MIN_SIZE_CLIENT
+    #define WOLFSSL_THM_MIN_SIZE_CLIENT   0
+#endif
+#ifndef WOLFSSL_THM_MIN_SIZE_SERVER
+    #define WOLFSSL_THM_MIN_SIZE_SERVER   0
+#endif
+#ifndef WOLFSSL_SA_MIN_SIZE_CLIENT
+    #define WOLFSSL_SA_MIN_SIZE_CLIENT    2
+#endif
+#ifndef WOLFSSL_SA_MIN_SIZE_SERVER
+    #define WOLFSSL_SA_MIN_SIZE_SERVER    2
+#endif
+#ifndef WOLFSSL_SAC_MIN_SIZE_CLIENT
+    #define WOLFSSL_SAC_MIN_SIZE_CLIENT   2
+#endif
+#ifndef WOLFSSL_SAC_MIN_SIZE_SERVER
+    #define WOLFSSL_SAC_MIN_SIZE_SERVER   2
+#endif
+#ifndef WOLFSSL_EC_MIN_SIZE_CLIENT
+    #define WOLFSSL_EC_MIN_SIZE_CLIENT    2
+#endif
+#ifndef WOLFSSL_EC_MIN_SIZE_SERVER
+    #define WOLFSSL_EC_MIN_SIZE_SERVER    2
+#endif
+#ifndef WOLFSSL_ECH_MIN_SIZE_CLIENT
+    #define WOLFSSL_ECH_MIN_SIZE_CLIENT   1
+#endif
+#ifndef WOLFSSL_ECH_MIN_SIZE_SERVER
+    #define WOLFSSL_ECH_MIN_SIZE_SERVER   0
+#endif
+#ifndef WOLFSSL_MFL_MIN_SIZE_CLIENT
+    #define WOLFSSL_MFL_MIN_SIZE_CLIENT   1
+#endif
+#ifndef WOLFSSL_MFL_MIN_SIZE_SERVER
+    #define WOLFSSL_MFL_MIN_SIZE_SERVER   1
+#endif
+#ifndef WOLFSSL_CKE_MIN_SIZE_CLIENT
+    #define WOLFSSL_CKE_MIN_SIZE_CLIENT   3
+#endif
+#ifndef WOLFSSL_CKE_MIN_SIZE_SERVER
+    #define WOLFSSL_CKE_MIN_SIZE_SERVER   3
+#endif
+#ifndef WOLFSSL_SV_MIN_SIZE_CLIENT
+    #define WOLFSSL_SV_MIN_SIZE_CLIENT    2
+#endif
+#ifndef WOLFSSL_SV_MIN_SIZE_SERVER
+    #define WOLFSSL_SV_MIN_SIZE_SERVER    2
+#endif
+#ifndef WOLFSSL_SCR_MIN_SIZE_CLIENT
+    #define WOLFSSL_SCR_MIN_SIZE_CLIENT   1
+#endif
+#ifndef WOLFSSL_SCR_MIN_SIZE_SERVER
+    #define WOLFSSL_SCR_MIN_SIZE_SERVER   1
+#endif
+#ifndef WOLFSSL_PF_MIN_SIZE_CLIENT
+    #define WOLFSSL_PF_MIN_SIZE_CLIENT    1
+#endif
+#ifndef WOLFSSL_PF_MIN_SIZE_SERVER
+    #define WOLFSSL_PF_MIN_SIZE_SERVER    1
+#endif
+#ifndef WOLFSSL_CAN_MIN_SIZE_CLIENT
+    #define WOLFSSL_CAN_MIN_SIZE_CLIENT   3
+#endif
+#ifndef WOLFSSL_CAN_MIN_SIZE_SERVER
+    #define WOLFSSL_CAN_MIN_SIZE_SERVER   3
+#endif
+#ifndef WOLFSSL_QTP_MIN_SIZE_CLIENT
+    #define WOLFSSL_QTP_MIN_SIZE_CLIENT   0
+#endif
+#ifndef WOLFSSL_QTP_MIN_SIZE_SERVER
+    #define WOLFSSL_QTP_MIN_SIZE_SERVER   0
+#endif
+#ifndef WOLFSSL_STK_MIN_SIZE_CLIENT
+    #define WOLFSSL_STK_MIN_SIZE_CLIENT   0
+#endif
+#ifndef WOLFSSL_STK_MIN_SIZE_SERVER
+    #define WOLFSSL_STK_MIN_SIZE_SERVER   0
+#endif
 
 #ifdef __cplusplus
     }  /* extern "C" */

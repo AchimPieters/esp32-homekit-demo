@@ -43,6 +43,9 @@
 #include <wolfssl/wolfcrypt/error-crypt.h>
 #include <wolfssl/wolfcrypt/hash.h>
 
+#ifdef WOLF_CRYPTO_CB
+    #include <wolfssl/wolfcrypt/cryptocb.h>
+#endif
 #ifdef NO_INLINE
     #include <wolfssl/wolfcrypt/misc.h>
 #else
@@ -59,7 +62,8 @@
     }
 #endif
 
-#if !defined(WOLFSSL_ARMASM) || !defined(WOLFSSL_ARMASM_CRYPTO_SHA3)
+#if !defined(WOLFSSL_ARMASM) || (!defined(__arm__) && \
+    !defined(WOLFSSL_ARMASM_CRYPTO_SHA3))
 
 #ifdef USE_INTEL_SPEEDUP
     #include <wolfssl/wolfcrypt/cpuid.h>
@@ -817,9 +821,11 @@ static int wc_InitSha3(wc_Sha3* sha3, void* heap, int devId)
 #if defined(WOLFSSL_ASYNC_CRYPT) && defined(WC_ASYNC_ENABLE_SHA3)
     ret = wolfAsync_DevCtxInit(&sha3->asyncDev,
                         WOLFSSL_ASYNC_MARKER_SHA3, sha3->heap, devId);
-#else
-    (void)devId;
+#elif defined(WOLF_CRYPTO_CB)
+    sha3->devId = devId;
 #endif /* WOLFSSL_ASYNC_CRYPT */
+
+    (void)devId;
 
     return ret;
 }
@@ -845,13 +851,32 @@ static int wc_Sha3Update(wc_Sha3* sha3, const byte* data, word32 len, byte p)
         return 0;
     }
 
+#ifdef WOLF_CRYPTO_CB
+    #ifndef WOLF_CRYPTO_CB_FIND
+    if (sha3->devId != INVALID_DEVID)
+    #endif
+    {
+        int hash_type = WC_HASH_TYPE_NONE;
+        switch (p) {
+            case WC_SHA3_224_COUNT: hash_type = WC_HASH_TYPE_SHA3_224; break;
+            case WC_SHA3_256_COUNT: hash_type = WC_HASH_TYPE_SHA3_256; break;
+            case WC_SHA3_384_COUNT: hash_type = WC_HASH_TYPE_SHA3_384; break;
+            case WC_SHA3_512_COUNT: hash_type = WC_HASH_TYPE_SHA3_512; break;
+            default: return BAD_FUNC_ARG;
+        }
+        ret = wc_CryptoCb_Sha3Hash(sha3, hash_type, data, len, NULL);
+        if (ret != WC_NO_ERR_TRACE(CRYPTOCB_UNAVAILABLE))
+            return ret;
+        /* fall-through when unavailable */
+    }
+#endif
 #if defined(WOLFSSL_ASYNC_CRYPT) && defined(WC_ASYNC_ENABLE_SHA3)
     if (sha3->asyncDev.marker == WOLFSSL_ASYNC_MARKER_SHA3) {
     #if defined(HAVE_INTEL_QA) && defined(QAT_V2)
         /* QAT only supports SHA3_256 */
         if (p == WC_SHA3_256_COUNT) {
             ret = IntelQaSymSha3(&sha3->asyncDev, NULL, data, len);
-            if (ret != NOT_COMPILED_IN)
+            if (ret != WC_NO_ERR_TRACE(NOT_COMPILED_IN))
                 return ret;
             /* fall-through when unavailable */
         }
@@ -880,6 +905,25 @@ static int wc_Sha3Final(wc_Sha3* sha3, byte* hash, byte p, byte len)
         return BAD_FUNC_ARG;
     }
 
+#ifdef WOLF_CRYPTO_CB
+    #ifndef WOLF_CRYPTO_CB_FIND
+    if (sha3->devId != INVALID_DEVID)
+    #endif
+    {
+        int hash_type = WC_HASH_TYPE_NONE;
+        switch (p) {
+            case WC_SHA3_224_COUNT: hash_type = WC_HASH_TYPE_SHA3_224; break;
+            case WC_SHA3_256_COUNT: hash_type = WC_HASH_TYPE_SHA3_256; break;
+            case WC_SHA3_384_COUNT: hash_type = WC_HASH_TYPE_SHA3_384; break;
+            case WC_SHA3_512_COUNT: hash_type = WC_HASH_TYPE_SHA3_512; break;
+            default: return BAD_FUNC_ARG;
+        }
+        ret = wc_CryptoCb_Sha3Hash(sha3, hash_type, NULL, 0, hash);
+        if (ret != WC_NO_ERR_TRACE(CRYPTOCB_UNAVAILABLE))
+            return ret;
+        /* fall-through when unavailable */
+    }
+#endif
 #if defined(WOLFSSL_ASYNC_CRYPT) && defined(WC_ASYNC_ENABLE_SHA3)
     if (sha3->asyncDev.marker == WOLFSSL_ASYNC_MARKER_SHA3) {
     #if defined(HAVE_INTEL_QA) && defined(QAT_V2)
@@ -887,7 +931,7 @@ static int wc_Sha3Final(wc_Sha3* sha3, byte* hash, byte p, byte len)
         /* QAT SHA-3 only supported on v2 (8970 or later cards) */
         if (len == WC_SHA3_256_DIGEST_SIZE) {
             ret = IntelQaSymSha3(&sha3->asyncDev, hash, NULL, len);
-            if (ret != NOT_COMPILED_IN)
+            if (ret != WC_NO_ERR_TRACE(NOT_COMPILED_IN))
                 return ret;
             /* fall-through when unavailable */
         }

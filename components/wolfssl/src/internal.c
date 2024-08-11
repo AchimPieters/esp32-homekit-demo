@@ -2167,7 +2167,7 @@ int wolfSSL_session_export_internal(WOLFSSL* ssl, byte* buf, word32* sz,
         }
     }
 
-    if (ret != 0 && ret != LENGTH_ONLY_E && buf != NULL) {
+    if (ret != 0 && ret != WC_NO_ERR_TRACE(LENGTH_ONLY_E) && buf != NULL) {
         /*in a fail case clear the buffer which could contain partial key info*/
         XMEMSET(buf, 0, *sz);
     }
@@ -2228,7 +2228,6 @@ int InitSSL_Side(WOLFSSL* ssl, word16 side)
         ssl->options.haveECC  = 1;      /* server turns on with ECC key cert */
     }
 #endif
-#ifdef HAVE_PQC
 #ifdef HAVE_FALCON
     if (ssl->options.side == WOLFSSL_CLIENT_END) {
         ssl->options.haveFalconSig  = 1; /* always on client side */
@@ -2239,7 +2238,6 @@ int InitSSL_Side(WOLFSSL* ssl, word16 side)
         ssl->options.haveDilithiumSig  = 1; /* always on client side */
     }
 #endif /* HAVE_DILITHIUM */
-#endif /* HAVE_PQC */
 
 #if defined(HAVE_EXTENDED_MASTER) && !defined(NO_WOLFSSL_CLIENT)
     if (ssl->options.side == WOLFSSL_CLIENT_END) {
@@ -2326,14 +2324,12 @@ int InitSSL_Ctx(WOLFSSL_CTX* ctx, WOLFSSL_METHOD* method, void* heap)
     ctx->minEccKeySz  = MIN_ECCKEY_SZ;
     ctx->eccTempKeySz = ECDHE_SIZE;
 #endif
-#ifdef HAVE_PQC
 #ifdef HAVE_FALCON
     ctx->minFalconKeySz = MIN_FALCONKEY_SZ;
 #endif /* HAVE_FALCON */
 #ifdef HAVE_DILITHIUM
     ctx->minDilithiumKeySz = MIN_DILITHIUMKEY_SZ;
 #endif /* HAVE_DILITHIUM */
-#endif /* HAVE_PQC */
     ctx->verifyDepth = MAX_CHAIN_DEPTH;
 #ifdef OPENSSL_EXTRA
     ctx->cbioFlag = WOLFSSL_CBIO_NONE;
@@ -2397,7 +2393,6 @@ int InitSSL_Ctx(WOLFSSL_CTX* ctx, WOLFSSL_METHOD* method, void* heap)
     wolfSSL_CTX_set_server_cert_type(ctx, NULL, 0); /* set to default */
 #endif /* HAVE_RPK */
 
-#ifdef HAVE_PQC
 #ifdef HAVE_FALCON
     if (method->side == WOLFSSL_CLIENT_END)
         ctx->haveFalconSig = 1;        /* always on client side */
@@ -2408,7 +2403,6 @@ int InitSSL_Ctx(WOLFSSL_CTX* ctx, WOLFSSL_METHOD* method, void* heap)
         ctx->haveDilithiumSig = 1;     /* always on client side */
                                        /* server can turn on by loading key */
 #endif /* HAVE_DILITHIUM */
-#endif /* HAVE_PQC */
 #ifdef HAVE_ECC
     if (method->side == WOLFSSL_CLIENT_END) {
         ctx->haveECDSAsig  = 1;        /* always on client side */
@@ -2460,19 +2454,25 @@ int InitSSL_Ctx(WOLFSSL_CTX* ctx, WOLFSSL_METHOD* method, void* heap)
         return MEMORY_E;
     }
     XMEMSET(ctx->param, 0, sizeof(WOLFSSL_X509_VERIFY_PARAM));
-    /* WOLFSSL_X509_LOOKUP and param */
-    if ((ctx->x509_store.lookup.dirs =
-                            (WOLFSSL_BY_DIR*)XMALLOC(sizeof(WOLFSSL_BY_DIR),
-                            heap, DYNAMIC_TYPE_OPENSSL)) == NULL ||
-        (ctx->x509_store.param = (WOLFSSL_X509_VERIFY_PARAM*)XMALLOC(
-                    sizeof(WOLFSSL_X509_VERIFY_PARAM),
-                    heap, DYNAMIC_TYPE_OPENSSL)) == NULL) {
-        WOLFSSL_MSG("ctx-x509_store.lookup.dir or ctx->x509_store.param memory "
-                    "allocation error");
+
+    /* WOLFSSL_X509_LOOKUP */
+    if ((ctx->x509_store.lookup.dirs = (WOLFSSL_BY_DIR*)XMALLOC(
+                           sizeof(WOLFSSL_BY_DIR),
+                           heap, DYNAMIC_TYPE_OPENSSL)) == NULL) {
+        WOLFSSL_MSG("ctx->x509_store.lookup.dirs: allocation error");
         return MEMORY_E;
     }
     XMEMSET(ctx->x509_store.lookup.dirs, 0, sizeof(WOLFSSL_BY_DIR));
+
+    /* param */
+    if ((ctx->x509_store.param = (WOLFSSL_X509_VERIFY_PARAM*)XMALLOC(
+                           sizeof(WOLFSSL_X509_VERIFY_PARAM),
+                           heap, DYNAMIC_TYPE_OPENSSL)) == NULL) {
+        WOLFSSL_MSG("ctx->x509_store.param: allocation error");
+        return MEMORY_E;
+    }
     XMEMSET(ctx->x509_store.param, 0, sizeof(WOLFSSL_X509_VERIFY_PARAM));
+
     if (wc_InitMutex(&ctx->x509_store.lookup.dirs->lock) != 0) {
         WOLFSSL_MSG("Bad mutex init");
         WOLFSSL_ERROR_VERBOSE(BAD_MUTEX_E);
@@ -2804,7 +2804,7 @@ void FreeSSL_Ctx(WOLFSSL_CTX* ctx)
     if (ret < 0) {
         /* check error state, if mutex error code then mutex init failed but
          * CTX was still malloc'd */
-        if (ctx->err == CTX_INIT_MUTEX_E) {
+        if (ctx->err == WC_NO_ERR_TRACE(CTX_INIT_MUTEX_E)) {
             SSL_CtxResourceFree(ctx);
             XFREE(ctx, heap, DYNAMIC_TYPE_CTX);
         #ifdef WOLFSSL_STATIC_MEMORY
@@ -3068,7 +3068,6 @@ static WC_INLINE void AddSuiteHashSigAlgo(byte* hashSigAlgo, byte macAlgo,
         }
         else
     #endif
-    #ifdef HAVE_PQC
     #ifdef HAVE_FALCON
         if (sigAlgo == falcon_level1_sa_algo) {
             ADD_HASH_SIG_ALGO(hashSigAlgo, inOutIdx,
@@ -3098,7 +3097,6 @@ static WC_INLINE void AddSuiteHashSigAlgo(byte* hashSigAlgo, byte macAlgo,
         }
         else
     #endif /* HAVE_DILITHIUM */
-    #endif /* HAVE_PQC */
 #ifdef WC_RSA_PSS
         if (sigAlgo == rsa_pss_sa_algo) {
             /* RSA PSS is sig then mac */
@@ -3159,7 +3157,6 @@ void InitSuitesHashSigAlgo(byte* hashSigAlgo, int haveSig, int tls1_2,
             &idx);
     }
 #endif
-#if defined(HAVE_PQC)
 #ifdef HAVE_FALCON
     if (haveSig & SIG_FALCON) {
         AddSuiteHashSigAlgo(hashSigAlgo, no_mac, falcon_level1_sa_algo, keySz,
@@ -3178,7 +3175,6 @@ void InitSuitesHashSigAlgo(byte* hashSigAlgo, int haveSig, int tls1_2,
             keySz, &idx);
     }
 #endif /* HAVE_DILITHIUM */
-#endif /* HAVE_PQC */
     if (haveSig & SIG_RSA) {
     #ifdef WC_RSA_PSS
         if (tls1_2) {
@@ -4389,7 +4385,7 @@ void DecodeSigAlg(const byte* input, byte* hashAlgo, byte* hsType)
             }
             break;
     #endif
-#ifdef HAVE_PQC
+#if defined(HAVE_FALCON) || defined(HAVE_DILITHIUM)
         case PQC_SA_MAJOR:
             /* Hash performed as part of sign/verify operation.
              * However, if we want a dual alg signature with a
@@ -4914,7 +4910,7 @@ int RsaSign(WOLFSSL* ssl, const byte* in, word32 inSz, byte* out,
 
     /* Handle async pending response */
 #ifdef WOLFSSL_ASYNC_CRYPT
-    if (key && ret == WC_PENDING_E) {
+    if (key && ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
         ret = wolfSSL_AsyncPush(ssl, &key->asyncDev);
     }
 #endif /* WOLFSSL_ASYNC_CRYPT */
@@ -4934,7 +4930,7 @@ int RsaSign(WOLFSSL* ssl, const byte* in, word32 inSz, byte* out,
 int RsaVerify(WOLFSSL* ssl, byte* in, word32 inSz, byte** out, int sigAlgo,
               int hashAlgo, RsaKey* key, buffer* keyBufInfo)
 {
-    int ret = SIG_VERIFY_E;
+    int ret = WC_NO_ERR_TRACE(SIG_VERIFY_E);
 
 #ifdef HAVE_PK_CALLBACKS
     const byte* keyBuf = NULL;
@@ -4990,7 +4986,7 @@ int RsaVerify(WOLFSSL* ssl, byte* in, word32 inSz, byte** out, int sigAlgo,
         !defined(WOLFSSL_RENESAS_TSIP_TLS)
     else
     #else
-    if (!ssl->ctx->RsaVerifyCb || ret == CRYPTOCB_UNAVAILABLE)
+    if (!ssl->ctx->RsaVerifyCb || ret == WC_NO_ERR_TRACE(CRYPTOCB_UNAVAILABLE))
     #endif
 #endif /*HAVE_PK_CALLBACKS */
     {
@@ -4999,7 +4995,7 @@ int RsaVerify(WOLFSSL* ssl, byte* in, word32 inSz, byte** out, int sigAlgo,
 
     /* Handle async pending response */
 #ifdef WOLFSSL_ASYNC_CRYPT
-    if (ret == WC_PENDING_E) {
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
         ret = wolfSSL_AsyncPush(ssl, &key->asyncDev);
     }
 #endif /* WOLFSSL_ASYNC_CRYPT */
@@ -5137,7 +5133,7 @@ int VerifyRsaSign(WOLFSSL* ssl, byte* verifySig, word32 sigSz,
 
     /* Handle async pending response */
 #ifdef WOLFSSL_ASYNC_CRYPT
-    if (key && ret == WC_PENDING_E) {
+    if (key && ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
         ret = wolfSSL_AsyncPush(ssl, &key->asyncDev);
     }
 #endif /* WOLFSSL_ASYNC_CRYPT */
@@ -5197,7 +5193,7 @@ int RsaDec(WOLFSSL* ssl, byte* in, word32 inSz, byte** out, word32* outSz,
 
     /* Handle async pending response */
 #ifdef WOLFSSL_ASYNC_CRYPT
-    if (ret == WC_PENDING_E) {
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
         ret = wolfSSL_AsyncPush(ssl, &key->asyncDev);
     }
 #endif /* WOLFSSL_ASYNC_CRYPT */
@@ -5217,7 +5213,7 @@ int RsaDec(WOLFSSL* ssl, byte* in, word32 inSz, byte** out, word32* outSz,
 int RsaEnc(WOLFSSL* ssl, const byte* in, word32 inSz, byte* out, word32* outSz,
     RsaKey* key, buffer* keyBufInfo)
 {
-    int ret = BAD_FUNC_ARG;
+    int ret = WC_NO_ERR_TRACE(BAD_FUNC_ARG);
 #ifdef HAVE_PK_CALLBACKS
     const byte* keyBuf = NULL;
     word32 keySz = 0;
@@ -5249,7 +5245,7 @@ int RsaEnc(WOLFSSL* ssl, const byte* in, word32 inSz, byte* out, word32* outSz,
         !defined(WOLFSSL_RENESAS_TSIP_TLS)
     else
     #else
-    if (!ssl->ctx->RsaEncCb || ret == CRYPTOCB_UNAVAILABLE)
+    if (!ssl->ctx->RsaEncCb || ret == WC_NO_ERR_TRACE(CRYPTOCB_UNAVAILABLE))
     #endif
 #endif /* HAVE_PK_CALLBACKS */
     {
@@ -5258,7 +5254,7 @@ int RsaEnc(WOLFSSL* ssl, const byte* in, word32 inSz, byte* out, word32* outSz,
 
     /* Handle async pending response */
 #ifdef WOLFSSL_ASYNC_CRYPT
-    if (ret == WC_PENDING_E) {
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
         ret = wolfSSL_AsyncPush(ssl, &key->asyncDev);
     }
 #endif /* WOLFSSL_ASYNC_CRYPT */
@@ -5318,7 +5314,7 @@ int EccSign(WOLFSSL* ssl, const byte* in, word32 inSz, byte* out,
         ret = ssl->ctx->EccSignCb(ssl, in, inSz, out, outSz, keyBuf,
             keySz, ctx);
 #if defined(WOLFSSL_RENESAS_TSIP_TLS)
-        if (ret == CRYPTOCB_UNAVAILABLE) {
+        if (ret == WC_NO_ERR_TRACE(CRYPTOCB_UNAVAILABLE)) {
             ret = wc_ecc_sign_hash(in, inSz, out, outSz, ssl->rng, key);
         }
 #endif /* WOLFSSL_RENESAS_TSIP_TLS */
@@ -5331,7 +5327,7 @@ int EccSign(WOLFSSL* ssl, const byte* in, word32 inSz, byte* out,
 
     /* Handle async pending response */
 #ifdef WOLFSSL_ASYNC_CRYPT
-    if (key && ret == WC_PENDING_E) {
+    if (key && ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
         ret = wolfSSL_AsyncPush(ssl, &key->asyncDev);
     }
 #endif /* WOLFSSL_ASYNC_CRYPT */
@@ -5344,7 +5340,7 @@ int EccSign(WOLFSSL* ssl, const byte* in, word32 inSz, byte* out,
 int EccVerify(WOLFSSL* ssl, const byte* in, word32 inSz, const byte* out,
     word32 outSz, ecc_key* key, buffer* keyBufInfo)
 {
-    int ret = SIG_VERIFY_E;
+    int ret = WC_NO_ERR_TRACE(SIG_VERIFY_E);
 #ifdef HAVE_PK_CALLBACKS
     const byte* keyBuf = NULL;
     word32 keySz = 0;
@@ -5378,7 +5374,7 @@ int EccVerify(WOLFSSL* ssl, const byte* in, word32 inSz, const byte* out,
         !defined(WOLFSSL_MAXQ108X)
     else
     #else
-    if (!ssl->ctx->EccVerifyCb || ret == CRYPTOCB_UNAVAILABLE)
+    if (!ssl->ctx->EccVerifyCb || ret == WC_NO_ERR_TRACE(CRYPTOCB_UNAVAILABLE))
     #endif
 #endif /* HAVE_PK_CALLBACKS  */
     {
@@ -5387,7 +5383,7 @@ int EccVerify(WOLFSSL* ssl, const byte* in, word32 inSz, const byte* out,
 
     /* Handle async pending response */
 #ifdef WOLFSSL_ASYNC_CRYPT
-    if (ret == WC_PENDING_E) {
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
         ret = wolfSSL_AsyncPush(ssl, &key->asyncDev);
     }
     else
@@ -5460,7 +5456,7 @@ int EccSharedSecret(WOLFSSL* ssl, ecc_key* priv_key, ecc_key* pub_key,
 
     /* Handle async pending response */
 #ifdef WOLFSSL_ASYNC_CRYPT
-    if (ret == WC_PENDING_E) {
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
         ret = wolfSSL_AsyncPush(ssl, asyncDev);
     }
 #endif /* WOLFSSL_ASYNC_CRYPT */
@@ -5537,7 +5533,7 @@ int EccMakeKey(WOLFSSL* ssl, ecc_key* key, ecc_key* peer)
 
     /* Handle async pending response */
 #ifdef WOLFSSL_ASYNC_CRYPT
-    if (ret == WC_PENDING_E) {
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
         ret = wolfSSL_AsyncPush(ssl, &key->asyncDev);
     }
 #endif /* WOLFSSL_ASYNC_CRYPT */
@@ -5577,7 +5573,7 @@ int Sm2wSm3Verify(WOLFSSL* ssl, const byte* id, word32 idSz, const byte* sig,
     word32 sigSz, const byte* msg, word32 msgSz, ecc_key* key,
     buffer* keyBufInfo)
 {
-    int ret = SIG_VERIFY_E;
+    int ret = WC_NO_ERR_TRACE(SIG_VERIFY_E);
     byte hash[WC_SM3_DIGEST_SIZE];
 
     (void)ssl;
@@ -5700,7 +5696,7 @@ int Ed25519Sign(WOLFSSL* ssl, const byte* in, word32 inSz, byte* out,
 
     /* Handle async pending response */
 #ifdef WOLFSSL_ASYNC_CRYPT
-    if (ret == WC_PENDING_E) {
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
         ret = wolfSSL_AsyncPush(ssl, &key->asyncDev);
     }
 #endif /* WOLFSSL_ASYNC_CRYPT */
@@ -5774,7 +5770,7 @@ int Ed25519Verify(WOLFSSL* ssl, const byte* in, word32 inSz, const byte* msg,
 
     /* Handle async pending response */
 #ifdef WOLFSSL_ASYNC_CRYPT
-    if (ret == WC_PENDING_E) {
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
         ret = wolfSSL_AsyncPush(ssl, &key->asyncDev);
     }
     else
@@ -5800,7 +5796,6 @@ int Ed25519Verify(WOLFSSL* ssl, const byte* in, word32 inSz, const byte* msg,
      */
     static int X25519GetKey(WOLFSSL* ssl, curve25519_key** otherKey)
     {
-        int ret = NO_PEER_KEY;
         struct curve25519_key* tmpKey = NULL;
 
         if (ssl == NULL || otherKey == NULL) {
@@ -5823,10 +5818,11 @@ int Ed25519Verify(WOLFSSL* ssl, const byte* in, word32 inSz, const byte* msg,
 
         if (tmpKey) {
             *otherKey = (curve25519_key *)tmpKey;
-            ret = 0;
+            return 0;
         }
-
-        return ret;
+        else {
+            return NO_PEER_KEY;
+        }
     }
 #endif /* HAVE_PK_CALLBACKS */
 
@@ -5870,7 +5866,7 @@ static int X25519SharedSecret(WOLFSSL* ssl, curve25519_key* priv_key,
 
     /* Handle async pending response */
 #ifdef WOLFSSL_ASYNC_CRYPT
-    if (ret == WC_PENDING_E) {
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
         ret = wolfSSL_AsyncPush(ssl, &priv_key->asyncDev);
     }
 #endif /* WOLFSSL_ASYNC_CRYPT */
@@ -5916,7 +5912,7 @@ static int X25519MakeKey(WOLFSSL* ssl, curve25519_key* key,
 
     /* Handle async pending response */
 #ifdef WOLFSSL_ASYNC_CRYPT
-    if (ret == WC_PENDING_E) {
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
         ret = wolfSSL_AsyncPush(ssl, &key->asyncDev);
     }
 #endif /* WOLFSSL_ASYNC_CRYPT */
@@ -6024,7 +6020,7 @@ int Ed448Sign(WOLFSSL* ssl, const byte* in, word32 inSz, byte* out,
 
     /* Handle async pending response */
 #ifdef WOLFSSL_ASYNC_CRYPT
-    if (ret == WC_PENDING_E) {
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
         ret = wolfSSL_AsyncPush(ssl, &key->asyncDev);
     }
 #endif /* WOLFSSL_ASYNC_CRYPT */
@@ -6098,7 +6094,7 @@ int Ed448Verify(WOLFSSL* ssl, const byte* in, word32 inSz, const byte* msg,
 
     /* Handle async pending response */
 #ifdef WOLFSSL_ASYNC_CRYPT
-    if (ret == WC_PENDING_E) {
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
         ret = wolfSSL_AsyncPush(ssl, &key->asyncDev);
     }
     else
@@ -6124,7 +6120,6 @@ int Ed448Verify(WOLFSSL* ssl, const byte* in, word32 inSz, const byte* msg,
      */
     static int X448GetKey(WOLFSSL* ssl, curve448_key** otherKey)
     {
-        int ret = NO_PEER_KEY;
         struct curve448_key* tmpKey = NULL;
 
         if (ssl == NULL || otherKey == NULL) {
@@ -6146,10 +6141,11 @@ int Ed448Verify(WOLFSSL* ssl, const byte* in, word32 inSz, const byte* msg,
 
         if (tmpKey) {
             *otherKey = (curve448_key *)tmpKey;
-            ret = 0;
+            return 0;
         }
-
-        return ret;
+        else {
+            return NO_PEER_KEY;
+        }
     }
 #endif /* HAVE_PK_CALLBACKS */
 
@@ -6194,7 +6190,7 @@ static int X448SharedSecret(WOLFSSL* ssl, curve448_key* priv_key,
 
     /* Handle async pending response */
 #ifdef WOLFSSL_ASYNC_CRYPT
-    if (ret == WC_PENDING_E) {
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
         ret = wolfSSL_AsyncPush(ssl, &priv_key->asyncDev);
     }
 #endif /* WOLFSSL_ASYNC_CRYPT */
@@ -6239,7 +6235,7 @@ static int X448MakeKey(WOLFSSL* ssl, curve448_key* key, curve448_key* peer)
 
     /* Handle async pending response */
 #ifdef WOLFSSL_ASYNC_CRYPT
-    if (ret == WC_PENDING_E) {
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
         ret = wolfSSL_AsyncPush(ssl, &key->asyncDev);
     }
 #endif /* WOLFSSL_ASYNC_CRYPT */
@@ -6276,7 +6272,7 @@ int DhGenKeyPair(WOLFSSL* ssl, DhKey* dhKey,
         ret = ssl->ctx->DhGenerateKeyPairCb(dhKey, ssl->rng, priv, privSz,
                                             pub, pubSz);
     }
-    if (ret == NOT_COMPILED_IN)
+    if (ret == WC_NO_ERR_TRACE(NOT_COMPILED_IN))
 #endif
     {
         PRIVATE_KEY_UNLOCK();
@@ -6286,7 +6282,7 @@ int DhGenKeyPair(WOLFSSL* ssl, DhKey* dhKey,
 
     /* Handle async pending response */
 #ifdef WOLFSSL_ASYNC_CRYPT
-    if (ret == WC_PENDING_E) {
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
         ret = wolfSSL_AsyncPush(ssl, &dhKey->asyncDev);
     }
 #endif /* WOLFSSL_ASYNC_CRYPT */
@@ -6356,7 +6352,7 @@ int DhAgree(WOLFSSL* ssl, DhKey* dhKey,
 
     /* Handle async pending response */
 #ifdef WOLFSSL_ASYNC_CRYPT
-    if (ret == WC_PENDING_E) {
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
         ret = wolfSSL_AsyncPush(ssl, &dhKey->asyncDev);
     }
 #endif /* WOLFSSL_ASYNC_CRYPT */
@@ -6766,14 +6762,12 @@ int SetSSL_CTX(WOLFSSL* ssl, WOLFSSL_CTX* ctx, int writeDup)
 #ifdef HAVE_ECC
     ssl->options.minEccKeySz = ctx->minEccKeySz;
 #endif
-#ifdef HAVE_PQC
 #ifdef HAVE_FALCON
     ssl->options.minFalconKeySz = ctx->minFalconKeySz;
 #endif /* HAVE_FALCON */
 #ifdef HAVE_DILITHIUM
     ssl->options.minDilithiumKeySz = ctx->minDilithiumKeySz;
 #endif /* HAVE_DILITHIUM */
-#endif /* HAVE_PQC */
 #if defined(OPENSSL_EXTRA) || defined(OPENSSL_EXTRA_X509_SMALL)
     ssl->options.verifyDepth = ctx->verifyDepth;
 #endif
@@ -7047,7 +7041,7 @@ void FreeHandshakeHashes(WOLFSSL* ssl)
 int InitHandshakeHashesAndCopy(WOLFSSL* ssl, HS_Hashes* source,
   HS_Hashes** destination)
 {
-    int ret = 0;
+    int ret;
     HS_Hashes* tmpHashes;
 
     if (source == NULL)
@@ -7057,7 +7051,11 @@ int InitHandshakeHashesAndCopy(WOLFSSL* ssl, HS_Hashes* source,
     tmpHashes = ssl->hsHashes;
     ssl->hsHashes = NULL;
 
-    InitHandshakeHashes(ssl);
+    ret = InitHandshakeHashes(ssl);
+    if (ret != 0) {
+        WOLFSSL_MSG_EX("InitHandshakeHashes failed. err = %d", ret);
+        return ret;
+    }
 
     *destination = ssl->hsHashes;
     ssl->hsHashes = tmpHashes;
@@ -7065,50 +7063,50 @@ int InitHandshakeHashesAndCopy(WOLFSSL* ssl, HS_Hashes* source,
   /* now copy the source contents to the destination */
 #ifndef NO_OLD_TLS
     #ifndef NO_SHA
-        ret = wc_ShaCopy(&source->hashSha, &(*destination)->hashSha);
+    ret = wc_ShaCopy(&source->hashSha, &(*destination)->hashSha);
     #endif
     #ifndef NO_MD5
-        if (ret == 0)
-            ret = wc_Md5Copy(&source->hashMd5, &(*destination)->hashMd5);
+    if (ret == 0)
+        ret = wc_Md5Copy(&source->hashMd5, &(*destination)->hashMd5);
     #endif
     #endif /* !NO_OLD_TLS */
     #ifndef NO_SHA256
-        if (ret == 0)
-            ret = wc_Sha256Copy(&source->hashSha256,
-                &(*destination)->hashSha256);
+    if (ret == 0)
+        ret = wc_Sha256Copy(&source->hashSha256,
+            &(*destination)->hashSha256);
     #endif
     #ifdef WOLFSSL_SHA384
-        if (ret == 0)
-            ret = wc_Sha384Copy(&source->hashSha384,
-                &(*destination)->hashSha384);
+    if (ret == 0)
+        ret = wc_Sha384Copy(&source->hashSha384,
+            &(*destination)->hashSha384);
     #endif
     #ifdef WOLFSSL_SHA512
-        if (ret == 0)
-            ret = wc_Sha512Copy(&source->hashSha512,
-                &(*destination)->hashSha512);
+    if (ret == 0)
+        ret = wc_Sha512Copy(&source->hashSha512,
+            &(*destination)->hashSha512);
     #endif
     #ifdef WOLFSSL_SM3
-        if (ret == 0)
-            ret = wc_Sm3Copy(&source->hashSm3,
-                &(*destination)->hashSm3);
+    if (ret == 0)
+        ret = wc_Sm3Copy(&source->hashSm3,
+            &(*destination)->hashSm3);
     #endif
     #if (defined(HAVE_ED25519) || defined(HAVE_ED448) || \
          (defined(WOLFSSL_SM2) && defined(WOLFSSL_SM3))) && \
         !defined(WOLFSSL_NO_CLIENT_AUTH)
-        if (ret == 0 && source->messages != NULL) {
-            (*destination)->messages = (byte*)XMALLOC(source->length, ssl->heap,
-                DYNAMIC_TYPE_HASHES);
-            (*destination)->length = source->length;
-            (*destination)->prevLen = source->prevLen;
+    if (ret == 0 && source->messages != NULL) {
+        (*destination)->messages = (byte*)XMALLOC(source->length, ssl->heap,
+            DYNAMIC_TYPE_HASHES);
+        (*destination)->length = source->length;
+        (*destination)->prevLen = source->prevLen;
 
-            if ((*destination)->messages == NULL) {
-                ret = MEMORY_E;
-            }
-            else {
-                XMEMCPY((*destination)->messages, source->messages,
-                    source->length);
-            }
+        if ((*destination)->messages == NULL) {
+            ret = MEMORY_E;
         }
+        else {
+            XMEMCPY((*destination)->messages, source->messages,
+                source->length);
+        }
+    }
     #endif
 
     return ret;
@@ -7235,6 +7233,8 @@ int InitSSL(WOLFSSL* ssl, WOLFSSL_CTX* ctx, int writeDup)
         ssl_hint = ((WOLFSSL_HEAP_HINT*)(ssl->heap));
         ctx_hint = ((WOLFSSL_HEAP_HINT*)(ctx->heap));
 
+        ssl_hint->memory = ctx_hint->memory;
+    #ifndef WOLFSSL_STATIC_MEMORY_LEAN
         /* lock and check IO count / handshake count */
         if (wc_LockMutex(&(ctx_hint->memory->memory_mutex)) != 0) {
             WOLFSSL_MSG("Bad memory_mutex lock");
@@ -7262,7 +7262,6 @@ int InitSSL(WOLFSSL* ssl, WOLFSSL_CTX* ctx, int writeDup)
         }
         ctx_hint->memory->curIO++;
         ctx_hint->memory->curHa++;
-        ssl_hint->memory = ctx_hint->memory;
         ssl_hint->haFlag = 1;
         wc_UnLockMutex(&(ctx_hint->memory->memory_mutex));
 
@@ -7298,6 +7297,7 @@ int InitSSL(WOLFSSL* ssl, WOLFSSL_CTX* ctx, int writeDup)
             }
             wc_UnLockMutex(&(ctx_hint->memory->memory_mutex));
         }
+    #endif /* !WOLFSSL_STATIC_MEMORY_LEAN */
     #ifdef WOLFSSL_HEAP_TEST
         }
     #endif
@@ -7746,7 +7746,6 @@ void FreeKey(WOLFSSL* ssl, int type, void** pKey)
                 wc_curve448_free((curve448_key*)*pKey);
                 break;
         #endif /* HAVE_CURVE448 */
-        #if defined(HAVE_PQC)
         #if defined(HAVE_FALCON)
             case DYNAMIC_TYPE_FALCON:
                 wc_falcon_free((falcon_key*)*pKey);
@@ -7757,7 +7756,6 @@ void FreeKey(WOLFSSL* ssl, int type, void** pKey)
                 wc_dilithium_free((dilithium_key*)*pKey);
                 break;
         #endif /* HAVE_DILITHIUM */
-        #endif /* HAVE_PQC */
         #ifndef NO_DH
             case DYNAMIC_TYPE_DH:
                 wc_FreeDhKey((DhKey*)*pKey);
@@ -7775,7 +7773,7 @@ void FreeKey(WOLFSSL* ssl, int type, void** pKey)
 
 int AllocKey(WOLFSSL* ssl, int type, void** pKey)
 {
-    int ret = BAD_FUNC_ARG;
+    int ret = WC_NO_ERR_TRACE(BAD_FUNC_ARG);
     int sz = 0;
 #ifdef HAVE_ECC
     ecc_key* eccKey;
@@ -7794,7 +7792,7 @@ int AllocKey(WOLFSSL* ssl, int type, void** pKey)
         WOLFSSL_MSG("Key already present!");
     #ifdef WOLFSSL_ASYNC_CRYPT
         /* allow calling this again for async reentry */
-        if (ssl->error == WC_PENDING_E) {
+        if (ssl->error == WC_NO_ERR_TRACE(WC_PENDING_E)) {
             return 0;
         }
     #endif
@@ -7833,7 +7831,6 @@ int AllocKey(WOLFSSL* ssl, int type, void** pKey)
             sz = sizeof(curve448_key);
             break;
     #endif /* HAVE_CURVE448 */
-    #if defined(HAVE_PQC)
     #if defined(HAVE_FALCON)
         case DYNAMIC_TYPE_FALCON:
             sz = sizeof(falcon_key);
@@ -7844,7 +7841,6 @@ int AllocKey(WOLFSSL* ssl, int type, void** pKey)
             sz = sizeof(dilithium_key);
             break;
     #endif /* HAVE_DILITHIUM */
-    #endif /* HAVE_PQC */
     #ifndef NO_DH
         case DYNAMIC_TYPE_DH:
             sz = sizeof(DhKey);
@@ -7908,7 +7904,6 @@ int AllocKey(WOLFSSL* ssl, int type, void** pKey)
             ret = 0;
             break;
     #endif /* HAVE_CURVE448 */
-    #if defined(HAVE_PQC)
     #if defined(HAVE_FALCON)
         case DYNAMIC_TYPE_FALCON:
             wc_falcon_init_ex((falcon_key*)*pKey, ssl->heap, ssl->devId);
@@ -7921,7 +7916,6 @@ int AllocKey(WOLFSSL* ssl, int type, void** pKey)
             ret = 0;
             break;
     #endif /* HAVE_DILITHIUM */
-    #endif /* HAVE_PQC */
     #ifdef HAVE_CURVE448
         case DYNAMIC_TYPE_CURVE448:
             wc_curve448_init((curve448_key*)*pKey);
@@ -7947,8 +7941,7 @@ int AllocKey(WOLFSSL* ssl, int type, void** pKey)
 
 #if !defined(NO_RSA) || defined(HAVE_ECC) || defined(HAVE_ED25519) || \
     defined(HAVE_CURVE25519) || defined(HAVE_ED448) || \
-    defined(HAVE_CURVE448) || (defined(HAVE_PQC) && defined(HAVE_FALCON)) || \
-    (defined(HAVE_PQC) && defined(HAVE_DILITHIUM))
+    defined(HAVE_CURVE448) || defined(HAVE_FALCON) || defined(HAVE_DILITHIUM)
 static int ReuseKey(WOLFSSL* ssl, int type, void* pKey)
 {
     int ret = 0;
@@ -7994,12 +7987,18 @@ static int ReuseKey(WOLFSSL* ssl, int type, void* pKey)
             ret = wc_curve448_init((curve448_key*)pKey);
             break;
     #endif /* HAVE_CURVE448 */
-    #if defined(HAVE_PQC) && defined(HAVE_FALCON)
+    #if defined(HAVE_FALCON)
         case DYNAMIC_TYPE_FALCON:
             wc_falcon_free((falcon_key*)pKey);
             ret = wc_falcon_init((falcon_key*)pKey);
             break;
-    #endif /* HAVE_PQC && HAVE_FALCON */
+    #endif /* HAVE_FALCON */
+    #if defined(HAVE_DILITHIUM)
+        case DYNAMIC_TYPE_DILITHIUM:
+            wc_dilithium_free((dilithium_key*)pKey);
+            ret = wc_dilithium_init((dilithium_key*)pKey);
+            break;
+    #endif /* HAVE_DILITHIUM */
     #ifndef NO_DH
         case DYNAMIC_TYPE_DH:
             wc_FreeDhKey((DhKey*)pKey);
@@ -8293,7 +8292,7 @@ void SSL_ResourceFree(WOLFSSL* ssl)
         }
     #endif
 #endif
-#if defined(HAVE_PQC) && defined(HAVE_FALCON)
+#if defined(HAVE_FALCON)
     FreeKey(ssl, DYNAMIC_TYPE_FALCON, (void**)&ssl->peerFalconKey);
     ssl->peerFalconKeyPresent = 0;
 #endif
@@ -8376,14 +8375,17 @@ void SSL_ResourceFree(WOLFSSL* ssl)
     /* avoid dereferencing a test value */
     if (ssl->heap != (void*)WOLFSSL_HEAP_TEST) {
     #endif
+        void* heap = ssl->ctx ? ssl->ctx->heap : ssl->heap;
+    #ifndef WOLFSSL_STATIC_MEMORY_LEAN
         WOLFSSL_HEAP_HINT* ssl_hint = (WOLFSSL_HEAP_HINT*)ssl->heap;
         WOLFSSL_HEAP*      ctx_heap;
-        void* heap = ssl->ctx ? ssl->ctx->heap : ssl->heap;
 
         ctx_heap = ssl_hint->memory;
+    #ifndef SINGLE_THREADED
         if (wc_LockMutex(&(ctx_heap->memory_mutex)) != 0) {
             WOLFSSL_MSG("Bad memory_mutex lock");
         }
+    #endif
         ctx_heap->curIO--;
         if (FreeFixedIO(ctx_heap, &(ssl_hint->outBuf)) != 1) {
             WOLFSSL_MSG("Error freeing fixed output buffer");
@@ -8391,15 +8393,20 @@ void SSL_ResourceFree(WOLFSSL* ssl)
         if (FreeFixedIO(ctx_heap, &(ssl_hint->inBuf)) != 1) {
             WOLFSSL_MSG("Error freeing fixed output buffer");
         }
-        if (ssl_hint->haFlag && ctx_heap->curHa > 0) { /* check if handshake count has been decreased*/
+
+        /* check if handshake count has been decreased*/
+        if (ssl_hint->haFlag && ctx_heap->curHa > 0) {
             ctx_heap->curHa--;
         }
+    #ifndef SINGLE_THREADED
         wc_UnLockMutex(&(ctx_heap->memory_mutex));
+    #endif
 
         /* check if tracking stats */
         if (ctx_heap->flag & WOLFMEM_TRACK_STATS) {
             XFREE(ssl_hint->stats, heap, DYNAMIC_TYPE_SSL);
         }
+    #endif /* !WOLFSSL_STATIC_MEMORY_LEAN */
         XFREE(ssl->heap, heap, DYNAMIC_TYPE_SSL);
     #ifdef WOLFSSL_HEAP_TEST
     }
@@ -8536,10 +8543,10 @@ void FreeHandshakeResources(WOLFSSL* ssl)
         FreeKey(ssl, DYNAMIC_TYPE_ED448, (void**)&ssl->peerEd448Key);
         ssl->peerEd448KeyPresent = 0;
 #endif /* HAVE_ED448 */
-#if defined(HAVE_PQC) && defined(HAVE_FALCON)
+#if defined(HAVE_FALCON)
         FreeKey(ssl, DYNAMIC_TYPE_FALCON, (void**)&ssl->peerFalconKey);
         ssl->peerFalconKeyPresent = 0;
-#endif /* HAVE_PQC */
+#endif /* HAVE_FALCON */
     }
 
 #ifdef HAVE_ECC
@@ -8667,14 +8674,20 @@ void FreeHandshakeResources(WOLFSSL* ssl)
         WOLFSSL_HEAP*      ctx_heap;
 
         ctx_heap = ssl_hint->memory;
+    #ifndef SINGLE_THREADED
         if (wc_LockMutex(&(ctx_heap->memory_mutex)) != 0) {
             WOLFSSL_MSG("Bad memory_mutex lock");
         }
+    #endif
+    #ifndef WOLFSSL_STATIC_MEMORY_LEAN
         if (ctx_heap->curHa > 0) {
             ctx_heap->curHa--;
         }
         ssl_hint->haFlag = 0; /* set to zero since handshake has been dec */
+    #endif
+    #ifndef SINGLE_THREADED
         wc_UnLockMutex(&(ctx_heap->memory_mutex));
+    #endif
     #ifdef WOLFSSL_HEAP_TEST
     }
     #endif
@@ -9976,7 +9989,7 @@ int HashRaw(WOLFSSL* ssl, const byte* data, int sz)
 
 #if defined(WOLFSSL_RENESAS_TSIP_TLS)
     ret = tsip_StoreMessage(ssl, data, sz);
-    if (ret != 0 && ret != CRYPTOCB_UNAVAILABLE) {
+    if (ret != 0 && ret != WC_NO_ERR_TRACE(CRYPTOCB_UNAVAILABLE)) {
         return ret;
     }
 #endif /* WOLFSSL_RENESAS_TSIP_TLS */
@@ -11118,7 +11131,7 @@ static int MsgCheckBoundary(const WOLFSSL* ssl, byte type,
  * @param ssl   The current connection
  * @param type  The enum HandShakeType of the current message
  * @param msgSz Size of the current message
- * @return
+ * @return int (less than 0 on fail, 0 on success)
  */
 int EarlySanityCheckMsgReceived(WOLFSSL* ssl, byte type, word32 msgSz)
 {
@@ -11274,7 +11287,9 @@ static int GetDtlsRecordHeader(WOLFSSL* ssl, word32* inOutIdx,
         /* version 1.3 already negotiated */
         if (ssl->options.tls1_3) {
             ret = GetDtls13RecordHeader(ssl, inOutIdx, rh, size);
-            if (ret == 0 || ret != SEQUENCE_ERROR || ret != DTLS_CID_ERROR)
+            if (ret == 0 ||
+                ret != WC_NO_ERR_TRACE(SEQUENCE_ERROR) ||
+                ret != WC_NO_ERR_TRACE(DTLS_CID_ERROR))
                 return ret;
         }
 
@@ -11296,7 +11311,7 @@ static int GetDtlsRecordHeader(WOLFSSL* ssl, word32* inOutIdx,
     if (ssl->buffers.inputBuffer.length - *inOutIdx < DTLS_RECORD_HEADER_SZ) {
         ret = GetInputData(ssl, DTLS_RECORD_HEADER_SZ);
         /* Check if Dtls13RtxTimeout(ssl) returned socket error */
-        if (ret == SOCKET_ERROR_E)
+        if (ret == WC_NO_ERR_TRACE(SOCKET_ERROR_E))
             return ret;
         if (ret != 0)
             return LENGTH_ERROR;
@@ -11434,7 +11449,20 @@ static int GetRecordHeader(WOLFSSL* ssl, word32* inOutIdx,
             }
         }
 #endif /* WOLFSSL_DTLS13 */
-        else {
+        /* Don't care about protocol version being lower than expected on alerts
+         * sent back before version negotitation. */
+        else if (!(ssl->options.side == WOLFSSL_CLIENT_END &&
+                            ssl->options.connectState == CLIENT_HELLO_SENT &&
+                            rh->type == alert &&
+                            rh->pvMajor == ssl->version.major &&
+        #ifdef WOLFSSL_DTLS
+                            ((ssl->options.dtls && rh->pvMinor == DTLS_MINOR) ||
+                             (!ssl->options.dtls &&
+                              rh->pvMinor < ssl->version.minor))
+        #else
+                            rh->pvMinor < ssl->version.minor
+        #endif
+                   )) {
             WOLFSSL_MSG("SSL version error");
             WOLFSSL_ERROR_VERBOSE(VERSION_ERROR);
             return VERSION_ERROR;              /* only use requested version */
@@ -12371,55 +12399,77 @@ int CipherRequires(byte first, byte second, int requirement)
    *.z.com matches y.z.com but not x.y.z.com
 
    return 1 on success */
-int MatchDomainName(const char* pattern, int len, const char* str)
+int MatchDomainName(const char* pattern, int patternLen, const char* str,
+                    word32 strLen)
 {
     int ret = 0;
 
-    if (pattern == NULL || str == NULL || len <= 0)
+    if (pattern == NULL || str == NULL || patternLen <= 0 || strLen == 0)
         return 0;
 
-    while (len > 0) {
-
-        char p = (char)XTOLOWER((unsigned char)*pattern++);
+    while (patternLen > 0) {
+        /* Get the next pattern char to evaluate */
+        char p = (char)XTOLOWER((unsigned char)*pattern);
         if (p == '\0')
             break;
 
+        pattern++;
+
         if (p == '*') {
             char s;
+            /* We will always match '*' */
+            patternLen--;
 
-            while (--len > 0) {
+            /* Consume any extra '*' chars until the next non '*' char. */
+            while (patternLen > 0) {
                 p = (char)XTOLOWER((unsigned char)*pattern);
                 pattern++;
-                if (p == '\0' && len > 0)
+                if (p == '\0' && patternLen > 0)
                     return 0;
                 if (p != '*')
                     break;
+
+                patternLen--;
             }
 
-            if (len == 0)
-                p = '\0';
+            /* Consume str until we reach next char in pattern after '*' or
+             * end of string */
+            while (strLen > 0) {
+                s = (char)XTOLOWER((unsigned char) *str);
+                str++;
+                strLen--;
 
-            while ( (s = (char)XTOLOWER((unsigned char) *str)) != '\0') {
-                if (s == p)
+                /* p is next char in pattern after '*', or '*' if '*' is the
+                 * last char in the pattern (in which case patternLen is 1) */
+                if ( ((s == p) && (patternLen > 0))) {
+                    /* We had already counted the '*' as matched, this means
+                     * we also matched the next non '*' char in pattern */
+                    patternLen--;
                     break;
+                }
+
+                /* If strlen is 0, we have consumed the entire string. Count that
+                 * as a match of '*' */
+                if (strLen == 0) {
+                    break;
+                }
+
                 if (s == '.')
                     return 0;
-                str++;
             }
         }
         else {
+            /* Simple case, pattern match exactly */
             if (p != (char)XTOLOWER((unsigned char) *str))
                 return 0;
-        }
 
-
-        if (len > 0) {
             str++;
-            len--;
+            strLen--;
+            patternLen--;
         }
     }
 
-    if (*str == '\0' && len == 0) {
+    if (strLen == 0 && patternLen == 0) {
         ret = 1; /* success */
     }
 
@@ -12431,14 +12481,16 @@ int MatchDomainName(const char* pattern, int len, const char* str)
  * Fail if there are wild patterns and they didn't match.
  * Check the common name if no alternative names matched.
  *
- * dCert    Decoded cert to get the alternative names from.
- * domain   Domain name to compare against.
- * checkCN  Whether to check the common name.
- * returns  1 : match was found.
- *          0 : no match found.
- *         -1 : No matches and wild pattern match failed.
+ * dCert     Decoded cert to get the alternative names from.
+ * domain    Domain name to compare against.
+ * domainLen Length of the domain name.
+ * checkCN   Whether to check the common name.
+ * returns   1 : match was found.
+ *           0 : no match found.
+ *          -1 : No matches and wild pattern match failed.
  */
-int CheckForAltNames(DecodedCert* dCert, const char* domain, int* checkCN)
+int CheckForAltNames(DecodedCert* dCert, const char* domain, word32 domainLen,
+                     int* checkCN)
 {
     int match = 0;
     DNS_entry* altName = NULL;
@@ -12469,7 +12521,7 @@ int CheckForAltNames(DecodedCert* dCert, const char* domain, int* checkCN)
             len = (word32)altName->len;
         }
 
-        if (MatchDomainName(buf, (int)len, domain)) {
+        if (MatchDomainName(buf, (int)len, domain, domainLen)) {
             match = 1;
             if (checkCN != NULL) {
                 *checkCN = 0;
@@ -12501,12 +12553,11 @@ int CheckForAltNames(DecodedCert* dCert, const char* domain, int* checkCN)
 int CheckHostName(DecodedCert* dCert, const char *domainName, size_t domainNameLen)
 {
     int checkCN;
-    int ret = DOMAIN_NAME_MISMATCH;
+    int ret = WC_NO_ERR_TRACE(DOMAIN_NAME_MISMATCH);
 
-    /* Assume name is NUL terminated. */
-    (void)domainNameLen;
-
-    if (CheckForAltNames(dCert, domainName, &checkCN) != 1) {
+    if (CheckForAltNames(dCert, domainName, (word32)domainNameLen,
+                                            &checkCN) != 1) {
+        ret = DOMAIN_NAME_MISMATCH;
         WOLFSSL_MSG("DomainName match on alt names failed");
     }
     else {
@@ -12516,10 +12567,11 @@ int CheckHostName(DecodedCert* dCert, const char *domainName, size_t domainNameL
 #ifndef WOLFSSL_HOSTNAME_VERIFY_ALT_NAME_ONLY
     if (checkCN == 1) {
         if (MatchDomainName(dCert->subjectCN, dCert->subjectCNLen,
-                            domainName) == 1) {
+                            domainName, (word32)domainNameLen) == 1) {
             ret = 0;
         }
         else {
+            ret = DOMAIN_NAME_MISMATCH;
             WOLFSSL_MSG("DomainName match on common name failed");
         }
     }
@@ -13234,7 +13286,7 @@ static int ProcessCSR(WOLFSSL* ssl, byte* input, word32* inOutIdx,
        const unsigned char* keyDer, unsigned int keySz,
        int* result, void* ctx)
     {
-        int ret = NOT_COMPILED_IN;
+        int ret = WC_NO_ERR_TRACE(NOT_COMPILED_IN);
         WOLFSSL* ssl = (WOLFSSL*)ctx;
 
         if (ssl && ssl->ctx->EccVerifyCb) {
@@ -13249,7 +13301,7 @@ static int ProcessCSR(WOLFSSL* ssl, byte* input, word32* inOutIdx,
        unsigned char** out, const unsigned char* keyDer, unsigned int keySz,
        void* ctx)
     {
-        int ret = NOT_COMPILED_IN;
+        int ret = WC_NO_ERR_TRACE(NOT_COMPILED_IN);
         WOLFSSL* ssl = (WOLFSSL*)ctx;
 
         if (ssl && ssl->ctx->RsaVerifyCb) {
@@ -13311,24 +13363,26 @@ void DoCertFatalAlert(WOLFSSL* ssl, int ret)
 
     /* Determine alert reason */
     alertWhy = bad_certificate;
-    if (ret == ASN_AFTER_DATE_E || ret == ASN_BEFORE_DATE_E) {
+    if (ret == WC_NO_ERR_TRACE(ASN_AFTER_DATE_E) ||
+        ret == WC_NO_ERR_TRACE(ASN_BEFORE_DATE_E)) {
         alertWhy = certificate_expired;
     }
-    else if (ret == ASN_NO_SIGNER_E || ret == ASN_PATHLEN_INV_E ||
-            ret == ASN_PATHLEN_SIZE_E) {
+    else if (ret == WC_NO_ERR_TRACE(ASN_NO_SIGNER_E) ||
+             ret == WC_NO_ERR_TRACE(ASN_PATHLEN_INV_E) ||
+             ret == WC_NO_ERR_TRACE(ASN_PATHLEN_SIZE_E)) {
         alertWhy = unknown_ca;
     }
 #ifdef OPENSSL_EXTRA
-    else if (ret == CRL_CERT_REVOKED) {
+    else if (ret == WC_NO_ERR_TRACE(CRL_CERT_REVOKED)) {
         alertWhy = certificate_revoked;
     }
 #endif
 #if defined(HAVE_RPK)
-    else if (ret == UNSUPPORTED_CERTIFICATE) {
+    else if (ret == WC_NO_ERR_TRACE(UNSUPPORTED_CERTIFICATE)) {
         alertWhy = unsupported_certificate;
     }
 #endif /* HAVE_RPK */
-    else if (ret == NO_PEER_CERT) {
+    else if (ret == WC_NO_ERR_TRACE(NO_PEER_CERT)) {
 #ifdef WOLFSSL_TLS13
         if (ssl->options.tls1_3) {
             alertWhy = certificate_required;
@@ -13454,6 +13508,9 @@ int SetupStoreCtxCallback(WOLFSSL_X509_STORE_CTX** store_pt,
                 store->current_cert = x509;
                 *x509Free = 1;
             }
+            else {
+                goto mem_error;
+            }
         }
 #endif
 #ifdef SESSION_CERTS
@@ -13554,7 +13611,8 @@ int DoVerifyCallback(WOLFSSL_CERT_MANAGER* cm, WOLFSSL* ssl, int cert_err,
                 ssl->param && ssl->param->hostName[0]) {
             /* If altNames names is present, then subject common name is ignored */
             if (args->dCert->altNames != NULL) {
-                if (CheckForAltNames(args->dCert, ssl->param->hostName, NULL) != 1) {
+                if (CheckForAltNames(args->dCert, ssl->param->hostName,
+                    (word32)XSTRLEN(ssl->param->hostName), NULL) != 1) {
                     if (cert_err == 0) {
                         ret = DOMAIN_NAME_MISMATCH;
                         WOLFSSL_ERROR_VERBOSE(ret);
@@ -13564,9 +13622,11 @@ int DoVerifyCallback(WOLFSSL_CERT_MANAGER* cm, WOLFSSL* ssl, int cert_err,
         #ifndef WOLFSSL_HOSTNAME_VERIFY_ALT_NAME_ONLY
             else {
                 if (args->dCert->subjectCN) {
-                    if (MatchDomainName(args->dCert->subjectCN,
-                                        args->dCert->subjectCNLen,
-                                        ssl->param->hostName) == 0) {
+                    if (MatchDomainName(
+                            args->dCert->subjectCN,
+                            args->dCert->subjectCNLen,
+                            ssl->param->hostName,
+                            (word32)XSTRLEN(ssl->param->hostName)) == 0) {
                         if (cert_err == 0) {
                             ret = DOMAIN_NAME_MISMATCH;
                             WOLFSSL_ERROR_VERBOSE(ret);
@@ -13975,6 +14035,7 @@ static int ProcessPeerCertParse(WOLFSSL* ssl, ProcPeerCertArgs* args,
     buffer* cert;
     byte* subjectHash = NULL;
     int alreadySigner = 0;
+    Signer *extraSigners = NULL;
 #if defined(HAVE_RPK)
     int cType;
 #endif
@@ -14005,7 +14066,7 @@ PRAGMA_GCC_DIAG_POP
     /* check if returning from non-blocking OCSP */
     /* skip this section because cert is already initialized and parsed */
 #ifdef WOLFSSL_NONBLOCK_OCSP
-    if (args->lastErr == OCSP_WANT_READ) {
+    if (args->lastErr == WC_NO_ERR_TRACE(OCSP_WANT_READ)) {
         args->lastErr = 0; /* clear error */
         return 0;
     }
@@ -14035,7 +14096,7 @@ PRAGMA_GCC_DIAG_POP
         }
 
         /* perform cert parsing and signature check */
-        sigRet = CheckCertSignature(cert->buffer, cert->length,
+        sigRet = wc_CheckCertSignature(cert->buffer, cert->length,
                                          ssl->heap, SSL_CM(ssl));
         /* fail on errors here after the ParseCertRelative call, so dCert is populated */
 
@@ -14076,9 +14137,13 @@ PRAGMA_GCC_DIAG_POP
             return ret;
     #endif
     }
-
+#ifdef HAVE_CERTIFICATE_STATUS_REQUEST_V2
+    if (verify != NO_VERIFY && TLSX_CSR2_IsMulti(ssl->extensions)) {
+        extraSigners = TLSX_CSR2_GetPendingSigners(ssl->extensions);
+    }
+#endif
     /* Parse Certificate */
-    ret = ParseCertRelative(args->dCert, certType, verify, SSL_CM(ssl));
+    ret = ParseCertRelative(args->dCert, certType, verify, SSL_CM(ssl), extraSigners);
 
 #if defined(HAVE_RPK)
     /* if cert type has negotiated with peer, confirm the cert received has
@@ -14111,7 +14176,9 @@ PRAGMA_GCC_DIAG_POP
 #endif /* HAVE_RPK */
 
     /* perform below checks for date failure cases */
-    if (ret == 0 || ret == ASN_BEFORE_DATE_E || ret == ASN_AFTER_DATE_E) {
+    if (ret == 0 ||
+        ret == WC_NO_ERR_TRACE(ASN_BEFORE_DATE_E) ||
+        ret == WC_NO_ERR_TRACE(ASN_AFTER_DATE_E)) {
         /* get subject and determine if already loaded */
     #ifndef NO_SKID
         if (args->dCert->extAuthKeyIdSet)
@@ -14134,7 +14201,7 @@ PRAGMA_GCC_DIAG_POP
         *pAlreadySigner = alreadySigner;
 
 #ifdef WOLFSSL_ASYNC_CRYPT
-    if (ret == WC_PENDING_E) {
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
         ret = wolfSSL_AsyncPush(ssl,
             args->dCert->sigCtx.asyncDev);
     }
@@ -14146,7 +14213,7 @@ PRAGMA_GCC_DIAG_POP
      * original return code is returned. */
     if (ssl->ctx && ssl->ctx->ProcessPeerCertCb) {
         int new_ret = ssl->ctx->ProcessPeerCertCb(ssl, args->dCert);
-        if (new_ret != NOT_COMPILED_IN) {
+        if (new_ret != WC_NO_ERR_TRACE(NOT_COMPILED_IN)) {
             ret = new_ret;
         }
     }
@@ -14215,7 +14282,6 @@ static int ProcessPeerCertCheckKey(WOLFSSL* ssl, ProcPeerCertArgs* args)
             }
             break;
     #endif /* HAVE_ED448 */
-    #if defined(HAVE_PQC)
     #if defined(HAVE_FALCON)
         case FALCON_LEVEL1k:
             if (ssl->options.minFalconKeySz < 0 ||
@@ -14234,7 +14300,6 @@ static int ProcessPeerCertCheckKey(WOLFSSL* ssl, ProcPeerCertArgs* args)
             }
             break;
     #endif /* HAVE_FALCON */
-    #endif /* HAVE_PQC */
     #if defined(HAVE_DILITHIUM)
         case DILITHIUM_LEVEL2k:
             if (ssl->options.minDilithiumKeySz < 0 ||
@@ -14311,6 +14376,9 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
     byte* subjectHash = NULL;
     int alreadySigner = 0;
 
+#if defined(HAVE_CERTIFICATE_STATUS_REQUEST_V2)
+    int addToPendingCAs = 0;
+#endif
     WOLFSSL_ENTER("ProcessPeerCerts");
 
 #if defined(WOLFSSL_ASYNC_CRYPT) || defined(WOLFSSL_NONBLOCK_OCSP)
@@ -14324,7 +14392,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
     args = (ProcPeerCertArgs*)ssl->async->args;
 #ifdef WOLFSSL_ASYNC_CRYPT
     ret = wolfSSL_AsyncPop(ssl, &ssl->options.asyncState);
-    if (ret != WC_NO_PENDING_E) {
+    if (ret != WC_NO_ERR_TRACE(WC_NO_PENDING_E)) {
         /* Check for error */
         if (ret < 0)
             goto exit_ppc;
@@ -14332,11 +14400,11 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
     else
 #endif /* WOLFSSL_ASYNC_CRYPT */
 #ifdef WOLFSSL_NONBLOCK_OCSP
-    if (ssl->error == OCSP_WANT_READ) {
+    if (ssl->error == WC_NO_ERR_TRACE(OCSP_WANT_READ)) {
         /* Re-entry after non-blocking OCSP */
     #ifdef WOLFSSL_ASYNC_CRYPT
         /* if async operationg not pending, reset error code */
-        if (ret == WC_NO_PENDING_E)
+        if (ret == WC_NO_ERR_TRACE(WC_NO_PENDING_E))
             ret = 0;
     #endif
     }
@@ -14672,7 +14740,8 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
     (defined(WOLFSSL_CERT_REQ) || defined(WOLFSSL_CERT_EXT)) && \
     !defined(NO_FILESYSTEM) && !defined(NO_WOLFSSL_DIR) && \
     !defined(NO_STDIO_FILESYSTEM)
-                    if (ret == ASN_NO_SIGNER_E || ret == ASN_SELF_SIGNED_E) {
+                    if (ret == WC_NO_ERR_TRACE(ASN_NO_SIGNER_E) ||
+                        ret == WC_NO_ERR_TRACE(ASN_SELF_SIGNED_E)) {
                         WOLFSSL_MSG("try to load certificate if hash dir is set");
                         ret = LoadCertByIssuer(SSL_STORE(ssl),
                            (WOLFSSL_X509_NAME*)args->dCert->issuerName,
@@ -14692,14 +14761,15 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                     }
 #endif
                 #ifdef WOLFSSL_ASYNC_CRYPT
-                    if (ret == WC_PENDING_E)
+                    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E))
                         goto exit_ppc;
                 #endif
                     if (ret == 0) {
                         ret = ProcessPeerCertCheckKey(ssl, args);
                     }
-                    else if (ret == ASN_PARSE_E || ret == BUFFER_E ||
-                             ret == MEMORY_E) {
+                    else if (ret == WC_NO_ERR_TRACE(ASN_PARSE_E) ||
+                             ret == WC_NO_ERR_TRACE(BUFFER_E) ||
+                             ret == WC_NO_ERR_TRACE(MEMORY_E)) {
                         WOLFSSL_MSG(
                             "Got Peer cert ASN PARSE_E, BUFFER E, MEMORY_E");
                         ERROR_OUT(ret, exit_ppc);
@@ -14734,9 +14804,11 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                     if (ret == 0) {
                 #ifdef HAVE_OCSP
                     #ifdef HAVE_CERTIFICATE_STATUS_REQUEST_V2
-                        if (ssl->status_request_v2) {
+                        addToPendingCAs = 0;
+                        if (ssl->status_request_v2 && TLSX_CSR2_IsMulti(ssl->extensions)) {
                             ret = TLSX_CSR2_InitRequests(ssl->extensions,
                                                     args->dCert, 0, ssl->heap);
+                            addToPendingCAs = 1;
                         }
                         else /* skips OCSP and force CRL check */
                     #endif /* HAVE_CERTIFICATE_STATUS_REQUEST_V2 */
@@ -14746,7 +14818,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                             ret = CheckCertOCSP_ex(SSL_CM(ssl)->ocsp,
                                                     args->dCert, ssl);
                         #ifdef WOLFSSL_NONBLOCK_OCSP
-                            if (ret == OCSP_WANT_READ) {
+                            if (ret == WC_NO_ERR_TRACE(OCSP_WANT_READ)) {
                                 args->lastErr = ret;
                                 goto exit_ppc;
                             }
@@ -14770,7 +14842,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                                    responder, do a CRL lookup. If any other
                                    error, skip the CRL lookup and fail the
                                    certificate. */
-                                doCrlLookup = (ret == OCSP_CERT_UNKNOWN);
+                                doCrlLookup = (ret == WC_NO_ERR_TRACE(OCSP_CERT_UNKNOWN));
                             }
                         #endif /* HAVE_OCSP */
 
@@ -14783,7 +14855,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                                  * same WOULD_BLOCK error code as OCSP's I/O
                                  * callback, and it is enabling it using the
                                  * same flag. */
-                                if (ret == OCSP_WANT_READ) {
+                                if (ret == WC_NO_ERR_TRACE(OCSP_WANT_READ)) {
                                     args->lastErr = ret;
                                     goto exit_ppc;
                                 }
@@ -14826,7 +14898,8 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                         chain mode only requires that the peer certificate
                         validate to a trusted CA */
                     if (ret != 0 && args->dCert->isCA) {
-                        if (ret == ASN_NO_SIGNER_E || ret == ASN_SELF_SIGNED_E) {
+                        if (ret == WC_NO_ERR_TRACE(ASN_NO_SIGNER_E) ||
+                            ret == WC_NO_ERR_TRACE(ASN_SELF_SIGNED_E)) {
                             if (!ssl->options.usingAltCertChain) {
                                 WOLFSSL_MSG("Trying alternate cert chain");
                                 ssl->options.usingAltCertChain = 1;
@@ -14849,7 +14922,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                      * for a CA cert to fail validation here, as we will verify
                      * the entire chain when we hit the peer (leaf) cert */
                     if ((ssl->ctx->doAppleNativeCertValidationFlag)
-                        && (ret == ASN_NO_SIGNER_E)) {
+                        && (ret == WC_NO_ERR_TRACE(ASN_NO_SIGNER_E))) {
 
                         WOLFSSL_MSG("Bypassing errors to allow for Apple native"
                                     " CA validation");
@@ -14867,8 +14940,9 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                     /* Do verify callback */
                     ret = DoVerifyCallback(SSL_CM(ssl), ssl, ret, args);
                     if (ssl->options.verifyNone &&
-                              (ret == CRL_MISSING || ret == CRL_CERT_REVOKED ||
-                               ret == CRL_CERT_DATE_ERR)) {
+                              (ret == WC_NO_ERR_TRACE(CRL_MISSING) ||
+                               ret == WC_NO_ERR_TRACE(CRL_CERT_REVOKED) ||
+                               ret == WC_NO_ERR_TRACE(CRL_CERT_DATE_ERR))) {
                         WOLFSSL_MSG("Ignoring CRL problem based on verify setting");
                         ret = ssl->error = 0;
                     }
@@ -14879,6 +14953,67 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                         skipAddCA = 1;
                     }
                 #endif
+#if defined(HAVE_CERTIFICATE_STATUS_REQUEST_V2)
+                    if (ret == 0 && addToPendingCAs && !alreadySigner) {
+#ifdef WOLFSSL_SMALL_STACK
+                        DecodedCert *dCertAdd = NULL;
+#else
+                        DecodedCert dCertAdd[1];
+#endif
+                        int dCertAdd_inited = 0;
+                        DerBuffer *derBuffer = NULL;
+                        buffer* cert = &args->certs[args->certIdx];
+                        Signer *s = NULL;
+
+#ifdef WOLFSSL_SMALL_STACK
+                        dCertAdd = (DecodedCert *)
+                            XMALLOC(sizeof(*dCertAdd), ssl->heap,
+                                    DYNAMIC_TYPE_TMP_BUFFER);
+                        if (dCertAdd == NULL) {
+                            ret = MEMORY_E;
+                            goto exit_req_v2;
+                        }
+#endif
+                        InitDecodedCert(dCertAdd, cert->buffer, cert->length,
+                                        ssl->heap);
+                        dCertAdd_inited = 1;
+                        ret = ParseCert(dCertAdd, CA_TYPE, NO_VERIFY,
+                                        SSL_CM(ssl));
+                        if (ret != 0) {
+                            goto exit_req_v2;
+                        }
+                        ret = AllocDer(&derBuffer, cert->length, CA_TYPE, ssl->heap);
+                        if (ret != 0 || derBuffer == NULL) {
+                            goto exit_req_v2;
+                        }
+                        XMEMCPY(derBuffer->buffer, cert->buffer, cert->length);
+                        s = MakeSigner(SSL_CM(ssl)->heap);
+                        if (s == NULL) {
+                            ret = MEMORY_E;
+                            goto exit_req_v2;
+                        }
+                        ret = FillSigner(s, dCertAdd, CA_TYPE, derBuffer);
+                        if (ret != 0) {
+                            goto exit_req_v2;
+                        }
+                        skipAddCA = 1;
+                        ret = TLSX_CSR2_AddPendingSigner(ssl->extensions, s);
+
+                    exit_req_v2:
+                        if (s && (ret != 0))
+                            FreeSigner(s, SSL_CM(ssl)->heap);
+                        if (derBuffer)
+                            FreeDer(&derBuffer);
+                        if (dCertAdd_inited)
+                            FreeDecodedCert(dCertAdd);
+#ifdef WOLFSSL_SMALL_STACK
+                        if (dCertAdd)
+                            XFREE(dCertAdd, ssl->heap, DYNAMIC_TYPE_TMP_BUFFER);
+#endif
+                        if (ret != 0)
+                            goto exit_ppc;
+                    }
+#endif /* HAVE_CERTIFICATE_STATUS_REQUEST_V2 */
 
                     /* If valid CA then add to Certificate Manager */
                     if (ret == 0 && args->dCert->isCA &&
@@ -14961,7 +15096,8 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
     (defined(WOLFSSL_CERT_REQ) || defined(WOLFSSL_CERT_EXT)) && \
     !defined(NO_FILESYSTEM) && !defined(NO_WOLFSSL_DIR) && \
     !defined(NO_STDIO_FILESYSTEM)
-                    if (ret == ASN_NO_SIGNER_E || ret == ASN_SELF_SIGNED_E) {
+                    if (ret == WC_NO_ERR_TRACE(ASN_NO_SIGNER_E) ||
+                        ret == WC_NO_ERR_TRACE(ASN_SELF_SIGNED_E)) {
                         int lastErr = ret; /* save error from last time */
                         WOLFSSL_MSG("try to load certificate if hash dir is set");
                         ret = LoadCertByIssuer(SSL_STORE(ssl),
@@ -14982,7 +15118,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                     }
 #endif
             #ifdef WOLFSSL_ASYNC_CRYPT
-                if (ret == WC_PENDING_E)
+                if (ret == WC_NO_ERR_TRACE(WC_PENDING_E))
                     goto exit_ppc;
             #endif
                 if (ret == 0) {
@@ -15039,8 +15175,10 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                         args->fatal = 0;
                     }
                 }
-                else if (ret == ASN_PARSE_E || ret == BUFFER_E ||
-                         ret == MEMORY_E || ret == BAD_FUNC_ARG) {
+                else if (ret == WC_NO_ERR_TRACE(ASN_PARSE_E) ||
+                         ret == WC_NO_ERR_TRACE(BUFFER_E) ||
+                         ret == WC_NO_ERR_TRACE(MEMORY_E) ||
+                         ret == WC_NO_ERR_TRACE(BAD_FUNC_ARG)) {
                     WOLFSSL_MSG("Got Peer cert ASN_PARSE_E, BUFFER_E, MEMORY_E,"
                                 " BAD_FUNC_ARG");
                 #if defined(WOLFSSL_EXTRA_ALERTS) || defined(OPENSSL_EXTRA) || \
@@ -15058,11 +15196,11 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
 
                     #if defined(OPENSSL_EXTRA) || defined(OPENSSL_EXTRA_X509_SMALL)
                     if (ssl->peerVerifyRet == 0) { /* Return first cert error here */
-                        if (ret == ASN_BEFORE_DATE_E) {
+                        if (ret == WC_NO_ERR_TRACE(ASN_BEFORE_DATE_E)) {
                             ssl->peerVerifyRet =
                            (unsigned long)WOLFSSL_X509_V_ERR_CERT_NOT_YET_VALID;
                         }
-                        else if (ret == ASN_AFTER_DATE_E) {
+                        else if (ret == WC_NO_ERR_TRACE(ASN_AFTER_DATE_E)) {
                             ssl->peerVerifyRet =
                             (unsigned long)WOLFSSL_X509_V_ERR_CERT_HAS_EXPIRED;
                         }
@@ -15200,11 +15338,11 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                         ret = CheckCertOCSP_ex(SSL_CM(ssl)->ocsp,
                                                     args->dCert, ssl);
                     #ifdef WOLFSSL_NONBLOCK_OCSP
-                        if (ret == OCSP_WANT_READ) {
+                        if (ret == WC_NO_ERR_TRACE(OCSP_WANT_READ)) {
                             goto exit_ppc;
                         }
                     #endif
-                        doLookup = (ret == OCSP_CERT_UNKNOWN);
+                        doLookup = (ret == WC_NO_ERR_TRACE(OCSP_CERT_UNKNOWN));
                         if (ret != 0) {
                             WOLFSSL_MSG("\tOCSP Lookup not ok");
                             args->fatal = 0;
@@ -15230,7 +15368,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                          * same WOULD_BLOCK error code as OCSP's I/O
                          * callback, and it is enabling it using the
                          * same flag. */
-                        if (ret == OCSP_WANT_READ) {
+                        if (ret == WC_NO_ERR_TRACE(OCSP_WANT_READ)) {
                             goto exit_ppc;
                         }
                     #endif
@@ -15278,7 +15416,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                     FreeX509(&ssl->peerCert);
                     InitX509(&ssl->peerCert, 0, ssl->heap);
                     copyRet = CopyDecodedToX509(&ssl->peerCert, args->dCert);
-                    if (copyRet == MEMORY_E) {
+                    if (copyRet == WC_NO_ERR_TRACE(MEMORY_E)) {
                         args->fatal = 1;
                     }
                 }
@@ -15379,6 +15517,9 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                     if (args->dCert->altNames) {
                         if (CheckForAltNames(args->dCert,
                                 (char*)ssl->buffers.domainName.buffer,
+                                (ssl->buffers.domainName.buffer == NULL ? 0 :
+                                (word32)XSTRLEN(
+                                (const char *)ssl->buffers.domainName.buffer)),
                                 NULL) != 1) {
                             WOLFSSL_MSG("DomainName match on alt names failed");
                             /* try to get peer key still */
@@ -15388,9 +15529,14 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                     }
                     else {
                         if (MatchDomainName(
-                                 args->dCert->subjectCN,
-                                 args->dCert->subjectCNLen,
-                                 (char*)ssl->buffers.domainName.buffer) == 0) {
+                                args->dCert->subjectCN,
+                                args->dCert->subjectCNLen,
+                                (char*)ssl->buffers.domainName.buffer,
+                                (ssl->buffers.domainName.buffer == NULL ? 0 :
+                                (word32)XSTRLEN(
+                                (const char *)ssl->buffers.domainName.buffer)
+                                )) == 0)
+                        {
                             WOLFSSL_MSG("DomainName match on common name failed");
                             ret = DOMAIN_NAME_MISMATCH;
                             WOLFSSL_ERROR_VERBOSE(ret);
@@ -15400,10 +15546,15 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                     /* Old behavior. */
                     if (MatchDomainName(args->dCert->subjectCN,
                                 args->dCert->subjectCNLen,
-                                (char*)ssl->buffers.domainName.buffer) == 0) {
+                                (char*)ssl->buffers.domainName.buffer,
+                                (ssl->buffers.domainName.buffer == NULL ? 0 :
+                                (word32)XSTRLEN(ssl->buffers.domainName.buffer))) == 0)
+                    {
                         WOLFSSL_MSG("DomainName match on common name failed");
                         if (CheckForAltNames(args->dCert,
                                  (char*)ssl->buffers.domainName.buffer,
+                                 (ssl->buffers.domainName.buffer == NULL ? 0 :
+                                 (word32)XSTRLEN(ssl->buffers.domainName.buffer)),
                                  NULL) != 1) {
                             WOLFSSL_MSG(
                                 "DomainName match on alt names failed too");
@@ -15695,7 +15846,6 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                         break;
                     }
                 #endif /* HAVE_ED448 && HAVE_ED448_KEY_IMPORT */
-                #if defined(HAVE_PQC)
                 #if defined(HAVE_FALCON)
                     case FALCON_LEVEL1k:
                     case FALCON_LEVEL5k:
@@ -15745,7 +15895,8 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                         break;
                     }
                 #endif /* HAVE_FALCON */
-                #if defined(HAVE_DILITHIUM)
+                #if defined(HAVE_DILITHIUM) && \
+                    !defined(WOLFSSL_DILITHIUM_NO_VERIFY)
                     case DILITHIUM_LEVEL2k:
                     case DILITHIUM_LEVEL3k:
                     case DILITHIUM_LEVEL5k:
@@ -15798,7 +15949,6 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                         break;
                     }
                 #endif /* HAVE_DILITHIUM */
-                #endif /* HAVE_PQC */
                     default:
                         break;
                 }
@@ -15857,8 +16007,9 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
             ret = DoVerifyCallback(SSL_CM(ssl), ssl, ret, args);
 
             if (ssl->options.verifyNone &&
-                              (ret == CRL_MISSING || ret == CRL_CERT_REVOKED ||
-                               ret == CRL_CERT_DATE_ERR)) {
+                              (ret == WC_NO_ERR_TRACE(CRL_MISSING) ||
+                               ret == WC_NO_ERR_TRACE(CRL_CERT_REVOKED) ||
+                               ret == WC_NO_ERR_TRACE(CRL_CERT_DATE_ERR))) {
                 WOLFSSL_MSG("Ignoring CRL problem based on verify setting");
                 ret = ssl->error = 0;
             }
@@ -15905,7 +16056,8 @@ exit_ppc:
 
 
 #if defined(WOLFSSL_ASYNC_CRYPT) || defined(WOLFSSL_NONBLOCK_OCSP)
-    if (ret == WC_PENDING_E || ret == OCSP_WANT_READ) {
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E) ||
+        ret == WC_NO_ERR_TRACE(OCSP_WANT_READ)) {
         /* Mark message as not received so it can process again */
         ssl->msgsReceived.got_certificate = 0;
 
@@ -15951,7 +16103,8 @@ static int DoCertificate(WOLFSSL* ssl, byte* input, word32* inOutIdx,
     /* Reset the session cert chain count in case the session resume failed,
      * do not reset if we are resuming after an async wait */
 #if defined(WOLFSSL_ASYNC_CRYPT) || defined(WOLFSSL_NONBLOCK_OCSP)
-    if (ssl->error != OCSP_WANT_READ && ssl->error != WC_PENDING_E)
+    if (ssl->error != WC_NO_ERR_TRACE(OCSP_WANT_READ) &&
+        ssl->error != WC_NO_ERR_TRACE(WC_PENDING_E))
 #endif
     {
         ssl->session->chain.count = 0;
@@ -15980,6 +16133,7 @@ static int DoCertificateStatus(WOLFSSL* ssl, byte* input, word32* inOutIdx,
     int    ret = 0;
     byte   status_type;
     word32 status_length;
+    int endCertificateOK = 0;
 
     WOLFSSL_START(WC_FUNC_CERTIFICATE_STATUS_DO);
     WOLFSSL_ENTER("DoCertificateStatus");
@@ -16003,6 +16157,7 @@ static int DoCertificateStatus(WOLFSSL* ssl, byte* input, word32* inOutIdx,
         /* WOLFSSL_CSR_OCSP overlaps with WOLFSSL_CSR2_OCSP */
         case WOLFSSL_CSR2_OCSP:
             ret = ProcessCSR(ssl, input, inOutIdx, status_length);
+            endCertificateOK = (ret == 0);
             break;
 
     #endif
@@ -16013,6 +16168,7 @@ static int DoCertificateStatus(WOLFSSL* ssl, byte* input, word32* inOutIdx,
             OcspRequest* request;
             word32 list_length = status_length;
             byte   idx = 0;
+            Signer *pendingCAs = NULL;
 
             #ifdef WOLFSSL_SMALL_STACK
                 CertStatus*   status;
@@ -16024,14 +16180,12 @@ static int DoCertificateStatus(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                 OcspResponse response[1];
             #endif
 
-            do {
-                if (ssl->status_request_v2) {
-                    ssl->status_request_v2 = 0;
-                    break;
-                }
-
+            if (!ssl->status_request_v2)
                 return BUFFER_ERROR;
-            } while(0);
+
+            ssl->status_request_v2 = 0;
+
+            pendingCAs = TLSX_CSR2_GetPendingSigners(ssl->extensions);
 
             #ifdef WOLFSSL_SMALL_STACK
                 status = (CertStatus*)XMALLOC(sizeof(CertStatus), ssl->heap,
@@ -16071,23 +16225,27 @@ static int DoCertificateStatus(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                 if (status_length) {
                     InitOcspResponse(response, single, status, input +*inOutIdx,
                                      status_length, ssl->heap);
-
+                    response->pendingCAs = pendingCAs;
                     if ((OcspResponseDecode(response, SSL_CM(ssl), ssl->heap,
                                                                         0) != 0)
                     ||  (response->responseStatus != OCSP_SUCCESSFUL)
                     ||  (response->single->status->status != CERT_GOOD))
                         ret = BAD_CERTIFICATE_STATUS_ERROR;
 
-                    while (ret == 0) {
+                    if (ret == 0) {
                         request = (OcspRequest*)TLSX_CSR2_GetRequest(
-                                ssl->extensions, status_type, idx++);
+                                ssl->extensions, status_type, idx);
 
-                        if (request == NULL)
+                        if (request == NULL) {
                             ret = BAD_CERTIFICATE_STATUS_ERROR;
-                        else if (CompareOcspReqResp(request, response) == 0)
-                            break;
-                        else if (idx == 1) /* server cert must be OK */
+                        }
+                        else if (CompareOcspReqResp(request, response) != 0) {
                             ret = BAD_CERTIFICATE_STATUS_ERROR;
+                        }
+                        else {
+                            if (idx == 0) /* server cert must be OK */
+                                endCertificateOK = 1;
+                        }
                     }
 
                     /* only frees 'single' if single->isDynamic is set */
@@ -16096,6 +16254,7 @@ static int DoCertificateStatus(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                     *inOutIdx   += status_length;
                     list_length -= status_length;
                 }
+                idx++;
             }
 
             ssl->status_request_v2 = 0;
@@ -16114,6 +16273,20 @@ static int DoCertificateStatus(WOLFSSL* ssl, byte* input, word32* inOutIdx,
         default:
             ret = BUFFER_ERROR;
     }
+
+    /* end certificate MUST be present */
+    if (endCertificateOK == 0)
+        ret = BAD_CERTIFICATE_STATUS_ERROR;
+#if defined(HAVE_CERTIFICATE_STATUS_REQUEST_V2)
+    if (ret == 0) {
+        if (TLSX_CSR2_MergePendingCA(ssl) < 0) {
+            WOLFSSL_MSG("Failed to merge pending CAs");
+        }
+    }
+    else {
+        TLSX_CSR2_ClearPendingCA(ssl);
+    }
+#endif
 
     if (ret != 0) {
         WOLFSSL_ERROR_VERBOSE(ret);
@@ -16518,44 +16691,6 @@ static int SanityCheckMsgReceived(WOLFSSL* ssl, byte type)
                 WOLFSSL_ERROR_VERBOSE(OUT_OF_ORDER_E);
                 return OUT_OF_ORDER_E;
             }
-#if defined(HAVE_CERTIFICATE_STATUS_REQUEST) || \
-                                     defined(HAVE_CERTIFICATE_STATUS_REQUEST_V2)
-            if (ssl->msgsReceived.got_certificate_status == 0) {
-                int csrRet = 0;
-#ifdef HAVE_CERTIFICATE_STATUS_REQUEST
-                if (csrRet == 0 && ssl->status_request) {
-                    WOLFSSL_MSG("No CertificateStatus before ServerKeyExchange");
-                    csrRet = TLSX_CSR_ForceRequest(ssl);
-                }
-#endif
-#ifdef HAVE_CERTIFICATE_STATUS_REQUEST_V2
-                if (csrRet == 0 && ssl->status_request_v2) {
-                    WOLFSSL_MSG("No CertificateStatus before ServerKeyExchange");
-                    csrRet = TLSX_CSR2_ForceRequest(ssl);
-                }
-#endif
-                if (csrRet != 0) {
-                    /* Error out if OCSP lookups are enabled and failed or if
-                     * the user requires stapling. */
-                    if (SSL_CM(ssl)->ocspEnabled || SSL_CM(ssl)->ocspMustStaple)
-                        return csrRet;
-                }
-                /* Check that a status request extension was seen as the
-                 * CertificateStatus wasn't when an OCSP staple is required.
-                 */
-                if (
-#ifdef HAVE_CERTIFICATE_STATUS_REQUEST
-                     !ssl->status_request &&
-#endif
-#ifdef HAVE_CERTIFICATE_STATUS_REQUEST_V2
-                     !ssl->status_request_v2 &&
-#endif
-                                                 SSL_CM(ssl)->ocspMustStaple) {
-                    WOLFSSL_ERROR_VERBOSE(OCSP_CERT_UNKNOWN);
-                    return OCSP_CERT_UNKNOWN;
-                }
-            }
-#endif
 
             break;
 #endif
@@ -16628,6 +16763,54 @@ static int SanityCheckMsgReceived(WOLFSSL* ssl, byte type)
                     return OUT_OF_ORDER_E;
                 }
             }
+#if defined(HAVE_CERTIFICATE_STATUS_REQUEST) || \
+                                     defined(HAVE_CERTIFICATE_STATUS_REQUEST_V2)
+            if (ssl->msgsReceived.got_certificate_status == 0) {
+                int csrRet = 0;
+#ifdef HAVE_CERTIFICATE_STATUS_REQUEST
+                if (csrRet == 0 && ssl->status_request) {
+                    WOLFSSL_MSG("No CertificateStatus before ServerHelloDone");
+                    csrRet = TLSX_CSR_ForceRequest(ssl);
+                }
+#endif
+#ifdef HAVE_CERTIFICATE_STATUS_REQUEST_V2
+                if (csrRet == 0 && ssl->status_request_v2) {
+                    WOLFSSL_MSG("No CertificateStatus before ServerHelloDone");
+                    csrRet = TLSX_CSR2_ForceRequest(ssl);
+                }
+                if (ssl->status_request_v2) {
+                    if (csrRet == 0) {
+                        if (TLSX_CSR2_MergePendingCA(ssl) < 0) {
+                            WOLFSSL_MSG("Failed to merge pending CAs");
+                        }
+                    }
+                    else {
+                        TLSX_CSR2_ClearPendingCA(ssl);
+                    }
+                }
+#endif
+                if (csrRet != 0) {
+                    /* Error out if OCSP lookups are enabled and failed or if
+                     * the user requires stapling. */
+                    if (SSL_CM(ssl)->ocspEnabled || SSL_CM(ssl)->ocspMustStaple)
+                        return csrRet;
+                }
+                /* Check that a status request extension was seen as the
+                 * CertificateStatus wasn't when an OCSP staple is required.
+                 */
+                if (
+#ifdef HAVE_CERTIFICATE_STATUS_REQUEST
+                     !ssl->status_request &&
+#endif
+#ifdef HAVE_CERTIFICATE_STATUS_REQUEST_V2
+                     !ssl->status_request_v2 &&
+#endif
+                                                 SSL_CM(ssl)->ocspMustStaple) {
+                    WOLFSSL_ERROR_VERBOSE(OCSP_CERT_UNKNOWN);
+                    return OCSP_CERT_UNKNOWN;
+                }
+            }
+#endif
             break;
 #endif
 
@@ -16997,7 +17180,8 @@ int DoHandShakeMsgType(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                                                IsAtLeastTLSv1_3(ssl->version)) {
 
         #if defined(WOLFSSL_ASYNC_CRYPT) || defined(WOLFSSL_NONBLOCK_OCSP)
-            if (ret != WC_PENDING_E && ret != OCSP_WANT_READ)
+            if (ret != WC_NO_ERR_TRACE(WC_PENDING_E) &&
+                ret != WC_NO_ERR_TRACE(OCSP_WANT_READ))
         #endif
             {
                 ssl->options.cacheMessages = 0;
@@ -17079,7 +17263,8 @@ int DoHandShakeMsgType(WOLFSSL* ssl, byte* input, word32* inOutIdx,
         if (ssl->options.resuming || !ssl->options.verifyPeer || \
                      !IsAtLeastTLSv1_2(ssl) || IsAtLeastTLSv1_3(ssl->version)) {
         #if defined(WOLFSSL_ASYNC_CRYPT) || defined(WOLFSSL_NONBLOCK_OCSP)
-            if (ret != WC_PENDING_E && ret != OCSP_WANT_READ)
+            if (ret != WC_NO_ERR_TRACE(WC_PENDING_E) &&
+                ret != WC_NO_ERR_TRACE(OCSP_WANT_READ))
         #endif
             {
                 ssl->options.cacheMessages = 0;
@@ -17145,7 +17330,8 @@ int DoHandShakeMsgType(WOLFSSL* ssl, byte* input, word32* inOutIdx,
 
 #if defined(WOLFSSL_ASYNC_CRYPT) || defined(WOLFSSL_NONBLOCK_OCSP)
     /* if async, offset index so this msg will be processed again */
-    if ((ret == WC_PENDING_E || ret == OCSP_WANT_READ) && *inOutIdx > 0) {
+    if ((ret == WC_NO_ERR_TRACE(WC_PENDING_E) ||
+         ret == WC_NO_ERR_TRACE(OCSP_WANT_READ)) && *inOutIdx > 0) {
         *inOutIdx -= HANDSHAKE_HEADER_SZ;
     #ifdef WOLFSSL_DTLS
         if (ssl->options.dtls) {
@@ -17155,7 +17341,8 @@ int DoHandShakeMsgType(WOLFSSL* ssl, byte* input, word32* inOutIdx,
     }
 
     /* make sure async error is cleared */
-    if (ret == 0 && (ssl->error == WC_PENDING_E || ssl->error == OCSP_WANT_READ)) {
+    if (ret == 0 && (ssl->error == WC_NO_ERR_TRACE(WC_PENDING_E) ||
+                     ssl->error == WC_NO_ERR_TRACE(OCSP_WANT_READ))) {
         ssl->error = 0;
     }
 #endif /* WOLFSSL_ASYNC_CRYPT || WOLFSSL_NONBLOCK_OCSP */
@@ -17278,7 +17465,7 @@ static int DoHandShakeMsg(WOLFSSL* ssl, byte* input, word32* inOutIdx,
         }
 
     #ifdef WOLFSSL_ASYNC_CRYPT
-        if (ssl->error != WC_PENDING_E)
+        if (ssl->error != WC_NO_ERR_TRACE(WC_PENDING_E))
     #endif
         {
             /* for async this copy was already done, do not replace, since
@@ -17298,7 +17485,7 @@ static int DoHandShakeMsg(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                                      ssl->arrays->pendingMsgSz - idx,
                                      ssl->arrays->pendingMsgSz);
         #ifdef WOLFSSL_ASYNC_CRYPT
-            if (ret == WC_PENDING_E) {
+            if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
                 /* setup to process fragment again */
                 ssl->arrays->pendingMsgOffset -= inputLength;
                 *inOutIdx -= inputLength;
@@ -17330,41 +17517,41 @@ int SendFatalAlertOnly(WOLFSSL *ssl, int error)
 
     switch (error) {
         /* not fatal errors */
-    case WANT_WRITE:
-    case WANT_READ:
-    case ZERO_RETURN:
+    case WC_NO_ERR_TRACE(WANT_WRITE):
+    case WC_NO_ERR_TRACE(WANT_READ):
+    case WC_NO_ERR_TRACE(ZERO_RETURN):
 #ifdef WOLFSSL_NONBLOCK_OCSP
-    case OCSP_WANT_READ:
+    case WC_NO_ERR_TRACE(OCSP_WANT_READ):
 #endif
 #ifdef WOLFSSL_ASYNC_CRYPT
-    case WC_PENDING_E:
+    case WC_NO_ERR_TRACE(WC_PENDING_E):
 #endif
         return 0;
 
     /* peer already disconnected and ssl is possibly in bad state
      * don't try to send an alert */
-    case SOCKET_ERROR_E:
+    case WC_NO_ERR_TRACE(SOCKET_ERROR_E):
         return error;
 
-    case BUFFER_ERROR:
-    case ASN_PARSE_E:
-    case COMPRESSION_ERROR:
+    case WC_NO_ERR_TRACE(BUFFER_ERROR):
+    case WC_NO_ERR_TRACE(ASN_PARSE_E):
+    case WC_NO_ERR_TRACE(COMPRESSION_ERROR):
         why = decode_error;
         break;
-    case VERIFY_FINISHED_ERROR:
-    case SIG_VERIFY_E:
+    case WC_NO_ERR_TRACE(VERIFY_FINISHED_ERROR):
+    case WC_NO_ERR_TRACE(SIG_VERIFY_E):
         why = decrypt_error;
         break;
-    case DUPLICATE_MSG_E:
-    case NO_CHANGE_CIPHER_E:
-    case OUT_OF_ORDER_E:
+    case WC_NO_ERR_TRACE(DUPLICATE_MSG_E):
+    case WC_NO_ERR_TRACE(NO_CHANGE_CIPHER_E):
+    case WC_NO_ERR_TRACE(OUT_OF_ORDER_E):
         why = unexpected_message;
         break;
-    case ECC_OUT_OF_RANGE_E:
+    case WC_NO_ERR_TRACE(ECC_OUT_OF_RANGE_E):
         why = bad_record_mac;
         break;
-    case MATCH_SUITE_ERROR:
-    case VERSION_ERROR:
+    case WC_NO_ERR_TRACE(MATCH_SUITE_ERROR):
+    case WC_NO_ERR_TRACE(VERSION_ERROR):
     default:
         why = handshake_failure;
         break;
@@ -17848,12 +18035,12 @@ int DtlsMsgDrain(WOLFSSL* ssl)
             DtlsTxMsgListClean(ssl);
         }
         else if (!IsAtLeastTLSv1_3(ssl->version)) {
-            if (SendFatalAlertOnly(ssl, ret) == SOCKET_ERROR_E) {
+            if (SendFatalAlertOnly(ssl, ret) == WC_NO_ERR_TRACE(SOCKET_ERROR_E)) {
                 ret = SOCKET_ERROR_E;
             }
         }
     #ifdef WOLFSSL_ASYNC_CRYPT
-        if (ret == WC_PENDING_E) {
+        if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
             break;
         }
     #endif
@@ -18710,7 +18897,7 @@ static WC_INLINE int EncryptDo(WOLFSSL* ssl, byte* out, const byte* input,
 
             ret = wc_Des3_CbcEncrypt(ssl->encrypt.des3, out, input, sz);
         #ifdef WOLFSSL_ASYNC_CRYPT
-            if (ret == WC_PENDING_E && asyncOkay) {
+            if (ret == WC_NO_ERR_TRACE(WC_PENDING_E) && asyncOkay) {
                 ret = wolfSSL_AsyncPush(ssl, asyncDev);
             }
         #endif
@@ -18728,7 +18915,7 @@ static WC_INLINE int EncryptDo(WOLFSSL* ssl, byte* out, const byte* input,
         #endif
             ret = wc_AesCbcEncrypt(ssl->encrypt.aes, out, input, sz);
         #ifdef WOLFSSL_ASYNC_CRYPT
-            if (ret == WC_PENDING_E && asyncOkay) {
+            if (ret == WC_NO_ERR_TRACE(WC_PENDING_E) && asyncOkay) {
                 ret = wolfSSL_AsyncPush(ssl, asyncDev);
             }
         #endif
@@ -18799,7 +18986,7 @@ static WC_INLINE int EncryptDo(WOLFSSL* ssl, byte* out, const byte* input,
                          ssl->encrypt.additional, AEAD_AUTH_DATA_SZ);
             }
 
-            if (ret == NOT_COMPILED_IN)
+            if (ret == WC_NO_ERR_TRACE(NOT_COMPILED_IN))
         #endif /* HAVE_PK_CALLBACKS */
             {
                 ret = aes_auth_fn(ssl->encrypt.aes,
@@ -18812,7 +18999,7 @@ static WC_INLINE int EncryptDo(WOLFSSL* ssl, byte* out, const byte* input,
             }
 
         #ifdef WOLFSSL_ASYNC_CRYPT
-            if (ret == WC_PENDING_E && asyncOkay) {
+            if (ret == WC_NO_ERR_TRACE(WC_PENDING_E) && asyncOkay) {
                 ret = wolfSSL_AsyncPush(ssl, asyncDev);
             }
         #endif
@@ -18902,7 +19089,7 @@ static WC_INLINE int EncryptDo(WOLFSSL* ssl, byte* out, const byte* input,
         #endif
             ret = wc_Sm4CbcEncrypt(ssl->encrypt.sm4, out, input, sz);
         #ifdef WOLFSSL_ASYNC_CRYPT
-            if (ret == WC_PENDING_E && asyncOkay) {
+            if (ret == WC_NO_ERR_TRACE(WC_PENDING_E) && asyncOkay) {
                 ret = wolfSSL_AsyncPush(ssl, asyncDev);
             }
         #endif
@@ -18966,7 +19153,7 @@ static WC_INLINE int EncryptDo(WOLFSSL* ssl, byte* out, const byte* input,
                     ssl->encrypt.additional, AEAD_AUTH_DATA_SZ);
 
         #ifdef WOLFSSL_ASYNC_CRYPT
-            if (ret == WC_PENDING_E && asyncOkay) {
+            if (ret == WC_NO_ERR_TRACE(WC_PENDING_E) && asyncOkay) {
                 ret = wolfSSL_AsyncPush(ssl, asyncDev);
             }
         #endif
@@ -18996,7 +19183,7 @@ static WC_INLINE int EncryptDo(WOLFSSL* ssl, byte* out, const byte* input,
 
 #ifdef WOLFSSL_ASYNC_CRYPT
     /* if async is not okay, then block */
-    if (ret == WC_PENDING_E && !asyncOkay) {
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E) && !asyncOkay) {
         ret = wc_AsyncWait(ret, asyncDev, event_flags);
     }
 #endif
@@ -19010,7 +19197,7 @@ static WC_INLINE int Encrypt(WOLFSSL* ssl, byte* out, const byte* input,
     int ret = 0;
 
 #ifdef WOLFSSL_ASYNC_CRYPT
-    if (ssl->error == WC_PENDING_E) {
+    if (ssl->error == WC_NO_ERR_TRACE(WC_PENDING_E)) {
         ssl->error = 0; /* clear async */
     }
 #endif
@@ -19103,7 +19290,7 @@ static WC_INLINE int Encrypt(WOLFSSL* ssl, byte* out, const byte* input,
 
         #ifdef WOLFSSL_ASYNC_CRYPT
             /* If pending, then leave and return will resume below */
-            if (ret == WC_PENDING_E) {
+            if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
                 return ret;
             }
         #endif
@@ -19199,7 +19386,7 @@ static WC_INLINE int DecryptDo(WOLFSSL* ssl, byte* plain, const byte* input,
 
             ret = wc_Des3_CbcDecrypt(ssl->decrypt.des3, plain, input, sz);
         #ifdef WOLFSSL_ASYNC_CRYPT
-            if (ret == WC_PENDING_E) {
+            if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
                 ret = wolfSSL_AsyncPush(ssl, &ssl->decrypt.des3->asyncDev);
             }
         #endif
@@ -19217,7 +19404,7 @@ static WC_INLINE int DecryptDo(WOLFSSL* ssl, byte* plain, const byte* input,
         #endif
             ret = wc_AesCbcDecrypt(ssl->decrypt.aes, plain, input, sz);
         #ifdef WOLFSSL_ASYNC_CRYPT
-            if (ret == WC_PENDING_E) {
+            if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
                 ret = wolfSSL_AsyncPush(ssl, &ssl->decrypt.aes->asyncDev);
             }
         #endif
@@ -19283,7 +19470,7 @@ static WC_INLINE int DecryptDo(WOLFSSL* ssl, byte* plain, const byte* input,
                         ssl->decrypt.additional, AEAD_AUTH_DATA_SZ);
             }
 
-            if (ret == NOT_COMPILED_IN)
+            if (ret == WC_NO_ERR_TRACE(NOT_COMPILED_IN))
         #endif /* HAVE_PK_CALLBACKS */
             {
                 if ((ret = aes_auth_fn(ssl->decrypt.aes,
@@ -19295,7 +19482,7 @@ static WC_INLINE int DecryptDo(WOLFSSL* ssl, byte* plain, const byte* input,
                             ssl->specs.aead_mac_size,
                             ssl->decrypt.additional, AEAD_AUTH_DATA_SZ)) < 0) {
                 #ifdef WOLFSSL_ASYNC_CRYPT
-                    if (ret == WC_PENDING_E) {
+                    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
                         ret = wolfSSL_AsyncPush(ssl,
                                                 &ssl->decrypt.aes->asyncDev);
                     }
@@ -19381,7 +19568,7 @@ static WC_INLINE int DecryptDo(WOLFSSL* ssl, byte* plain, const byte* input,
         #endif
             ret = wc_Sm4CbcDecrypt(ssl->decrypt.sm4, plain, input, sz);
         #ifdef WOLFSSL_ASYNC_CRYPT
-            if (ret == WC_PENDING_E) {
+            if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
                 ret = wolfSSL_AsyncPush(ssl, &ssl->decrypt.aes->asyncDev);
             }
         #endif
@@ -19442,7 +19629,7 @@ static WC_INLINE int DecryptDo(WOLFSSL* ssl, byte* plain, const byte* input,
                         ssl->specs.aead_mac_size,
                         ssl->decrypt.additional, AEAD_AUTH_DATA_SZ)) < 0) {
             #ifdef WOLFSSL_ASYNC_CRYPT
-                if (ret == WC_PENDING_E) {
+                if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
                     ret = wolfSSL_AsyncPush(ssl,
                                             &ssl->decrypt.sm4->asyncDev);
                 }
@@ -19482,9 +19669,9 @@ static int DecryptTls(WOLFSSL* ssl, byte* plain, const byte* input, word16 sz)
 
 #ifdef WOLFSSL_ASYNC_CRYPT
     ret = wolfSSL_AsyncPop(ssl, &ssl->decrypt.state);
-    if (ret != WC_NO_PENDING_E) {
+    if (ret != WC_NO_ERR_TRACE(WC_NO_PENDING_E)) {
         /* check for still pending */
-        if (ret == WC_PENDING_E)
+        if (ret == WC_NO_ERR_TRACE(WC_PENDING_E))
             return ret;
 
         ssl->error = 0; /* clear async */
@@ -19599,7 +19786,7 @@ static int DecryptTls(WOLFSSL* ssl, byte* plain, const byte* input, word16 sz)
 
         #ifdef WOLFSSL_ASYNC_CRYPT
             /* If pending, leave and return below */
-            if (ret == WC_PENDING_E) {
+            if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
                 return ret;
             }
         #endif
@@ -20712,11 +20899,13 @@ static WC_INLINE int VerifyMac(WOLFSSL* ssl, const byte* input, word32 msgSz,
                 ret = ssl->ctx->VerifyMacCb(ssl, input,
                            (msgSz - ivExtra) - digestSz - pad - 1,
                            digestSz, (word32)content, ctx);
-                if (ret != 0 && ret != PROTOCOLCB_UNAVAILABLE) {
+                if (ret != 0 &&
+                    ret != WC_NO_ERR_TRACE(PROTOCOLCB_UNAVAILABLE)) {
                     return ret;
                 }
             }
-            if (!ssl->ctx->VerifyMacCb || ret == PROTOCOLCB_UNAVAILABLE)
+            if (!ssl->ctx->VerifyMacCb ||
+                ret == WC_NO_ERR_TRACE(PROTOCOLCB_UNAVAILABLE))
 #endif
             ret = TimingPadVerify(ssl, input, pad, digestSz, msgSz - ivExtra,
                                   content);
@@ -20808,7 +20997,8 @@ static int DtlsShouldDrop(WOLFSSL* ssl, int retcode)
     }
 
     if ((ssl->options.handShakeDone && retcode != 0)
-        || retcode == SEQUENCE_ERROR || retcode == DTLS_CID_ERROR) {
+        || retcode == WC_NO_ERR_TRACE(SEQUENCE_ERROR)
+        || retcode == WC_NO_ERR_TRACE(DTLS_CID_ERROR)) {
         WOLFSSL_MSG_EX("Silently dropping DTLS message: %d", retcode);
         return 1;
     }
@@ -20868,7 +21058,8 @@ int ProcessReplyEx(WOLFSSL* ssl, int allowSocketErr)
     #ifdef WOLFSSL_NONBLOCK_OCSP
         && ssl->error != OCSP_WANT_READ
     #endif
-        && (allowSocketErr != 1 || ssl->error != SOCKET_ERROR_E)
+        && (allowSocketErr != 1 ||
+            ssl->error != WC_NO_ERR_TRACE(SOCKET_ERROR_E))
     ) {
         WOLFSSL_MSG("ProcessReply retry in error state, not allowed");
         return ssl->error;
@@ -20879,7 +21070,8 @@ int ProcessReplyEx(WOLFSSL* ssl, int allowSocketErr)
 #if defined(WOLFSSL_CHECK_ALERT_ON_ERR) && \
     (defined(WOLFSSL_ASYNC_CRYPT) || defined(WOLFSSL_NONBLOCK_OCSP))
     if (allowSocketErr == 1 && \
-        (ssl->error == WC_PENDING_E || ssl->error == OCSP_WANT_READ)) {
+        (ssl->error == WC_NO_ERR_TRACE(WC_PENDING_E) ||
+         ssl->error == WC_NO_ERR_TRACE(OCSP_WANT_READ))) {
         return ssl->error;
     }
 #endif
@@ -21060,7 +21252,7 @@ int ProcessReplyEx(WOLFSSL* ssl, int allowSocketErr)
 #endif
             if (ret != 0) {
                 switch (ret) {
-                case VERSION_ERROR:
+                case WC_NO_ERR_TRACE(VERSION_ERROR):
                     /* send alert per RFC5246 Appendix E. Backward
                      * Compatibility */
                     if (ssl->options.side == WOLFSSL_CLIENT_END)
@@ -21068,7 +21260,7 @@ int ProcessReplyEx(WOLFSSL* ssl, int allowSocketErr)
                             wolfssl_alert_protocol_version);
                     break;
 #ifdef HAVE_MAX_FRAGMENT
-                case LENGTH_ERROR:
+                case WC_NO_ERR_TRACE(LENGTH_ERROR):
                     SendAlert(ssl, alert_fatal, record_overflow);
                     break;
 #endif /* HAVE_MAX_FRAGMENT */
@@ -21155,7 +21347,7 @@ default:
                                    ssl->buffers.inputBuffer.idx,
                                    ssl->curSize, ssl->curRL.type);
             #ifdef WOLFSSL_ASYNC_CRYPT
-                if (ret == WC_PENDING_E)
+                if (ret == WC_NO_ERR_TRACE(WC_PENDING_E))
                     return ret;
             #endif
                 if (ret < 0) {
@@ -21302,7 +21494,7 @@ default:
                 }
 
             #ifdef WOLFSSL_ASYNC_CRYPT
-                if (ret == WC_PENDING_E)
+                if (ret == WC_NO_ERR_TRACE(WC_PENDING_E))
                     return ret;
             #endif
 
@@ -21386,7 +21578,7 @@ default:
                                     ssl->curSize, ssl->curRL.type,
                                     &ssl->keys.padSz);
                 #ifdef WOLFSSL_ASYNC_CRYPT
-                    if (ret == WC_PENDING_E)
+                    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E))
                         return ret;
                 #endif
                     if (ret < 0) {
@@ -21537,14 +21729,15 @@ default:
                                 ssl->buffers.inputBuffer.buffer,
                                 &ssl->buffers.inputBuffer.idx,
                                 ssl->buffers.inputBuffer.length);
-                            if (ret == 0 || ret == WC_PENDING_E) {
+                            if (ret == 0 ||
+                                ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
                                 /* Reset timeout as we have received a valid
                                  * DTLS handshake message */
                                 ssl->dtls_timeout = ssl->dtls_timeout_init;
                             }
                             else {
                                 if (SendFatalAlertOnly(ssl, ret)
-                                        == SOCKET_ERROR_E) {
+                                        == WC_NO_ERR_TRACE(SOCKET_ERROR_E)) {
                                     ret = SOCKET_ERROR_E;
                                 }
                             }
@@ -21585,7 +21778,8 @@ default:
                                             &ssl->buffers.inputBuffer.idx,
                                             ssl->buffers.inputBuffer.length);
                         if (ret != 0) {
-                            if (SendFatalAlertOnly(ssl, ret) == SOCKET_ERROR_E)
+                            if (SendFatalAlertOnly(ssl, ret) ==
+                                WC_NO_ERR_TRACE(SOCKET_ERROR_E))
                                 ret = SOCKET_ERROR_E;
                         }
 #else
@@ -21625,7 +21819,7 @@ default:
                      * Current message should have been DtlsMsgStore'ed and
                      * should be processed with DtlsMsgDrain */
                             && (!ssl->options.dtls
-                                || ret != WC_PENDING_E)
+                                || ret != WC_NO_ERR_TRACE(WC_PENDING_E))
 #endif
                     ) {
                         WOLFSSL_ERROR(ret);
@@ -21738,7 +21932,8 @@ default:
                         /* Check for duplicate CCS message in DTLS mode.
                          * DTLS allows for duplicate messages, and it should be
                          * skipped. Also skip if out of order. */
-                            if (ret != DUPLICATE_MSG_E && ret != OUT_OF_ORDER_E)
+                            if (ret != WC_NO_ERR_TRACE(DUPLICATE_MSG_E) &&
+                                ret != WC_NO_ERR_TRACE(OUT_OF_ORDER_E))
                                 return ret;
                             /* Reset error */
                             ret = 0;
@@ -21833,7 +22028,7 @@ default:
                         defined(HAVE_SECURE_RENEGOTIATION)
                         /* Not really an error. We will return after cleaning
                          * up the processReply state. */
-                        if (ret != APP_DATA_READY)
+                        if (ret != WC_NO_ERR_TRACE(APP_DATA_READY))
                     #endif
                             return ret;
                     }
@@ -21962,7 +22157,7 @@ default:
 #endif
 #if defined(WOLFSSL_DTLS13) || defined(HAVE_SECURE_RENEGOTIATION)
             /* Signal to user that we have application data ready to read */
-            if (ret == APP_DATA_READY)
+            if (ret == WC_NO_ERR_TRACE(APP_DATA_READY))
                 return ret;
 #endif
             /* It is safe to shrink the input buffer here now. local vars will
@@ -22153,7 +22348,7 @@ static int SSL_hmac(WOLFSSL* ssl, byte* digest, const byte* in, word32 sz,
         ret = wc_Md5Final(&md5, result);
     #ifdef WOLFSSL_ASYNC_CRYPT
         /* TODO: Make non-blocking */
-        if (ret == WC_PENDING_E) {
+        if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
             ret = wc_AsyncWait(ret, &md5.asyncDev, WC_ASYNC_FLAG_NONE);
         }
     #endif
@@ -22173,7 +22368,7 @@ static int SSL_hmac(WOLFSSL* ssl, byte* digest, const byte* in, word32 sz,
         ret =  wc_Md5Final(&md5, digest);
     #ifdef WOLFSSL_ASYNC_CRYPT
         /* TODO: Make non-blocking */
-        if (ret == WC_PENDING_E) {
+        if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
             ret = wc_AsyncWait(ret, &md5.asyncDev, WC_ASYNC_FLAG_NONE);
         }
     #endif
@@ -22203,7 +22398,7 @@ static int SSL_hmac(WOLFSSL* ssl, byte* digest, const byte* in, word32 sz,
         ret = wc_ShaFinal(&sha, result);
     #ifdef WOLFSSL_ASYNC_CRYPT
         /* TODO: Make non-blocking */
-        if (ret == WC_PENDING_E) {
+        if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
             ret = wc_AsyncWait(ret, &sha.asyncDev, WC_ASYNC_FLAG_NONE);
         }
     #endif
@@ -22223,7 +22418,7 @@ static int SSL_hmac(WOLFSSL* ssl, byte* digest, const byte* in, word32 sz,
         ret =  wc_ShaFinal(&sha, digest);
     #ifdef WOLFSSL_ASYNC_CRYPT
         /* TODO: Make non-blocking */
-        if (ret == WC_PENDING_E) {
+        if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
             ret = wc_AsyncWait(ret, &sha.asyncDev, WC_ASYNC_FLAG_NONE);
         }
     #endif
@@ -22456,7 +22651,7 @@ int BuildMessage(WOLFSSL* ssl, byte* output, int outSz, const byte* input,
         args = &ssl->async->buildArgs;
 
         ret = wolfSSL_AsyncPop(ssl, &ssl->options.buildMsgState);
-        if (ret != WC_NO_PENDING_E) {
+        if (ret != WC_NO_ERR_TRACE(WC_NO_PENDING_E)) {
             /* Check for error */
             if (ret < 0)
                 goto exit_buildmsg;
@@ -22470,7 +22665,7 @@ int BuildMessage(WOLFSSL* ssl, byte* output, int outSz, const byte* input,
 
     /* Reset state */
 #ifdef WOLFSSL_ASYNC_CRYPT
-    if (ret == WC_NO_PENDING_E)
+    if (ret == WC_NO_ERR_TRACE(WC_NO_PENDING_E))
 #endif
     {
         ret = 0;
@@ -22804,7 +22999,7 @@ int BuildMessage(WOLFSSL* ssl, byte* output, int outSz, const byte* input,
 
             if (ret != 0) {
             #ifdef WOLFSSL_ASYNC_CRYPT
-                if (ret != WC_PENDING_E)
+                if (ret != WC_NO_ERR_TRACE(WC_PENDING_E))
             #endif
                 {
                     /* Zeroize plaintext. */
@@ -22881,7 +23076,7 @@ exit_buildmsg:
     WOLFSSL_LEAVE("BuildMessage", ret);
 
 #ifdef WOLFSSL_ASYNC_CRYPT
-    if (ret == WC_PENDING_E) {
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
         return ret;
     }
 #endif
@@ -23093,7 +23288,7 @@ static int CreateOcspRequest(WOLFSSL* ssl, OcspRequest* request,
 
     InitDecodedCert(cert, certData, length, ssl->heap);
     /* TODO: Setup async support here */
-    ret = ParseCertRelative(cert, CERT_TYPE, VERIFY, SSL_CM(ssl));
+    ret = ParseCertRelative(cert, CERT_TYPE, VERIFY, SSL_CM(ssl), NULL);
     if (ret != 0) {
         WOLFSSL_MSG("ParseCert failed");
     }
@@ -23190,9 +23385,9 @@ int CreateOcspResponse(WOLFSSL* ssl, OcspRequest** ocspRequest,
                                ssl->heap);
 
         /* Suppressing, not critical */
-        if (ret == OCSP_CERT_REVOKED ||
-            ret == OCSP_CERT_UNKNOWN ||
-            ret == OCSP_LOOKUP_FAIL) {
+        if (ret == WC_NO_ERR_TRACE(OCSP_CERT_REVOKED) ||
+            ret == WC_NO_ERR_TRACE(OCSP_CERT_UNKNOWN) ||
+            ret == WC_NO_ERR_TRACE(OCSP_LOOKUP_FAIL)) {
             ret = 0;
         }
     }
@@ -23766,6 +23961,7 @@ static int BuildCertificateStatus(WOLFSSL* ssl, byte type, buffer* status,
     byte*  output  = NULL;
     word32 idx     = RECORD_HEADER_SZ + HANDSHAKE_HEADER_SZ;
     word32 length  = ENUM_LEN;
+    word32 headerSz= idx;
     int    sendSz  = 0;
     int    ret     = 0;
     int    i       = 0;
@@ -23785,88 +23981,42 @@ static int BuildCertificateStatus(WOLFSSL* ssl, byte type, buffer* status,
         default:
             return 0;
     }
+#ifdef WOLFSSL_DTLS
+    if (ssl->options.dtls) {
+        headerSz = idx = DTLS_RECORD_HEADER_SZ + DTLS_HANDSHAKE_HEADER_SZ;
+        sendSz  = idx + length;
 
+    } else
+#endif
     sendSz = (int)(idx + length);
 
     if (ssl->keys.encryptionOn)
         sendSz += MAX_MSG_EXTRA;
 
-    /* Set this in case CheckAvailableSize returns a WANT_WRITE so that state
-     * is not advanced yet */
-    ssl->options.buildingMsg = 1;
+    output =(byte*)XMALLOC(sendSz, ssl->heap, DYNAMIC_TYPE_OCSP);
+    if (output == NULL)
+        return MEMORY_E;
 
-    if ((ret = CheckAvailableSize(ssl, sendSz)) == 0) {
-        output = GetOutputBuffer(ssl);
+    AddHeaders(output, length, certificate_status, ssl);
 
-        AddHeaders(output, length, certificate_status, ssl);
+    output[idx++] = type;
 
-        output[idx++] = type;
-
-        if (type == WOLFSSL_CSR2_OCSP_MULTI) {
-            c32to24(length - (ENUM_LEN + OPAQUE24_LEN), output + idx);
-            idx += OPAQUE24_LEN;
-        }
-
-        for (i = 0; i < count; i++) {
-            c32to24(status[i].length, output + idx);
-            idx += OPAQUE24_LEN;
-
-            XMEMCPY(output + idx, status[i].buffer, status[i].length);
-            idx += status[i].length;
-        }
-
-        if (IsEncryptionOn(ssl, 1)) {
-            byte* input;
-            int   inputSz = (int)idx; /* build msg adds rec hdr */
-            int   recordHeaderSz = RECORD_HEADER_SZ;
-
-            if (ssl->options.dtls)
-                recordHeaderSz += DTLS_RECORD_EXTRA;
-            inputSz -= recordHeaderSz;
-            input = (byte*)XMALLOC(inputSz, ssl->heap, DYNAMIC_TYPE_IN_BUFFER);
-            if (input == NULL)
-                return MEMORY_E;
-
-            XMEMCPY(input, output + recordHeaderSz, inputSz);
-            #ifdef WOLFSSL_DTLS
-                ret = DtlsMsgPoolSave(ssl, input, (word32)inputSz, certificate_status);
-            #endif
-            if (ret == 0)
-                sendSz = BuildMessage(ssl, output, sendSz, input, inputSz,
-                                      handshake, 1, 0, 0, CUR_ORDER);
-            XFREE(input, ssl->heap, DYNAMIC_TYPE_IN_BUFFER);
-
-            if (sendSz < 0)
-                ret = sendSz;
-        }
-        else {
-            #ifdef WOLFSSL_DTLS
-                if (ret == 0 && IsDtlsNotSctpMode(ssl))
-                    ret = DtlsMsgPoolSave(ssl, output, (word32)sendSz, certificate_status);
-                if (ret == 0 && ssl->options.dtls)
-                    DtlsSEQIncrement(ssl, CUR_ORDER);
-            #endif
-            ret = HashOutput(ssl, output, sendSz, 0);
-        }
-
-    #if defined(WOLFSSL_CALLBACKS) || defined(OPENSSL_EXTRA)
-        if (ret == 0 && ssl->hsInfoOn)
-            AddPacketName(ssl, "CertificateStatus");
-        if (ret == 0 && ssl->toInfoOn) {
-            ret = AddPacketInfo(ssl, "CertificateStatus", handshake, output,
-                    sendSz, WRITE_PROTO, 0, ssl->heap);
-            if (ret != 0)
-                return ret;
-        }
-    #endif
-
-        if (ret == 0) {
-            ssl->options.buildingMsg = 0;
-            ssl->buffers.outputBuffer.length += sendSz;
-            if (!ssl->options.groupMessages)
-                ret = SendBuffered(ssl);
-        }
+    if (type == WOLFSSL_CSR2_OCSP_MULTI) {
+        c32to24(length - (ENUM_LEN + OPAQUE24_LEN), output + idx);
+        idx += OPAQUE24_LEN;
     }
+
+    for (i = 0; i < count; i++) {
+        c32to24(status[i].length, output + idx);
+        idx += OPAQUE24_LEN;
+
+        XMEMCPY(output + idx, status[i].buffer, status[i].length);
+        idx += status[i].length;
+    }
+    /* Send Message. Handled message fragmentation in the function if needed */
+    ret = SendHandshakeMsg(ssl, output, (sendSz - headerSz), certificate_status,
+                "Certificate Status");
+    XFREE(output, ssl->heap, DYNAMIC_TYPE_OCSP);
 
     WOLFSSL_LEAVE("BuildCertificateStatus", ret);
     return ret;
@@ -23919,7 +24069,8 @@ int SendCertificateStatus(WOLFSSL* ssl)
             }
 
             /* Let's not error out the connection if we can't verify our cert */
-            if (ret == ASN_SELF_SIGNED_E || ret == ASN_NO_SIGNER_E)
+            if (ret == WC_NO_ERR_TRACE(ASN_SELF_SIGNED_E) ||
+                ret == WC_NO_ERR_TRACE(ASN_NO_SIGNER_E))
                 ret = 0;
 
             if (response.buffer) {
@@ -24002,9 +24153,9 @@ int SendCertificateStatus(WOLFSSL* ssl)
                                         request, &responses[i + 1], ssl->heap);
 
                             /* Suppressing, not critical */
-                            if (ret == OCSP_CERT_REVOKED ||
-                                ret == OCSP_CERT_UNKNOWN ||
-                                ret == OCSP_LOOKUP_FAIL) {
+                            if (ret == WC_NO_ERR_TRACE(OCSP_CERT_REVOKED) ||
+                                ret == WC_NO_ERR_TRACE(OCSP_CERT_UNKNOWN) ||
+                                ret == WC_NO_ERR_TRACE(OCSP_LOOKUP_FAIL)) {
                                 ret = 0;
                             }
 
@@ -24028,9 +24179,9 @@ int SendCertificateStatus(WOLFSSL* ssl)
                                            request, &responses[++i], ssl->heap);
 
                     /* Suppressing, not critical */
-                    if (ret == OCSP_CERT_REVOKED ||
-                        ret == OCSP_CERT_UNKNOWN ||
-                        ret == OCSP_LOOKUP_FAIL) {
+                    if (ret == WC_NO_ERR_TRACE(OCSP_CERT_REVOKED) ||
+                        ret == WC_NO_ERR_TRACE(OCSP_CERT_UNKNOWN) ||
+                        ret == WC_NO_ERR_TRACE(OCSP_LOOKUP_FAIL)) {
                         ret = 0;
                     }
                 }
@@ -24051,7 +24202,8 @@ int SendCertificateStatus(WOLFSSL* ssl)
             }
 
             /* Let's not error out the connection if we can't verify our cert */
-            if (ret == ASN_SELF_SIGNED_E || ret == ASN_NO_SIGNER_E)
+            if (ret == WC_NO_ERR_TRACE(ASN_SELF_SIGNED_E) ||
+                ret == WC_NO_ERR_TRACE(ASN_NO_SIGNER_E))
                 ret = 0;
 
             break;
@@ -24305,7 +24457,8 @@ int SendData(WOLFSSL* ssl, const void* data, int sz)
     }
 
     /* don't allow write after decrypt or mac error */
-    if (ssl->error == VERIFY_MAC_ERROR || ssl->error == DECRYPT_ERROR) {
+    if (ssl->error == WC_NO_ERR_TRACE(VERIFY_MAC_ERROR) ||
+        ssl->error == WC_NO_ERR_TRACE(DECRYPT_ERROR)) {
         /* For DTLS allow these possible errors and allow the session
             to continue despite them */
         if (ssl->options.dtls) {
@@ -24344,7 +24497,7 @@ int SendData(WOLFSSL* ssl, const void* data, int sz)
         if ( (err = wolfSSL_negotiate(ssl)) != WOLFSSL_SUCCESS) {
         #ifdef WOLFSSL_ASYNC_CRYPT
             /* if async would block return WANT_WRITE */
-            if (ssl->error == WC_PENDING_E) {
+            if (ssl->error == WC_NO_ERR_TRACE(WC_PENDING_E)) {
                 return WOLFSSL_CBIO_ERR_WANT_WRITE;
             }
         #endif
@@ -24361,8 +24514,8 @@ int SendData(WOLFSSL* ssl, const void* data, int sz)
         WOLFSSL_MSG("output buffer was full, trying to send again");
         if ( (ssl->error = SendBuffered(ssl)) < 0) {
             WOLFSSL_ERROR(ssl->error);
-            if (ssl->error == SOCKET_ERROR_E && (ssl->options.connReset ||
-                                                 ssl->options.isClosed)) {
+            if (ssl->error == WC_NO_ERR_TRACE(SOCKET_ERROR_E) &&
+                (ssl->options.connReset || ssl->options.isClosed)) {
                 ssl->error = SOCKET_PEER_CLOSED_E;
                 WOLFSSL_ERROR(ssl->error);
                 return 0;  /* peer reset or closed */
@@ -24508,7 +24661,7 @@ int SendData(WOLFSSL* ssl, const void* data, int sz)
         }
         if (sendSz < 0) {
         #ifdef WOLFSSL_ASYNC_CRYPT
-            if (sendSz == WC_PENDING_E)
+            if (sendSz == WC_NO_ERR_TRACE(WC_PENDING_E))
                 ssl->error = sendSz;
         #endif
             return BUILD_MSG_ERROR;
@@ -24525,8 +24678,8 @@ int SendData(WOLFSSL* ssl, const void* data, int sz)
                doesn't present like WANT_WRITE */
             ssl->buffers.plainSz  = buffSz;
             ssl->buffers.prevSent = sent;
-            if (ssl->error == SOCKET_ERROR_E && (ssl->options.connReset ||
-                                                 ssl->options.isClosed)) {
+            if (ssl->error == WC_NO_ERR_TRACE(SOCKET_ERROR_E) &&
+                (ssl->options.connReset || ssl->options.isClosed)) {
                 ssl->error = SOCKET_PEER_CLOSED_E;
                 WOLFSSL_ERROR(ssl->error);
                 return 0;  /* peer reset or closed */
@@ -24562,9 +24715,9 @@ int ReceiveData(WOLFSSL* ssl, byte* output, int sz, int peek)
     if (ssl->options.dtls) {
         /* In DTLS mode, we forgive some errors and allow the session
          * to continue despite them. */
-        if (ssl->error == VERIFY_MAC_ERROR ||
-            ssl->error == DECRYPT_ERROR ||
-            ssl->error == DTLS_SIZE_ERROR) {
+        if (ssl->error == WC_NO_ERR_TRACE(VERIFY_MAC_ERROR) ||
+            ssl->error == WC_NO_ERR_TRACE(DECRYPT_ERROR) ||
+            ssl->error == WC_NO_ERR_TRACE(DTLS_SIZE_ERROR)) {
 
             ssl->error = 0;
         }
@@ -24596,7 +24749,7 @@ int ReceiveData(WOLFSSL* ssl, byte* output, int sz, int peek)
             if ( (err = wolfSSL_negotiate(ssl)) != WOLFSSL_SUCCESS) {
             #ifdef WOLFSSL_ASYNC_CRYPT
                 /* if async would block return WANT_WRITE */
-                if (ssl->error == WC_PENDING_E) {
+                if (ssl->error == WC_NO_ERR_TRACE(WC_PENDING_E)) {
                     return WOLFSSL_CBIO_ERR_WANT_READ;
                 }
             #endif
@@ -24623,7 +24776,7 @@ startScr:
                 WOLFSSL_MSG("Zero return, no more data coming");
                 return 0; /* no more data coming */
             }
-            if (ssl->error == SOCKET_ERROR_E) {
+            if (ssl->error == WC_NO_ERR_TRACE(SOCKET_ERROR_E)) {
                 if (ssl->options.connReset || ssl->options.isClosed) {
                     WOLFSSL_MSG("Peer reset or closed, connection done");
                     ssl->error = SOCKET_PEER_CLOSED_E;
@@ -24659,7 +24812,7 @@ startScr:
                 if ( (err = wolfSSL_negotiate(ssl)) != WOLFSSL_SUCCESS) {
                 #ifdef WOLFSSL_ASYNC_CRYPT
                     /* if async would block return WANT_WRITE */
-                    if (ssl->error == WC_PENDING_E) {
+                    if (ssl->error == WC_NO_ERR_TRACE(WC_PENDING_E)) {
                         return WOLFSSL_CBIO_ERR_WANT_READ;
                     }
                 #endif
@@ -24834,6 +24987,11 @@ static int SendAlert_ex(WOLFSSL* ssl, int severity, int type)
 #endif /* WOLFSSL_DTLS13 */
             {
                 AddRecordHeader(output, ALERT_SIZE, alert, ssl, CUR_ORDER);
+#ifdef WOLFSSL_DTLS
+                /* AddRecordHeader doesn't increment the seq number */
+                if (ssl->options.dtls)
+                    DtlsSEQIncrement(ssl, CUR_ORDER);
+#endif
             }
 
         output += RECORD_HEADER_SZ;
@@ -24923,6 +25081,10 @@ int SendAlert(WOLFSSL* ssl, int severity, int type)
 
     return SendAlert_ex(ssl, severity, type);
 }
+
+#ifdef WOLFSSL_DEBUG_TRACE_ERROR_CODES_H
+#include <wolfssl/debug-untrace-error-codes.h>
+#endif
 
 const char* wolfSSL_ERR_reason_error_string(unsigned long e)
 {
@@ -25461,6 +25623,10 @@ const char* wolfSSL_ERR_reason_error_string(unsigned long e)
 
 #endif /* NO_ERROR_STRINGS */
 }
+
+#ifdef WOLFSSL_DEBUG_TRACE_ERROR_CODES
+#include <wolfssl/debug-trace-error-codes.h>
+#endif
 
 const char* wolfSSL_ERR_func_error_string(unsigned long e)
 {
@@ -26403,7 +26569,7 @@ const char* wolfSSL_get_cipher_name_iana(WOLFSSL* ssl)
 int GetCipherSuiteFromName(const char* name, byte* cipherSuite0,
                            byte* cipherSuite, int* flags)
 {
-    int           ret = BAD_FUNC_ARG;
+    int           ret = WC_NO_ERR_TRACE(BAD_FUNC_ARG);
     int           i;
     unsigned long len;
     const char*   nameDelim;
@@ -26474,8 +26640,11 @@ static int ParseCipherList(Suites* suites,
         return 0;
     }
 
-    if (next[0] == 0 || XSTRCMP(next, "ALL") == 0 ||
-        XSTRCMP(next, "DEFAULT") == 0 || XSTRCMP(next, "HIGH") == 0) {
+    if (next[0] == '\0' ||
+        XSTRCMP(next, "ALL") == 0 ||
+        XSTRCMP(next, "DEFAULT") == 0 ||
+        XSTRCMP(next, "HIGH") == 0)
+    {
         /* Add all ciphersuites except anonymous and null ciphers. Prefer RSA */
 #ifndef NO_RSA
         haveRSA = 1;
@@ -26487,7 +26656,8 @@ static int ParseCipherList(Suites* suites,
                 0,
 #endif
                 haveRSA, 1, 1, !haveRSA, 1, haveRSA, !haveRSA, 1, 1, 0, 0,
-                side);
+                side
+        );
         return 1; /* wolfSSL default */
     }
 
@@ -26507,6 +26677,8 @@ static int ParseCipherList(Suites* suites,
             if (length > currLen) {
                 length = currLen;
             }
+            if (currLen == 0)
+                break;
         }
 
     #if defined(OPENSSL_EXTRA) || defined(OPENSSL_ALL)
@@ -26760,14 +26932,12 @@ static int ParseCipherList(Suites* suites,
                                                              defined(HAVE_ED448)
                     haveSig |= SIG_ECDSA;
                 #endif
-                #if defined(HAVE_PQC)
                 #ifdef HAVE_FALCON
                     haveSig |= SIG_FALCON;
                 #endif /* HAVE_FALCON */
                 #ifdef HAVE_DILITHIUM
                     haveSig |= SIG_DILITHIUM;
                 #endif /* HAVE_DILITHIUM */
-                #endif /* HAVE_PQC */
                 }
                 else
             #ifdef BUILD_TLS_SM4_GCM_SM3
@@ -26830,7 +27000,7 @@ static int ParseCipherList(Suites* suites,
             }
         }
     }
-    while (next++); /* ++ needed to skip ':' */
+    while (next++); /* increment to skip ':' */
 
     if (ret) {
         int keySz = 0;
@@ -26999,14 +27169,12 @@ int SetCipherListFromBytes(WOLFSSL_CTX* ctx, Suites* suites, const byte* list,
         #if defined(HAVE_ECC) || defined(HAVE_ED25519) || defined(HAVE_ED448)
             haveECDSAsig = 1;
         #endif
-        #if defined(HAVE_PQC)
         #ifdef HAVE_FALCON
             haveFalconSig = 1;
         #endif /* HAVE_FALCON */
         #ifdef HAVE_DILITHIUM
             haveDilithiumSig = 1;
         #endif /* HAVE_DILITHIUM */
-        #endif /* HAVE_PQC */
         }
         else
     #endif /* WOLFSSL_TLS13 */
@@ -27247,7 +27415,6 @@ static int MatchSigAlgo(WOLFSSL* ssl, int sigAlgo)
         return sigAlgo == ed448_sa_algo;
     }
 #endif
-#ifdef HAVE_PQC
 #ifdef HAVE_FALCON
     if (ssl->pkCurveOID == CTC_FALCON_LEVEL1) {
         /* Certificate has Falcon level 1 key, only match with Falcon level 1
@@ -27274,7 +27441,6 @@ static int MatchSigAlgo(WOLFSSL* ssl, int sigAlgo)
         return sigAlgo == dilithium_level5_sa_algo;
     }
 #endif /* HAVE_DILITHIUM */
-#endif /* HAVE_PQC */
 #ifdef WC_RSA_PSS
     /* RSA certificate and PSS sig alg. */
     if (ssl->options.sigAlgo == rsa_sa_algo) {
@@ -27325,10 +27491,43 @@ static byte MinHashAlgo(WOLFSSL* ssl)
     return sha_mac;
 }
 
-int PickHashSigAlgo(WOLFSSL* ssl, const byte* hashSigAlgo, word32 hashSigAlgoSz)
+/* Check if a given peer hashSigAlgo is supported in our ssl->suites or
+ * ssl->ctx->suites.
+ *
+ * Returns 1 on match.
+ * Returns 0 otherwise.
+ * */
+static int SupportedHashSigAlgo(WOLFSSL* ssl, const byte * hashSigAlgo)
+{
+    const Suites * suites = NULL;
+    word32         i = 0;
+
+    if (ssl == NULL || hashSigAlgo == NULL) {
+        return 0;
+    }
+
+    suites = WOLFSSL_SUITES(ssl);
+
+    if (suites == NULL || suites->hashSigAlgoSz == 0) {
+        return 0;
+    }
+
+    for (i = 0; (i+1) < suites->hashSigAlgoSz; i += HELLO_EXT_SIGALGO_SZ) {
+        if (XMEMCMP(&suites->hashSigAlgo[i], hashSigAlgo,
+                    HELLO_EXT_SIGALGO_SZ) == 0) {
+            /* Match found. */
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+int PickHashSigAlgo(WOLFSSL* ssl, const byte* hashSigAlgo, word32 hashSigAlgoSz,
+                    int matchSuites)
 {
     word32 i;
-    int ret = MATCH_SUITE_ERROR;
+    int ret = WC_NO_ERR_TRACE(MATCH_SUITE_ERROR);
     byte minHash;
 
     /* set defaults */
@@ -27366,6 +27565,14 @@ int PickHashSigAlgo(WOLFSSL* ssl, const byte* hashSigAlgo, word32 hashSigAlgoSz)
         if (!MatchSigAlgo(ssl, sigAlgo))
             continue;
 
+        if (matchSuites) {
+            /* Keep looking if peer algorithm isn't supported in our ssl->suites
+             * or ssl->ctx->suites. */
+            if (!SupportedHashSigAlgo(ssl, &hashSigAlgo[i])) {
+                continue;
+            }
+        }
+
     #ifdef HAVE_ED25519
         if (ssl->pkCurveOID == ECC_ED25519_OID) {
             /* Matched Ed25519 - set chosen and finished. */
@@ -27384,7 +27591,6 @@ int PickHashSigAlgo(WOLFSSL* ssl, const byte* hashSigAlgo, word32 hashSigAlgoSz)
             break;
         }
     #endif
-    #if defined(HAVE_PQC)
     #if defined(HAVE_FALCON)
         if (ssl->pkCurveOID == CTC_FALCON_LEVEL1 ||
             ssl->pkCurveOID == CTC_FALCON_LEVEL5 ) {
@@ -27406,7 +27612,6 @@ int PickHashSigAlgo(WOLFSSL* ssl, const byte* hashSigAlgo, word32 hashSigAlgoSz)
             break;
         }
     #endif /* HAVE_DILITHIUM */
-    #endif /* HAVE_PQC */
 
     #if defined(WOLFSSL_ECDSA_MATCH_HASH) && defined(USE_ECDSA_KEYSZ_HASH_ALGO)
         #error "WOLFSSL_ECDSA_MATCH_HASH and USE_ECDSA_KEYSZ_HASH_ALGO cannot "
@@ -27767,7 +27972,7 @@ int PickHashSigAlgo(WOLFSSL* ssl, const byte* hashSigAlgo, word32 hashSigAlgoSz)
 int CreateDevPrivateKey(void** pkey, byte* data, word32 length, int hsType,
                         int label, int id, void* heap, int devId)
 {
-    int ret = NOT_COMPILED_IN;
+    int ret = WC_NO_ERR_TRACE(NOT_COMPILED_IN);
 
     if (hsType == DYNAMIC_TYPE_RSA) {
 #ifndef NO_RSA
@@ -27816,7 +28021,7 @@ int CreateDevPrivateKey(void** pkey, byte* data, word32 length, int hsType,
 #endif
     }
     else if (hsType == DYNAMIC_TYPE_DILITHIUM) {
-#if defined(HAVE_PQC) && defined(HAVE_DILITHIUM)
+#if defined(HAVE_DILITHIUM)
         dilithium_key* dilithiumKey;
 
         dilithiumKey = (dilithium_key*)XMALLOC(sizeof(dilithium_key), heap,
@@ -27841,7 +28046,7 @@ int CreateDevPrivateKey(void** pkey, byte* data, word32 length, int hsType,
 #endif
     }
     else if (hsType == DYNAMIC_TYPE_FALCON) {
-#if defined(HAVE_PQC) && defined(HAVE_FALCON)
+#if defined(HAVE_FALCON)
         falcon_key* falconKey;
 
         falconKey = (falcon_key*)XMALLOC(sizeof(falcon_key), heap,
@@ -27881,7 +28086,7 @@ int CreateDevPrivateKey(void** pkey, byte* data, word32 length, int hsType,
  */
 int DecodePrivateKey(WOLFSSL *ssl, word32* length)
 {
-    int      ret = BAD_FUNC_ARG;
+    int      ret = WC_NO_ERR_TRACE(BAD_FUNC_ARG);
     int      keySz;
     word32   idx;
 
@@ -27978,7 +28183,7 @@ int DecodePrivateKey(WOLFSSL *ssl, word32* length)
         }
         else if ((ssl->buffers.keyType == falcon_level1_sa_algo) ||
                  (ssl->buffers.keyType == falcon_level5_sa_algo)) {
-    #if defined(HAVE_PQC) && defined(HAVE_FALCON)
+    #if defined(HAVE_FALCON)
             if (ssl->buffers.keyLabel) {
                 ret = wc_falcon_init_label((falcon_key*)ssl->hsKey,
                                            (char*)ssl->buffers.key->buffer,
@@ -28014,7 +28219,7 @@ int DecodePrivateKey(WOLFSSL *ssl, word32* length)
         else if ((ssl->buffers.keyType == dilithium_level2_sa_algo) ||
                  (ssl->buffers.keyType == dilithium_level3_sa_algo) ||
                  (ssl->buffers.keyType == dilithium_level5_sa_algo)) {
-    #if defined(HAVE_PQC) && defined(HAVE_DILITHIUM)
+    #if defined(HAVE_DILITHIUM) && !defined(WOLFSSL_DILITHIUM_NO_SIGN)
             if (ssl->buffers.keyLabel) {
                 ret = wc_dilithium_init_label((dilithium_key*)ssl->hsKey,
                                               (char*)ssl->buffers.key->buffer,
@@ -28284,7 +28489,6 @@ int DecodePrivateKey(WOLFSSL *ssl, word32* length)
         }
     }
 #endif /* HAVE_ED448 && HAVE_ED448_KEY_IMPORT */
-#if defined(HAVE_PQC)
 #if defined(HAVE_FALCON)
     #if !defined(NO_RSA) || defined(HAVE_ECC)
         FreeKey(ssl, ssl->hsType, (void**)&ssl->hsKey);
@@ -28351,7 +28555,8 @@ int DecodePrivateKey(WOLFSSL *ssl, word32* length)
         }
     }
 #endif /* HAVE_FALCON */
-#if defined(HAVE_DILITHIUM)
+#if defined(HAVE_DILITHIUM) && !defined(WOLFSSL_DILITHIUM_NO_SIGN) && \
+    !defined(WOLFSSL_DILITHIUM_NO_ASN1)
     #if !defined(NO_RSA) || defined(HAVE_ECC)
         FreeKey(ssl, ssl->hsType, (void**)&ssl->hsKey);
     #endif
@@ -28403,9 +28608,10 @@ int DecodePrivateKey(WOLFSSL *ssl, word32* length)
         /* Set start of data to beginning of buffer. */
         idx = 0;
         /* Decode the key assuming it is a Dilithium private key. */
-        ret = wc_dilithium_import_private_only(ssl->buffers.key->buffer,
-                                               ssl->buffers.key->length,
-                                               (dilithium_key*)ssl->hsKey);
+        ret = wc_Dilithium_PrivateKeyDecode(ssl->buffers.key->buffer,
+                                            &idx,
+                                            (dilithium_key*)ssl->hsKey,
+                                            ssl->buffers.key->length);
         if (ret == 0) {
             WOLFSSL_MSG("Using Dilithium private key");
 
@@ -28423,7 +28629,6 @@ int DecodePrivateKey(WOLFSSL *ssl, word32* length)
         }
     }
 #endif /* HAVE_DILITHIUM */
-#endif /* HAVE_PQC */
 
     (void)idx;
     (void)keySz;
@@ -28443,7 +28648,7 @@ exit_dpk:
  */
 int DecodeAltPrivateKey(WOLFSSL *ssl, word32* length)
 {
-    int      ret = BAD_FUNC_ARG;
+    int      ret = WC_NO_ERR_TRACE(BAD_FUNC_ARG);
     int      keySz;
     word32   idx;
 
@@ -28530,7 +28735,7 @@ int DecodeAltPrivateKey(WOLFSSL *ssl, word32* length)
         }
         else if ((ssl->buffers.altKeyType == falcon_level1_sa_algo) ||
                  (ssl->buffers.altKeyType == falcon_level5_sa_algo)) {
-    #if defined(HAVE_PQC) && defined(HAVE_FALCON)
+    #if defined(HAVE_FALCON)
             if (ssl->buffers.altKeyLabel) {
                 ret = wc_falcon_init_label((falcon_key*)ssl->hsAltKey,
                                            (char*)ssl->buffers.altKey->buffer,
@@ -28566,7 +28771,7 @@ int DecodeAltPrivateKey(WOLFSSL *ssl, word32* length)
         else if ((ssl->buffers.altKeyType == dilithium_level2_sa_algo) ||
                  (ssl->buffers.altKeyType == dilithium_level3_sa_algo) ||
                  (ssl->buffers.altKeyType == dilithium_level5_sa_algo)) {
-    #if defined(HAVE_PQC) && defined(HAVE_DILITHIUM)
+    #if defined(HAVE_DILITHIUM)
             if (ssl->buffers.altKeyLabel) {
                 ret = wc_dilithium_init_label((dilithium_key*)ssl->hsAltKey,
                                         (char*)ssl->buffers.altKey->buffer,
@@ -28721,7 +28926,6 @@ int DecodeAltPrivateKey(WOLFSSL *ssl, word32* length)
         }
     }
 #endif
-#if defined(HAVE_PQC)
 #if defined(HAVE_FALCON)
     #if !defined(NO_RSA) || defined(HAVE_ECC)
         FreeKey(ssl, ssl->hsAltType, (void**)&ssl->hsAltKey);
@@ -28832,9 +29036,10 @@ int DecodeAltPrivateKey(WOLFSSL *ssl, word32* length)
         /* Set start of data to beginning of buffer. */
         idx = 0;
         /* Decode the key assuming it is a Dilithium private key. */
-        ret = wc_dilithium_import_private_only(ssl->buffers.altKey->buffer,
-                                               ssl->buffers.altKey->length,
-                                               (dilithium_key*)ssl->hsAltKey);
+        ret = wc_Dilithium_PrivateKeyDecode(ssl->buffers.altKey->buffer,
+                                            &idx,
+                                            (dilithium_key*)ssl->hsAltKey,
+                                            ssl->buffers.altKey->length);
         if (ret == 0) {
             WOLFSSL_MSG("Using Dilithium private key");
 
@@ -28852,7 +29057,6 @@ int DecodeAltPrivateKey(WOLFSSL *ssl, word32* length)
         }
     }
 #endif /* HAVE_DILITHIUM */
-#endif /* HAVE_PQC */
 
     (void)idx;
     (void)keySz;
@@ -29989,7 +30193,7 @@ static int HashSkeData(WOLFSSL* ssl, enum wc_HashType hashType,
             if ((len > size) || ((*inOutIdx - begin) + len > size))
                 return BUFFER_ERROR;
 
-            if (PickHashSigAlgo(ssl, input + *inOutIdx, len) != 0 &&
+            if (PickHashSigAlgo(ssl, input + *inOutIdx, len, 0) != 0 &&
                                              ssl->buffers.certificate &&
                                              ssl->buffers.certificate->buffer) {
             #ifdef HAVE_PK_CALLBACKS
@@ -30162,7 +30366,7 @@ static int HashSkeData(WOLFSSL* ssl, enum wc_HashType hashType,
 
     static int CheckCurveId(int tlsCurveId)
     {
-        int ret = ECC_CURVE_ERROR;
+        int ret = WC_NO_ERR_TRACE(ECC_CURVE_ERROR);
 
         switch (tlsCurveId) {
     #if (defined(HAVE_ECC160) || defined(HAVE_ALL_CURVES)) && ECC_MIN_KEY_SZ <= 160
@@ -30230,7 +30434,9 @@ static int HashSkeData(WOLFSSL* ssl, enum wc_HashType hashType,
             case WOLFSSL_ECC_SECP521R1: return ECC_SECP521R1_OID;
         #endif /* !NO_ECC_SECP */
     #endif
-            default: break;
+            default:
+                ret = WC_NO_ERR_TRACE(ECC_CURVE_ERROR);
+                break;
         }
 
         return ret;
@@ -30556,7 +30762,7 @@ static int DoServerKeyExchange(WOLFSSL* ssl, const byte* input,
     args = (DskeArgs*)ssl->async->args;
 
     ret = wolfSSL_AsyncPop(ssl, &ssl->options.asyncState);
-    if (ret != WC_NO_PENDING_E) {
+    if (ret != WC_NO_ERR_TRACE(WC_NO_PENDING_E)) {
         /* Check for error */
         if (ret < 0)
             goto exit_dske;
@@ -30682,9 +30888,9 @@ static int DoServerKeyExchange(WOLFSSL* ssl, const byte* input,
                                 input + args->idx, length,
                                 EC25519_LITTLE_ENDIAN)) != 0) {
                         #ifdef WOLFSSL_EXTRA_ALERTS
-                            if (ret == BUFFER_E)
+                            if (ret == WC_NO_ERR_TRACE(BUFFER_E))
                                 SendAlert(ssl, alert_fatal, decode_error);
-                            else if (ret == ECC_OUT_OF_RANGE_E)
+                            else if (ret == WC_NO_ERR_TRACE(ECC_OUT_OF_RANGE_E))
                                 SendAlert(ssl, alert_fatal, bad_record_mac);
                             else {
                                 SendAlert(ssl, alert_fatal, illegal_parameter);
@@ -30725,9 +30931,9 @@ static int DoServerKeyExchange(WOLFSSL* ssl, const byte* input,
                                 input + args->idx, length,
                                 EC448_LITTLE_ENDIAN)) != 0) {
                         #ifdef WOLFSSL_EXTRA_ALERTS
-                            if (ret == BUFFER_E)
+                            if (ret == WC_NO_ERR_TRACE(BUFFER_E))
                                 SendAlert(ssl, alert_fatal, decode_error);
-                            else if (ret == ECC_OUT_OF_RANGE_E)
+                            else if (ret == WC_NO_ERR_TRACE(ECC_OUT_OF_RANGE_E))
                                 SendAlert(ssl, alert_fatal, bad_record_mac);
                             else {
                                 SendAlert(ssl, alert_fatal, illegal_parameter);
@@ -30879,9 +31085,9 @@ static int DoServerKeyExchange(WOLFSSL* ssl, const byte* input,
                                 input + args->idx, length,
                                 EC25519_LITTLE_ENDIAN)) != 0) {
                         #ifdef WOLFSSL_EXTRA_ALERTS
-                            if (ret == BUFFER_E)
+                            if (ret == WC_NO_ERR_TRACE(BUFFER_E))
                                 SendAlert(ssl, alert_fatal, decode_error);
-                            else if (ret == ECC_OUT_OF_RANGE_E)
+                            else if (ret == WC_NO_ERR_TRACE(ECC_OUT_OF_RANGE_E))
                                 SendAlert(ssl, alert_fatal, bad_record_mac);
                             else {
                                 SendAlert(ssl, alert_fatal, illegal_parameter);
@@ -30922,9 +31128,9 @@ static int DoServerKeyExchange(WOLFSSL* ssl, const byte* input,
                                 input + args->idx, length,
                                 EC448_LITTLE_ENDIAN)) != 0) {
                         #ifdef WOLFSSL_EXTRA_ALERTS
-                            if (ret == BUFFER_E)
+                            if (ret == WC_NO_ERR_TRACE(BUFFER_E))
                                 SendAlert(ssl, alert_fatal, decode_error);
-                            else if (ret == ECC_OUT_OF_RANGE_E)
+                            else if (ret == WC_NO_ERR_TRACE(ECC_OUT_OF_RANGE_E))
                                 SendAlert(ssl, alert_fatal, bad_record_mac);
                             else {
                                 SendAlert(ssl, alert_fatal, illegal_parameter);
@@ -31020,6 +31226,15 @@ static int DoServerKeyExchange(WOLFSSL* ssl, const byte* input,
                         if ((args->idx - args->begin) + ENUM_LEN + ENUM_LEN >
                                                                         size) {
                             ERROR_OUT(BUFFER_ERROR, exit_dske);
+                        }
+
+                        /* Check if hashSigAlgo in Server Key Exchange is supported
+                         * in our ssl->suites or ssl->ctx->suites. */
+                        if (!SupportedHashSigAlgo(ssl, &input[args->idx])) {
+                        #ifdef WOLFSSL_EXTRA_ALERTS
+                            SendAlert(ssl, alert_fatal, handshake_failure);
+                        #endif
+                            ERROR_OUT(MATCH_SUITE_ERROR, exit_dske);
                         }
 
                         DecodeSigAlg(&input[args->idx], &ssl->options.peerHashAlgo,
@@ -31220,7 +31435,7 @@ static int DoServerKeyExchange(WOLFSSL* ssl, const byte* input,
                                 ret = 0;
                             }
                         #ifdef WOLFSSL_ASYNC_CRYPT
-                            if (ret != WC_PENDING_E)
+                            if (ret != WC_NO_ERR_TRACE(WC_PENDING_E))
                         #endif
                             {
                                 /* peerRsaKey */
@@ -31248,7 +31463,7 @@ static int DoServerKeyExchange(WOLFSSL* ssl, const byte* input,
                                     (ssl->buffers.sig.length - SEED_LEN));
                             }
                         #endif /* HAVE_PK_CALLBACKS */
-                            if (ret == NOT_COMPILED_IN) {
+                            if (ret == WC_NO_ERR_TRACE(NOT_COMPILED_IN)) {
                             #if defined(WOLFSSL_SM2) && defined(WOLFSSL_SM3)
                                 if (ssl->options.peerSigAlgo == sm2_sa_algo) {
                                     ret = Sm2wSm3Verify(ssl,
@@ -31282,7 +31497,7 @@ static int DoServerKeyExchange(WOLFSSL* ssl, const byte* input,
                             }
 
                         #ifdef WOLFSSL_ASYNC_CRYPT
-                            if (ret != WC_PENDING_E)
+                            if (ret != WC_NO_ERR_TRACE(WC_PENDING_E))
                         #endif
                             {
                                 /* peerEccDsaKey */
@@ -31312,7 +31527,7 @@ static int DoServerKeyExchange(WOLFSSL* ssl, const byte* input,
                             );
 
                         #ifdef WOLFSSL_ASYNC_CRYPT
-                            if (ret != WC_PENDING_E)
+                            if (ret != WC_NO_ERR_TRACE(WC_PENDING_E))
                         #endif
                             {
                                 /* peerEccDsaKey */
@@ -31342,7 +31557,7 @@ static int DoServerKeyExchange(WOLFSSL* ssl, const byte* input,
                             );
 
                         #ifdef WOLFSSL_ASYNC_CRYPT
-                            if (ret != WC_PENDING_E)
+                            if (ret != WC_NO_ERR_TRACE(WC_PENDING_E))
                         #endif
                             {
                                 /* peerEccDsaKey */
@@ -31559,7 +31774,7 @@ exit_dske:
 
 #ifdef WOLFSSL_ASYNC_CRYPT
     /* Handle async operation */
-    if (ret == WC_PENDING_E) {
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
         /* Mark message as not received so it can process again */
         ssl->msgsReceived.got_server_key_exchange = 0;
 
@@ -31640,7 +31855,7 @@ int SendClientKeyExchange(WOLFSSL* ssl)
 
 #ifdef WOLFSSL_ASYNC_CRYPT
     ret = wolfSSL_AsyncPop(ssl, &ssl->options.asyncState);
-    if (ret != WC_NO_PENDING_E) {
+    if (ret != WC_NO_ERR_TRACE(WC_NO_PENDING_E)) {
         /* Check for error */
         if (ret < 0)
             goto exit_scke;
@@ -31940,11 +32155,13 @@ int SendClientKeyExchange(WOLFSSL* ssl)
                         void* ctx = wolfSSL_GetGenPreMasterCtx(ssl);
                         ret = ssl->ctx->GenPreMasterCb(ssl,
                             ssl->arrays->preMasterSecret, ENCRYPT_LEN, ctx);
-                        if (ret != 0 && ret != PROTOCOLCB_UNAVAILABLE) {
+                        if (ret != 0 &&
+                            ret != WC_NO_ERR_TRACE(PROTOCOLCB_UNAVAILABLE)) {
                             goto exit_scke;
                         }
                     }
-                    if (!ssl->ctx->GenPreMasterCb || ret == PROTOCOLCB_UNAVAILABLE)
+                    if (!ssl->ctx->GenPreMasterCb ||
+                        ret == WC_NO_ERR_TRACE(PROTOCOLCB_UNAVAILABLE))
                     #endif
                     {
                         /* build PreMasterSecret with RNG data */
@@ -32039,7 +32256,7 @@ int SendClientKeyExchange(WOLFSSL* ssl)
                         MAX_PSK_ID_LEN, ssl->arrays->psk_key, MAX_PSK_KEY_LEN);
                     if (ssl->arrays->psk_keySz == 0 ||
                             (ssl->arrays->psk_keySz > MAX_PSK_KEY_LEN &&
-                        (int)ssl->arrays->psk_keySz != USE_HW_PSK)) {
+                        (int)ssl->arrays->psk_keySz != WC_NO_ERR_TRACE(USE_HW_PSK))) {
                         ERROR_OUT(PSK_KEY_ERROR, exit_scke);
                     }
 
@@ -32084,7 +32301,7 @@ int SendClientKeyExchange(WOLFSSL* ssl)
                         MAX_PSK_ID_LEN, ssl->arrays->psk_key, MAX_PSK_KEY_LEN);
                     if (ssl->arrays->psk_keySz == 0 ||
                             (ssl->arrays->psk_keySz > MAX_PSK_KEY_LEN &&
-                        (int)ssl->arrays->psk_keySz != USE_HW_PSK)) {
+                        (int)ssl->arrays->psk_keySz != WC_NO_ERR_TRACE(USE_HW_PSK))) {
                         ERROR_OUT(PSK_KEY_ERROR, exit_scke);
                     }
 
@@ -32167,7 +32384,7 @@ int SendClientKeyExchange(WOLFSSL* ssl)
                         MAX_PSK_ID_LEN, ssl->arrays->psk_key, MAX_PSK_KEY_LEN);
                     if (ssl->arrays->psk_keySz == 0 ||
                             (ssl->arrays->psk_keySz > MAX_PSK_KEY_LEN &&
-                        (int)ssl->arrays->psk_keySz != USE_HW_PSK)) {
+                        (int)ssl->arrays->psk_keySz != WC_NO_ERR_TRACE(USE_HW_PSK))) {
                         ERROR_OUT(PSK_KEY_ERROR, exit_scke);
                     }
 
@@ -32442,7 +32659,7 @@ int SendClientKeyExchange(WOLFSSL* ssl)
                         WOLFSSL_CLIENT_END
                     );
                 #ifdef WOLFSSL_ASYNC_CRYPT
-                    if (ret != WC_PENDING_E)
+                    if (ret != WC_NO_ERR_TRACE(WC_PENDING_E))
                 #endif
                     {
                         FreeKey(ssl, DYNAMIC_TYPE_ECC,
@@ -32807,7 +33024,7 @@ exit_scke:
 
 #ifdef WOLFSSL_ASYNC_IO
     /* Handle async operation */
-    if (ret == WC_PENDING_E || ret == WANT_WRITE) {
+    if (ret == WC_NO_ERR_TRACE(WC_PENDING_E) || ret == WANT_WRITE) {
         if (ssl->options.buildingMsg)
             return ret;
         /* If we have completed all states then we will not enter this function
@@ -32907,10 +33124,10 @@ int SendCertificateVerify(WOLFSSL* ssl)
     args = (ScvArgs*)ssl->async->args;
 #ifdef WOLFSSL_ASYNC_CRYPT
     /* BuildMessage does its own Pop */
-    if (ssl->error != WC_PENDING_E ||
+    if (ssl->error != WC_NO_ERR_TRACE(WC_PENDING_E) ||
             ssl->options.asyncState != TLS_ASYNC_END)
         ret = wolfSSL_AsyncPop(ssl, &ssl->options.asyncState);
-    if (ret != WC_NO_PENDING_E) {
+    if (ret != WC_NO_ERR_TRACE(WC_NO_PENDING_E)) {
         /* Check for error */
         if (ret < 0)
             goto exit_scv;
@@ -33300,7 +33517,7 @@ int SendCertificateVerify(WOLFSSL* ssl)
                     );
 
                     /* free temporary buffer now */
-                    if (ret != WC_PENDING_E) {
+                    if (ret != WC_NO_ERR_TRACE(WC_PENDING_E)) {
                         XFREE(args->verifySig, ssl->heap, DYNAMIC_TYPE_SIGNATURE);
                         args->verifySig = NULL;
                     }
@@ -33521,7 +33738,7 @@ static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
 
 #ifndef NO_CERTS
 
-#ifdef WOLF_PRIVATE_KEY_ID
+#if defined(WOLF_PRIVATE_KEY_ID) || defined(HAVE_PK_CALLBACKS)
     int GetPrivateKeySigSize(WOLFSSL* ssl)
     {
         int sigSz = 0;
@@ -33562,7 +33779,7 @@ static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
         }
         return sigSz;
     }
-#endif /* HAVE_PK_CALLBACKS */
+#endif /* WOLF_PRIVATE_KEY_ID || HAVE_PK_CALLBACKS */
 
 #endif /* NO_CERTS */
 
@@ -33654,23 +33871,23 @@ static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
     int TranslateErrorToAlert(int err)
     {
         switch (err) {
-            case BUFFER_ERROR:
+            case WC_NO_ERR_TRACE(BUFFER_ERROR):
                 return decode_error;
-            case EXT_NOT_ALLOWED:
-            case PEER_KEY_ERROR:
-            case ECC_PEERKEY_ERROR:
-            case BAD_KEY_SHARE_DATA:
-            case PSK_KEY_ERROR:
-            case INVALID_PARAMETER:
-            case HRR_COOKIE_ERROR:
-            case BAD_BINDER:
+            case WC_NO_ERR_TRACE(EXT_NOT_ALLOWED):
+            case WC_NO_ERR_TRACE(PEER_KEY_ERROR):
+            case WC_NO_ERR_TRACE(ECC_PEERKEY_ERROR):
+            case WC_NO_ERR_TRACE(BAD_KEY_SHARE_DATA):
+            case WC_NO_ERR_TRACE(PSK_KEY_ERROR):
+            case WC_NO_ERR_TRACE(INVALID_PARAMETER):
+            case WC_NO_ERR_TRACE(HRR_COOKIE_ERROR):
+            case WC_NO_ERR_TRACE(BAD_BINDER):
                 return illegal_parameter;
-            case INCOMPLETE_DATA:
+            case WC_NO_ERR_TRACE(INCOMPLETE_DATA):
                 return missing_extension;
-            case MATCH_SUITE_ERROR:
-            case MISSING_HANDSHAKE_DATA:
+            case WC_NO_ERR_TRACE(MATCH_SUITE_ERROR):
+            case WC_NO_ERR_TRACE(MISSING_HANDSHAKE_DATA):
                 return handshake_failure;
-            case VERSION_ERROR:
+            case WC_NO_ERR_TRACE(VERSION_ERROR):
                 return wolfssl_alert_protocol_version;
             default:
                 return invalid_alert;
@@ -34037,7 +34254,7 @@ static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
         args = (SskeArgs*)ssl->async->args;
     #ifdef WOLFSSL_ASYNC_CRYPT
         ret = wolfSSL_AsyncPop(ssl, &ssl->options.asyncState);
-        if (ret != WC_NO_PENDING_E) {
+        if (ret != WC_NO_ERR_TRACE(WC_NO_PENDING_E)) {
             /* Check for error */
             if (ret < 0)
                 goto exit_sske;
@@ -34327,7 +34544,8 @@ static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
                             if (ssl->eccTempKeyPresent == 0) {
                                 ret = X25519MakeKey(ssl,
                                         (curve25519_key*)ssl->eccTempKey, NULL);
-                                if (ret == 0 || ret == WC_PENDING_E) {
+                                if (ret == 0 ||
+                                    ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
                                     ssl->eccTempKeyPresent =
                                         DYNAMIC_TYPE_CURVE25519;
                                 }
@@ -34354,7 +34572,8 @@ static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
                             if (ssl->eccTempKeyPresent == 0) {
                                 ret = X448MakeKey(ssl,
                                           (curve448_key*)ssl->eccTempKey, NULL);
-                                if (ret == 0 || ret == WC_PENDING_E) {
+                                if (ret == 0 ||
+                                    ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
                                     ssl->eccTempKeyPresent =
                                         DYNAMIC_TYPE_CURVE448;
                                 }
@@ -34379,7 +34598,8 @@ static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
 
                         if (ssl->eccTempKeyPresent == 0) {
                             ret = EccMakeKey(ssl, ssl->eccTempKey, NULL);
-                            if (ret == 0 || ret == WC_PENDING_E) {
+                            if (ret == 0 ||
+                                ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
                                 ssl->eccTempKeyPresent = DYNAMIC_TYPE_ECC;
                             }
                         }
@@ -35737,7 +35957,7 @@ static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
             int ret = TLSX_KeyShare_Choose(ssl, extensions, first, second,
                                            &cs->clientKSE, &searched);
 
-            if (ret == MEMORY_E) {
+            if (ret == WC_NO_ERR_TRACE(MEMORY_E)) {
                 WOLFSSL_MSG("TLSX_KeyShare_Choose() failed in "
                             "VerifyServerSuite() with MEMORY_E");
                 return 0;
@@ -35752,7 +35972,7 @@ static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
                 cs->doHelloRetry = 1;
             }
         #ifdef WOLFSSL_ASYNC_CRYPT
-            if (ret == WC_PENDING_E)
+            if (ret == WC_NO_ERR_TRACE(WC_PENDING_E))
                 return ret;
         #endif
             if (!cs->doHelloRetry && ret != 0)
@@ -35819,7 +36039,7 @@ static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
             for (i = 0; i < suites->suiteSz; i += 2) {
                 for (j = 0; j < peerSuites->suiteSz; j += 2) {
                     ret = CompareSuites(ssl, suites, peerSuites, i, j, cs, extensions);
-                    if (ret != MATCH_SUITE_ERROR)
+                    if (ret != WC_NO_ERR_TRACE(MATCH_SUITE_ERROR))
                         return ret;
                 }
             }
@@ -35829,7 +36049,7 @@ static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
             for (j = 0; j < peerSuites->suiteSz; j += 2) {
                 for (i = 0; i < suites->suiteSz; i += 2) {
                     ret = CompareSuites(ssl, suites, peerSuites, i, j, cs, extensions);
-                    if (ret != MATCH_SUITE_ERROR)
+                    if (ret != WC_NO_ERR_TRACE(MATCH_SUITE_ERROR))
                         return ret;
                 }
             }
@@ -35868,7 +36088,7 @@ static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
         if (ret != 0)
             return ret;
         ret = PickHashSigAlgo(ssl, peerSuites->hashSigAlgo,
-                                         peerSuites->hashSigAlgoSz);
+                              peerSuites->hashSigAlgoSz, 1);
         if (ret != 0)
             return ret;
 
@@ -36231,7 +36451,7 @@ static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
                 ret = SetCipherSpecs(ssl);
                 if (ret == 0) {
                     ret = PickHashSigAlgo(ssl, clSuites->hashSigAlgo,
-                                               clSuites->hashSigAlgoSz);
+                                          clSuites->hashSigAlgoSz, 0);
                 }
             }
             else if (ret == 0) {
@@ -36307,7 +36527,7 @@ static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
 
                     /* propagate socket errors to avoid re-calling send alert */
                     err = SendAlert(ssl, alert_fatal, alertType);
-                    if (err == SOCKET_ERROR_E)
+                    if (err == WC_NO_ERR_TRACE(SOCKET_ERROR_E))
                         ret = SOCKET_ERROR_E;
                 }
                 *inOutIdx += helloSz;
@@ -36615,8 +36835,12 @@ static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
 
             /* check for TLS_EMPTY_RENEGOTIATION_INFO_SCSV suite */
             ret = TLSX_AddEmptyRenegotiationInfo(&ssl->extensions, ssl->heap);
-            if (ret != WOLFSSL_SUCCESS)
+            if (ret != WOLFSSL_SUCCESS) {
+                ret = SECURE_RENEGOTIATION_E;
                 goto out;
+            } else {
+                ret = 0;
+            }
 
             extension = TLSX_Find(ssl->extensions, TLSX_RENEGOTIATION_INFO);
             if (extension) {
@@ -36952,7 +37176,7 @@ static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
         args = (DcvArgs*)ssl->async->args;
 
         ret = wolfSSL_AsyncPop(ssl, &ssl->options.asyncState);
-        if (ret != WC_NO_PENDING_E) {
+        if (ret != WC_NO_ERR_TRACE(WC_NO_PENDING_E)) {
             /* Check for error */
             if (ret < 0)
                 goto exit_dcv;
@@ -37205,7 +37429,7 @@ static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
 
             #ifdef WOLFSSL_ASYNC_CRYPT
                 /* handle async pending */
-                if (ret == WC_PENDING_E)
+                if (ret == WC_NO_ERR_TRACE(WC_PENDING_E))
                     goto exit_dcv;
             #endif
 
@@ -37343,7 +37567,7 @@ static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
 
     #ifdef WOLFSSL_ASYNC_CRYPT
         /* Handle async operation */
-        if (ret == WC_PENDING_E) {
+        if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
             /* Mark message as not received so it can process again */
             ssl->msgsReceived.got_certificate_verify = 0;
 
@@ -37351,9 +37575,9 @@ static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
         }
     #endif /* WOLFSSL_ASYNC_CRYPT */
     #ifdef WOLFSSL_EXTRA_ALERTS
-        if (ret == BUFFER_ERROR)
+        if (ret == WC_NO_ERR_TRACE(BUFFER_ERROR))
             SendAlert(ssl, alert_fatal, decode_error);
-        else if (ret == SIG_VERIFY_E)
+        else if (ret == WC_NO_ERR_TRACE(SIG_VERIFY_E))
             SendAlert(ssl, alert_fatal, decrypt_error);
         else if (ret != 0)
             SendAlert(ssl, alert_fatal, bad_certificate);
@@ -37566,7 +37790,7 @@ static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
         it = (InternalTicket*)et->enc_ticket;
 
     #ifdef WOLFSSL_ASYNC_CRYPT
-        if (ssl->error != WC_PENDING_E)
+        if (ssl->error != WC_NO_ERR_TRACE(WC_PENDING_E))
     #endif
         {
             XMEMSET(et, 0, sizeof(*et));
@@ -37673,7 +37897,7 @@ static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
         }
         if (ret != WOLFSSL_TICKET_RET_OK) {
 #ifdef WOLFSSL_ASYNC_CRYPT
-            if (ret == WC_PENDING_E) {
+            if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
                 return ret;
             }
 #endif
@@ -37794,7 +38018,7 @@ static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
         }
         if (ret != WOLFSSL_TICKET_RET_OK) {
         #ifdef WOLFSSL_ASYNC_CRYPT
-            if (ret == WC_PENDING_E) {
+            if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
                 return ret;
             }
         #endif /* WOLFSSL_ASYNC_CRYPT */
@@ -38792,6 +39016,10 @@ static int DefTicketEncCb(WOLFSSL* ssl, byte key_name[WOLFSSL_TICKET_NAME_SZ],
 
     WOLFSSL_ENTER("DefTicketEncCb");
 
+    if ((!enc) && (inLen != sizeof(InternalTicket))) {
+        return BUFFER_E;
+    }
+
     /* Check we have setup the RNG, name and primary key. */
     if (keyCtx->expirary[0] == 0) {
 #ifndef SINGLE_THREADED
@@ -39128,7 +39356,7 @@ static int DefTicketEncCb(WOLFSSL* ssl, byte key_name[WOLFSSL_TICKET_NAME_SZ],
         args = (DckeArgs*)ssl->async->args;
 
         ret = wolfSSL_AsyncPop(ssl, &ssl->options.asyncState);
-        if (ret != WC_NO_PENDING_E) {
+        if (ret != WC_NO_ERR_TRACE(WC_NO_PENDING_E)) {
             /* Check for error */
             if (ret < 0)
                 goto exit_dcke;
@@ -39350,7 +39578,7 @@ static int DefTicketEncCb(WOLFSSL* ssl, byte key_name[WOLFSSL_TICKET_NAME_SZ],
 
                         if (ssl->arrays->psk_keySz == 0 ||
                             (ssl->arrays->psk_keySz > MAX_PSK_KEY_LEN &&
-                        (int)ssl->arrays->psk_keySz != USE_HW_PSK)) {
+                        (int)ssl->arrays->psk_keySz != WC_NO_ERR_TRACE(USE_HW_PSK))) {
                         #if defined(WOLFSSL_EXTRA_ALERTS) || \
                             defined(WOLFSSL_PSK_IDENTITY_ALERT)
                             SendAlert(ssl, alert_fatal,
@@ -39442,9 +39670,9 @@ static int DefTicketEncCb(WOLFSSL* ssl, byte key_name[WOLFSSL_TICKET_NAME_SZ],
                                     input + args->idx, args->length,
                                     EC25519_LITTLE_ENDIAN)) != 0) {
                         #ifdef WOLFSSL_EXTRA_ALERTS
-                                if (ret == BUFFER_E)
+                                if (ret == WC_NO_ERR_TRACE(BUFFER_E))
                                     SendAlert(ssl, alert_fatal, decode_error);
-                                else if (ret == ECC_OUT_OF_RANGE_E)
+                                else if (ret == WC_NO_ERR_TRACE(ECC_OUT_OF_RANGE_E))
                                     SendAlert(ssl, alert_fatal, bad_record_mac);
                                 else {
                                     SendAlert(ssl, alert_fatal,
@@ -39499,9 +39727,9 @@ static int DefTicketEncCb(WOLFSSL* ssl, byte key_name[WOLFSSL_TICKET_NAME_SZ],
                                     input + args->idx, args->length,
                                     EC448_LITTLE_ENDIAN)) != 0) {
                         #ifdef WOLFSSL_EXTRA_ALERTS
-                                if (ret == BUFFER_E)
+                                if (ret == WC_NO_ERR_TRACE(BUFFER_E))
                                     SendAlert(ssl, alert_fatal, decode_error);
-                                else if (ret == ECC_OUT_OF_RANGE_E)
+                                else if (ret == WC_NO_ERR_TRACE(ECC_OUT_OF_RANGE_E))
                                     SendAlert(ssl, alert_fatal, bad_record_mac);
                                 else {
                                     SendAlert(ssl, alert_fatal,
@@ -39744,9 +39972,9 @@ static int DefTicketEncCb(WOLFSSL* ssl, byte key_name[WOLFSSL_TICKET_NAME_SZ],
                                     input + args->idx, args->length,
                                     EC25519_LITTLE_ENDIAN)) != 0) {
                         #ifdef WOLFSSL_EXTRA_ALERTS
-                                if (ret == BUFFER_E)
+                                if (ret == WC_NO_ERR_TRACE(BUFFER_E))
                                     SendAlert(ssl, alert_fatal, decode_error);
-                                else if (ret == ECC_OUT_OF_RANGE_E)
+                                else if (ret == WC_NO_ERR_TRACE(ECC_OUT_OF_RANGE_E))
                                     SendAlert(ssl, alert_fatal, bad_record_mac);
                                 else {
                                     SendAlert(ssl, alert_fatal,
@@ -39803,9 +40031,9 @@ static int DefTicketEncCb(WOLFSSL* ssl, byte key_name[WOLFSSL_TICKET_NAME_SZ],
                                     input + args->idx, args->length,
                                     EC448_LITTLE_ENDIAN)) != 0) {
                         #ifdef WOLFSSL_EXTRA_ALERTS
-                                if (ret == BUFFER_E)
+                                if (ret == WC_NO_ERR_TRACE(BUFFER_E))
                                     SendAlert(ssl, alert_fatal, decode_error);
-                                else if (ret == ECC_OUT_OF_RANGE_E)
+                                else if (ret == WC_NO_ERR_TRACE(ECC_OUT_OF_RANGE_E))
                                     SendAlert(ssl, alert_fatal, bad_record_mac);
                                 else {
                                     SendAlert(ssl, alert_fatal,
@@ -39906,10 +40134,10 @@ static int DefTicketEncCb(WOLFSSL* ssl, byte key_name[WOLFSSL_TICKET_NAME_SZ],
                          *       RSA_BUFFER_E, RSA_PAD_E and RSA_PRIVATE_ERROR
                          */
                     #ifdef WOLFSSL_ASYNC_CRYPT
-                        if (ret == WC_PENDING_E)
+                        if (ret == WC_NO_ERR_TRACE(WC_PENDING_E))
                             goto exit_dcke;
                     #endif
-                        if (ret == BAD_FUNC_ARG)
+                        if (ret == WC_NO_ERR_TRACE(BAD_FUNC_ARG))
                             goto exit_dcke;
 
                         lenErrMask = 0 - (SECRET_LEN != args->sigSz);
@@ -39972,7 +40200,7 @@ static int DefTicketEncCb(WOLFSSL* ssl, byte key_name[WOLFSSL_TICKET_NAME_SZ],
                             WOLFSSL_SERVER_END
                         );
                     #ifdef WOLFSSL_ASYNC_CRYPT
-                        if (ret != WC_PENDING_E)
+                        if (ret != WC_NO_ERR_TRACE(WC_PENDING_E))
                     #endif
                         {
                             FreeKey(ssl, DYNAMIC_TYPE_ECC,
@@ -40028,7 +40256,7 @@ static int DefTicketEncCb(WOLFSSL* ssl, byte key_name[WOLFSSL_TICKET_NAME_SZ],
                                 WOLFSSL_SERVER_END
                             );
                         #ifdef WOLFSSL_ASYNC_CRYPT
-                            if (ret != WC_PENDING_E)
+                            if (ret != WC_NO_ERR_TRACE(WC_PENDING_E))
                         #endif
                             {
                                 FreeKey(ssl, DYNAMIC_TYPE_CURVE25519,
@@ -40049,7 +40277,7 @@ static int DefTicketEncCb(WOLFSSL* ssl, byte key_name[WOLFSSL_TICKET_NAME_SZ],
                                 WOLFSSL_SERVER_END
                             );
                         #ifdef WOLFSSL_ASYNC_CRYPT
-                            if (ret != WC_PENDING_E)
+                            if (ret != WC_NO_ERR_TRACE(WC_PENDING_E))
                         #endif
                             {
                                 FreeKey(ssl, DYNAMIC_TYPE_CURVE448,
@@ -40193,7 +40421,7 @@ static int DefTicketEncCb(WOLFSSL* ssl, byte key_name[WOLFSSL_TICKET_NAME_SZ],
 
                         if (ssl->arrays->psk_keySz == 0 ||
                             (ssl->arrays->psk_keySz > MAX_PSK_KEY_LEN &&
-                        (int)ssl->arrays->psk_keySz != USE_HW_PSK)) {
+                        (int)ssl->arrays->psk_keySz != WC_NO_ERR_TRACE(USE_HW_PSK))) {
                         #if defined(WOLFSSL_EXTRA_ALERTS) || \
                             defined(WOLFSSL_PSK_IDENTITY_ALERT)
                             SendAlert(ssl, alert_fatal,
@@ -40239,7 +40467,7 @@ static int DefTicketEncCb(WOLFSSL* ssl, byte key_name[WOLFSSL_TICKET_NAME_SZ],
 
                         if (ssl->arrays->psk_keySz == 0 ||
                             (ssl->arrays->psk_keySz > MAX_PSK_KEY_LEN &&
-                        (int)ssl->arrays->psk_keySz != USE_HW_PSK)) {
+                        (int)ssl->arrays->psk_keySz != WC_NO_ERR_TRACE(USE_HW_PSK))) {
                             ERROR_OUT(PSK_KEY_ERROR, exit_dcke);
                         }
                         /* SERVER: Pre-shared Key for peer authentication. */
@@ -40325,7 +40553,7 @@ static int DefTicketEncCb(WOLFSSL* ssl, byte key_name[WOLFSSL_TICKET_NAME_SZ],
         WOLFSSL_END(WC_FUNC_CLIENT_KEY_EXCHANGE_DO);
     #ifdef WOLFSSL_ASYNC_CRYPT
         /* Handle async operation */
-        if (ret == WC_PENDING_E) {
+        if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
             /* Mark message as not received so it can process again */
             ssl->msgsReceived.got_client_key_exchange = 0;
 
@@ -40417,7 +40645,8 @@ int wolfSSL_AsyncPop(WOLFSSL* ssl, byte* state)
         event = &asyncDev->event;
 
         ret = wolfAsync_EventPop(event, WOLF_EVENT_TYPE_ASYNC_WOLFSSL);
-        if (ret != WC_NO_PENDING_E && ret != WC_PENDING_E) {
+        if (ret != WC_NO_ERR_TRACE(WC_NO_PENDING_E) &&
+            ret != WC_NO_ERR_TRACE(WC_PENDING_E)) {
             /* advance key share state if doesn't need called again */
             if (state && (asyncDev->event.flags & WC_ASYNC_FLAG_CALL_AGAIN) == 0) {
                 (*state)++;
@@ -40430,7 +40659,7 @@ int wolfSSL_AsyncPop(WOLFSSL* ssl, byte* state)
     #if (defined(WOLF_CRYPTO_CB) || defined(HAVE_PK_CALLBACKS)) && \
         !defined(WOLFSSL_ASYNC_CRYPT_SW) && !defined(HAVE_INTEL_QA) && \
         !defined(HAVE_CAVIUM)
-        else if (ret == WC_PENDING_E) {
+        else if (ret == WC_NO_ERR_TRACE(WC_PENDING_E)) {
             /* Allow the underlying crypto API to be called again to trigger the
              * crypto or PK callback. The actual callback must be called, since
              * the completion is not detected in the poll like Intel QAT or

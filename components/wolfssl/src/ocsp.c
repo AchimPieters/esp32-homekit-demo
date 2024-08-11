@@ -144,7 +144,7 @@ static int xstat2err(int st)
 
 int CheckCertOCSP_ex(WOLFSSL_OCSP* ocsp, DecodedCert* cert, WOLFSSL* ssl)
 {
-    int ret = OCSP_LOOKUP_FAIL;
+    int ret = WC_NO_ERR_TRACE(OCSP_LOOKUP_FAIL);
 
 #ifdef WOLFSSL_SMALL_STACK
     OcspRequest* ocspRequest;
@@ -227,7 +227,7 @@ static int GetOcspStatus(WOLFSSL_OCSP* ocsp, OcspRequest* request,
                   OcspEntry* entry, CertStatus** status, buffer* responseBuffer,
                   void* heap)
 {
-    int ret = OCSP_INVALID_STATUS;
+    int ret = WC_NO_ERR_TRACE(OCSP_INVALID_STATUS);
 
     WOLFSSL_ENTER("GetOcspStatus");
 
@@ -328,7 +328,12 @@ int CheckOcspResponse(WOLFSSL_OCSP *ocsp, byte *response, int responseSz,
 #endif
     InitOcspResponse(ocspResponse, newSingle, newStatus, response,
                      (word32)responseSz, ocsp->cm->heap);
-
+#if defined(HAVE_CERTIFICATE_STATUS_REQUEST_V2)
+    if (ocspRequest != NULL && ocspRequest->ssl != NULL &&
+           TLSX_CSR2_IsMulti(((WOLFSSL*)ocspRequest->ssl)->extensions)) {
+        ocspResponse->pendingCAs = TLSX_CSR2_GetPendingSigners(((WOLFSSL*)ocspRequest->ssl)->extensions);
+    }
+#endif
     ret = OcspResponseDecode(ocspResponse, ocsp->cm, ocsp->cm->heap, 0);
     if (ret != 0) {
         ocsp->error = ret;
@@ -410,10 +415,10 @@ end:
     if (ret == 0 && validated == 1) {
         WOLFSSL_MSG("New OcspResponse validated");
     }
-    else if (ret == OCSP_CERT_REVOKED) {
+    else if (ret == WC_NO_ERR_TRACE(OCSP_CERT_REVOKED)) {
         WOLFSSL_MSG("OCSP revoked");
     }
-    else if (ret == OCSP_CERT_UNKNOWN) {
+    else if (ret == WC_NO_ERR_TRACE(OCSP_CERT_UNKNOWN)) {
         WOLFSSL_MSG("OCSP unknown");
     }
     else {
@@ -466,7 +471,7 @@ int CheckOcspRequest(WOLFSSL_OCSP* ocsp, OcspRequest* ocspRequest,
 
     ret = GetOcspStatus(ocsp, ocspRequest, entry, &status, responseBuffer,
                         heap);
-    if (ret != OCSP_INVALID_STATUS)
+    if (ret != WC_NO_ERR_TRACE(OCSP_INVALID_STATUS))
         return ret;
 
     if (responseBuffer) {
@@ -555,7 +560,7 @@ int CheckOcspRequest(WOLFSSL_OCSP* ocsp, OcspRequest* ocspRequest,
 
 #ifndef WOLFSSL_NO_OCSP_ISSUER_CHAIN_CHECK
 static int CheckOcspResponderChain(OcspEntry* single, DecodedCert *cert,
-        void* vp) {
+        void* vp, Signer* pendingCAs) {
     /* Attempt to build a chain up to cert's issuer */
     WOLFSSL_CERT_MANAGER* cm = (WOLFSSL_CERT_MANAGER*)vp;
     Signer* ca = NULL;
@@ -574,8 +579,16 @@ static int CheckOcspResponderChain(OcspEntry* single, DecodedCert *cert,
 
     /* End loop if no more issuers found or if we have found a self
      * signed cert (ca == prev) */
-    for (ca = GetCAByName(cm, single->issuerHash); ca != NULL && ca != prev;
-            prev = ca, ca = GetCAByName(cm, ca->issuerNameHash)) {
+    ca = GetCAByName(cm, single->issuerHash);
+#if defined(HAVE_CERTIFICATE_STATUS_REQUEST_V2)
+    if (ca == NULL && pendingCAs != NULL) {
+        ca = findSignerByName(pendingCAs, single->issuerHash);
+    }
+#else
+    (void)pendingCAs;
+#endif
+    for (; ca != NULL && ca != prev;
+            prev = ca) {
         if (XMEMCMP(cert->issuerHash, ca->issuerNameHash,
                 OCSP_DIGEST_SIZE) == 0) {
             WOLFSSL_MSG("\tOCSP Response signed by authorized "
@@ -584,6 +597,12 @@ static int CheckOcspResponderChain(OcspEntry* single, DecodedCert *cert,
             passed = 1;
             break;
         }
+        ca = GetCAByName(cm, ca->issuerNameHash);
+#if defined(HAVE_CERTIFICATE_STATUS_REQUEST_V2)
+        if (ca == NULL && pendingCAs != NULL) {
+            ca = findSignerByName(pendingCAs, single->issuerHash);
+        }
+#endif
     }
     return passed;
 }
@@ -632,7 +651,7 @@ int CheckOcspResponder(OcspResponse *bs, DecodedCert *cert, void* vp)
             }
 #ifndef WOLFSSL_NO_OCSP_ISSUER_CHAIN_CHECK
             else if (vp != NULL) {
-                passed = CheckOcspResponderChain(single, cert, vp);
+                passed = CheckOcspResponderChain(single, cert, vp, bs->pendingCAs);
             }
 #endif
         }
@@ -783,7 +802,7 @@ WOLFSSL_OCSP_CERTID* wolfSSL_OCSP_cert_to_id(
 
     InitDecodedCert(cert, subject->derCert->buffer,
                     subject->derCert->length, NULL);
-    if (ParseCertRelative(cert, CERT_TYPE, VERIFY_OCSP, cm) != 0) {
+    if (ParseCertRelative(cert, CERT_TYPE, VERIFY_OCSP, cm, NULL) != 0) {
         FreeDecodedCert(cert);
         goto out;
     }
@@ -873,7 +892,7 @@ int wolfSSL_OCSP_basic_verify(WOLFSSL_OCSP_BASICRESP *bs,
 
     InitDecodedCert(cert, bs->cert, bs->certSz, NULL);
     certInit = 1;
-    if (ParseCertRelative(cert, CERT_TYPE, VERIFY, st->cm) < 0)
+    if (ParseCertRelative(cert, CERT_TYPE, VERIFY, st->cm, NULL) < 0)
         goto out;
 
     if (!(flags & OCSP_NOCHECKS)) {
@@ -1025,7 +1044,7 @@ OcspResponse* wolfSSL_d2i_OCSP_RESPONSE(OcspResponse** response,
     resp->maxIdx = (word32)len;
 
     ret = OcspResponseDecode(resp, NULL, NULL, 1);
-    if (ret != 0 && ret != ASN_OCSP_CONFIRM_E) {
+    if (ret != 0 && ret != WC_NO_ERR_TRACE(ASN_OCSP_CONFIRM_E)) {
         /* for just converting from a DER to an internal structure the CA may
          * not yet be known to this function for signature verification */
         wolfSSL_OCSP_RESPONSE_free(resp);

@@ -80,7 +80,7 @@
             #endif
         #endif /* WOLFSSL_SGX */
     #endif
-    #ifndef SINGLE_THREADED
+    #if !defined(SINGLE_THREADED) && !defined(_WIN32_WCE)
         #include <process.h>
     #endif
 #elif defined(THREADX)
@@ -342,7 +342,11 @@
 #endif
 #elif defined(_MSC_VER)
     /* Use MSVC compiler intrinsics for atomic ops */
-    #include <intrin.h>
+    #ifdef _WIN32_WCE
+        #include <armintr.h>
+    #else
+        #include <intrin.h>
+    #endif
     typedef volatile long wolfSSL_Atomic_Int;
     #define WOLFSSL_ATOMIC_OPS
 #endif
@@ -716,12 +720,16 @@ WOLFSSL_ABI WOLFSSL_API int wolfCrypt_Cleanup(void);
     #if !defined(NO_WOLFSSL_DIR)\
         && !defined(WOLFSSL_NUCLEUS) && !defined(WOLFSSL_NUCLEUS_1_2)
         #if defined(USE_WINDOWS_API)
+            #include <io.h>
             #include <sys/stat.h>
             #ifndef XSTAT
                 #define XSTAT       _stat
             #endif
             #define XS_ISREG(s) (s & _S_IFREG)
             #define SEPARATOR_CHAR ';'
+            #define XWRITE      _write
+            #define XREAD       _read
+            #define XALTHOMEVARNAME "USERPROFILE"
 
         #elif defined(ARDUINO)
             #ifndef XSTAT

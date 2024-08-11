@@ -215,6 +215,17 @@
 #ifdef HAVE_EX_DATA
         session->ownExData = save_ownExData;
 #endif
+
+#if defined(WOLFSSL_TLS13) && defined(HAVE_SESSION_TICKET) &&                  \
+    defined(WOLFSSL_TICKET_NONCE_MALLOC) &&                                    \
+    (!defined(HAVE_FIPS) || (defined(FIPS_VERSION_GE) && FIPS_VERSION_GE(5,3)))
+        if ((session->ticketNonce.data != NULL) &&
+            (session->ticketNonce.data != session->ticketNonce.dataStatic))
+        {
+            XFREE(session->ticketNonce.data, NULL, DYNAMIC_TYPE_SESSION_TICK);
+            session->ticketNonce.data = NULL;
+        }
+#endif
     }
 
 WOLFSSL_ABI
@@ -747,6 +758,20 @@ long wolfSSL_CTX_set_session_cache_mode(WOLFSSL_CTX* ctx, long mode)
 }
 
 #ifdef OPENSSL_EXTRA
+#ifdef HAVE_MAX_FRAGMENT
+/* return the max fragment size set when handshake was negotiated */
+unsigned char wolfSSL_SESSION_get_max_fragment_length(WOLFSSL_SESSION* session)
+{
+    session = ClientSessionToSession(session);
+    if (session == NULL) {
+        return 0;
+    }
+
+    return session->mfl;
+}
+#endif
+
+
 /* Get the session cache mode for CTX
  *
  * ctx  WOLFSSL_CTX struct to get cache mode from

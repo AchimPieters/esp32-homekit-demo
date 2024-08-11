@@ -329,7 +329,7 @@ int wc_KyberKey_MakeKey(KyberKey* key, WC_RNG* rng)
     {
         ret = wc_CryptoCb_MakePqcKemKey(rng, WC_PQC_KEM_TYPE_KYBER,
                                         key->type, key);
-        if (ret != CRYPTOCB_UNAVAILABLE)
+        if (ret != WC_NO_ERR_TRACE(CRYPTOCB_UNAVAILABLE))
             return ret;
         /* fall-through when unavailable */
         ret = 0;
@@ -440,7 +440,7 @@ int wc_KyberKey_Encapsulate(KyberKey* key, unsigned char* ct, unsigned char* ss,
     ) {
         ret = wc_CryptoCb_PqcEncapsulate(ct, ctlen, ss, KYBER_SS_SZ, rng,
                                          WC_PQC_KEM_TYPE_KYBER, key);
-        if (ret != CRYPTOCB_UNAVAILABLE)
+        if (ret != WC_NO_ERR_TRACE(CRYPTOCB_UNAVAILABLE))
             return ret;
         /* fall-through when unavailable */
         ret = 0;
@@ -549,7 +549,7 @@ int wc_KyberKey_Decapsulate(KyberKey* key, unsigned char* ss,
     ) {
         ret = wc_CryptoCb_PqcDecapsulate(ct, ctlen, ss, KYBER_SS_SZ,
                                          WC_PQC_KEM_TYPE_KYBER, key);
-        if (ret != CRYPTOCB_UNAVAILABLE)
+        if (ret != WC_NO_ERR_TRACE(CRYPTOCB_UNAVAILABLE))
             return ret;
         /* fall-through when unavailable */
         ret = 0;
@@ -608,7 +608,8 @@ int wc_KyberKey_Decapsulate(KyberKey* key, unsigned char* ss,
  * @return  NOT_COMPILED_IN when key type is not supported.
  * @return  BUFFER_E when len is not the correct size.
  */
-int wc_KyberKey_DecodePrivateKey(KyberKey* key, unsigned char* in, word32 len)
+int wc_KyberKey_DecodePrivateKey(KyberKey* key, const unsigned char* in,
+    word32 len)
 {
     int ret = 0;
     word32 privLen = 0;
@@ -647,7 +648,8 @@ int wc_KyberKey_DecodePrivateKey(KyberKey* key, unsigned char* in, word32 len)
  * @return  NOT_COMPILED_IN when key type is not supported.
  * @return  BUFFER_E when len is not the correct size.
  */
-int wc_KyberKey_DecodePublicKey(KyberKey* key, unsigned char* in, word32 len)
+int wc_KyberKey_DecodePublicKey(KyberKey* key, const unsigned char* in,
+    word32 len)
 {
     int ret = 0;
     word32 pubLen = 0;

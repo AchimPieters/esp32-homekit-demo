@@ -1499,7 +1499,8 @@ int wolfSSL_SMIME_write_PKCS7(WOLFSSL_BIO* out, PKCS7* pkcs7, WOLFSSL_BIO* in,
 
     /* Base64 encode signedData bundle */
     if (ret > 0) {
-        if (Base64_Encode(p7out, (word32)len, NULL, &sigBase64Len) != LENGTH_ONLY_E) {
+        if (Base64_Encode(p7out, (word32)len, NULL, &sigBase64Len) !=
+            WC_NO_ERR_TRACE(LENGTH_ONLY_E)) {
             ret = 0;
         }
         else {
@@ -1931,7 +1932,7 @@ int wolfSSL_PKCS12_parse(WC_PKCS12* pkcs12, const char* psw,
                 DYNAMIC_TYPE_X509);
             InitX509(x509, 1, heap);
             InitDecodedCert(DeCert, current->buffer, current->bufferSz, heap);
-            if (ParseCertRelative(DeCert, CERT_TYPE, NO_VERIFY, NULL) != 0) {
+            if (ParseCertRelative(DeCert, CERT_TYPE, NO_VERIFY, NULL, NULL) != 0) {
                 WOLFSSL_MSG("Issue with parsing certificate");
                 FreeDecodedCert(DeCert);
                 wolfSSL_X509_free(x509);
@@ -2008,7 +2009,7 @@ int wolfSSL_PKCS12_parse(WC_PKCS12* pkcs12, const char* psw,
         }
         InitX509(*cert, 1, heap);
         InitDecodedCert(DeCert, certData, certDataSz, heap);
-        if (ParseCertRelative(DeCert, CERT_TYPE, NO_VERIFY, NULL) != 0) {
+        if (ParseCertRelative(DeCert, CERT_TYPE, NO_VERIFY, NULL, NULL) != 0) {
             WOLFSSL_MSG("Issue with parsing certificate");
         }
         if (CopyDecodedToX509(*cert, DeCert) != 0) {

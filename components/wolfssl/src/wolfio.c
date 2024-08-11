@@ -153,6 +153,11 @@ static WC_INLINE int TranslateReturnCode(int old, int sd)
         if (errno == RTCSERR_TCP_TIMED_OUT)
             errno = SOCKET_EAGAIN;
     }
+#elif defined(WOLFSSL_EMNET)
+    if (old < 0) { /* SOCKET_ERROR */
+        /* Get the real socket error */
+        IP_SOCK_getsockopt(sd, SOL_SOCKET, SO_ERROR, &old, (int)sizeof(old));
+    }
 #endif
 
     return old;
@@ -166,7 +171,7 @@ static WC_INLINE int wolfSSL_LastError(int err)
     return WSAGetLastError();
 #elif defined(EBSNET)
     return xn_getlasterror();
-#elif defined(WOLFSSL_LINUXKM)
+#elif defined(WOLFSSL_LINUXKM) || defined(WOLFSSL_EMNET)
     return err; /* Return provided error value */
 #elif defined(FUSION_RTOS)
     #include <fclerrno.h>
@@ -1607,6 +1612,11 @@ int wolfIO_HttpProcessResponse(int sfd, const char** appStrList,
 
         /* read data if no \r\n or first time */
         if ((start == NULL) || (end == NULL)) {
+            if (httpBufSz < len + 1) {
+                return BUFFER_ERROR; /* can't happen, but Coverity thinks it
+                                      * can.
+                                      */
+            }
             result = wolfIO_Recv(sfd, (char*)httpBuf+len, httpBufSz-len-1, 0);
             if (result > 0) {
                 len += result;

@@ -95,7 +95,7 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
     #include <wolfcrypt/src/misc.c>
 #endif
 
-#ifndef WOLFSSL_ARMASM
+#if !defined(WOLFSSL_ARMASM) && !defined(WOLFSSL_RISCV_ASM)
 
 #ifdef WOLFSSL_IMX6_CAAM_BLOB
     /* case of possibly not using hardware acceleration for AES but using key
@@ -727,7 +727,8 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
                 return MEMORY_E;
 #endif
 
-            if (AES_set_encrypt_key_AESNI(userKey,bits,temp_key) == BAD_FUNC_ARG) {
+            if (AES_set_encrypt_key_AESNI(userKey,bits,temp_key)
+                == WC_NO_ERR_TRACE(BAD_FUNC_ARG)) {
 #ifdef WOLFSSL_SMALL_STACK
                 XFREE(temp_key, aes->heap, DYNAMIC_TYPE_AES);
 #endif
@@ -966,6 +967,9 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
     #endif
 #elif defined(WOLFSSL_HAVE_PSA) && !defined(WOLFSSL_PSA_NO_AES)
 /* implemented in wolfcrypt/src/port/psa/psa_aes.c */
+
+#elif defined(WOLFSSL_RISCV_ASM)
+/* implemented in wolfcrypt/src/port/risc-v/riscv-64-aes.c */
 
 #else
 
@@ -4317,6 +4321,7 @@ static void AesSetKey_C(Aes* aes, const byte* key, word32 keySz, int dir)
 
 #endif /* NEED_AES_TABLES */
 
+#ifndef WOLFSSL_RISCV_ASM
     /* Software AES - SetKey */
     static WARN_UNUSED_RESULT int wc_AesSetKeyLocal(
         Aes* aes, const byte* userKey, word32 keylen, const byte* iv, int dir,
@@ -4630,6 +4635,7 @@ static void AesSetKey_C(Aes* aes, const byte* key, word32 keySz, int dir)
         return wc_AesSetKeyLocal(aes, userKey, keylen, iv, dir, 1);
 
     } /* wc_AesSetKey() */
+#endif
 
     #if defined(WOLFSSL_AES_DIRECT) || defined(WOLFSSL_AES_COUNTER)
         /* AES-CTR and AES-DIRECT need to use this for key setup */
@@ -5509,7 +5515,7 @@ int wc_AesCbcEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
         #endif
         {
             int crypto_cb_ret = wc_CryptoCb_AesCbcEncrypt(aes, out, in, sz);
-            if (crypto_cb_ret != CRYPTOCB_UNAVAILABLE)
+            if (crypto_cb_ret != WC_NO_ERR_TRACE(CRYPTOCB_UNAVAILABLE))
                 return crypto_cb_ret;
             /* fall-through when unavailable */
         }
@@ -5678,7 +5684,7 @@ int wc_AesCbcEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
         #endif
         {
             int crypto_cb_ret = wc_CryptoCb_AesCbcDecrypt(aes, out, in, sz);
-            if (crypto_cb_ret != CRYPTOCB_UNAVAILABLE)
+            if (crypto_cb_ret != WC_NO_ERR_TRACE(CRYPTOCB_UNAVAILABLE))
                 return crypto_cb_ret;
             /* fall-through when unavailable */
         }
@@ -6068,7 +6074,7 @@ int wc_AesCbcEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
             #endif
             {
                 int crypto_cb_ret = wc_CryptoCb_AesCtrEncrypt(aes, out, in, sz);
-                if (crypto_cb_ret != CRYPTOCB_UNAVAILABLE)
+                if (crypto_cb_ret != WC_NO_ERR_TRACE(CRYPTOCB_UNAVAILABLE))
                     return crypto_cb_ret;
                 /* fall-through when unavailable */
             }
@@ -6171,7 +6177,7 @@ int wc_AesCbcEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
     #endif /* NEED_AES_CTR_SOFT */
 
 #endif /* WOLFSSL_AES_COUNTER */
-#endif /* !WOLFSSL_ARMASM */
+#endif /* !WOLFSSL_ARMASM && ! WOLFSSL_RISCV_ASM */
 
 
 /*
@@ -6220,6 +6226,9 @@ static WC_INLINE void IncCtr(byte* ctr, word32 ctrSz)
 
 #ifdef WOLFSSL_ARMASM
     /* implementation is located in wolfcrypt/src/port/arm/armv8-aes.c */
+
+#elif defined(WOLFSSL_RISCV_ASM)
+    /* implemented in wolfcrypt/src/port/risc-v/riscv-64-aes.c */
 
 #elif defined(WOLFSSL_AFALG)
     /* implemented in wolfcrypt/src/port/afalg/afalg_aes.c */
@@ -8316,7 +8325,7 @@ int wc_AesGcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         int crypto_cb_ret =
             wc_CryptoCb_AesGcmEncrypt(aes, out, in, sz, iv, ivSz, authTag,
                                       authTagSz, authIn, authInSz);
-        if (crypto_cb_ret != CRYPTOCB_UNAVAILABLE)
+        if (crypto_cb_ret != WC_NO_ERR_TRACE(CRYPTOCB_UNAVAILABLE))
             return crypto_cb_ret;
         /* fall-through when unavailable */
     }
@@ -8859,7 +8868,7 @@ int wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
 {
     int ret;
 #ifdef WOLFSSL_AESNI
-    int res = AES_GCM_AUTH_E;
+    int res = WC_NO_ERR_TRACE(AES_GCM_AUTH_E);
 #endif
 
     /* argument checks */
@@ -8880,7 +8889,7 @@ int wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         int crypto_cb_ret =
             wc_CryptoCb_AesGcmDecrypt(aes, out, in, sz, iv, ivSz,
                                       authTag, authTagSz, authIn, authInSz);
-        if (crypto_cb_ret != CRYPTOCB_UNAVAILABLE)
+        if (crypto_cb_ret != WC_NO_ERR_TRACE(CRYPTOCB_UNAVAILABLE))
             return crypto_cb_ret;
         /* fall-through when unavailable */
     }
@@ -10478,6 +10487,9 @@ int wc_AesCcmCheckTagSize(int sz)
 #ifdef WOLFSSL_ARMASM
     /* implementation located in wolfcrypt/src/port/arm/armv8-aes.c */
 
+#elif defined(WOLFSSL_RISCV_ASM)
+    /* implementation located in wolfcrypt/src/port/risc-v/riscv-64-aes.c */
+
 #elif defined(HAVE_COLDFIRE_SEC)
     #error "Coldfire SEC doesn't currently support AES-CCM mode"
 
@@ -10749,6 +10761,11 @@ int wc_AesCcmEncrypt(Aes* aes, byte* out, const byte* in, word32 inSz,
             authTagSz > AES_BLOCK_SIZE)
         return BAD_FUNC_ARG;
 
+    /* Sanity check on authIn to prevent segfault in xorbuf() where
+     * variable 'in' is dereferenced as the mask 'm' in misc.c */
+    if (authIn == NULL && authInSz > 0)
+        return BAD_FUNC_ARG;
+
     /* sanity check on tag size */
     if (wc_AesCcmCheckTagSize((int)authTagSz) != 0) {
         return BAD_FUNC_ARG;
@@ -10762,7 +10779,7 @@ int wc_AesCcmEncrypt(Aes* aes, byte* out, const byte* in, word32 inSz,
         int crypto_cb_ret =
             wc_CryptoCb_AesCcmEncrypt(aes, out, in, inSz, nonce, nonceSz,
                                       authTag, authTagSz, authIn, authInSz);
-        if (crypto_cb_ret != CRYPTOCB_UNAVAILABLE)
+        if (crypto_cb_ret != WC_NO_ERR_TRACE(CRYPTOCB_UNAVAILABLE))
             return crypto_cb_ret;
         /* fall-through when unavailable */
     }
@@ -10891,6 +10908,11 @@ int  wc_AesCcmDecrypt(Aes* aes, byte* out, const byte* in, word32 inSz,
         authTagSz > AES_BLOCK_SIZE)
         return BAD_FUNC_ARG;
 
+    /* Sanity check on authIn to prevent segfault in xorbuf() where
+     * variable 'in' is dereferenced as the mask 'm' in misc.c */
+    if (authIn == NULL && authInSz > 0)
+        return BAD_FUNC_ARG;
+
     /* sanity check on tag size */
     if (wc_AesCcmCheckTagSize((int)authTagSz) != 0) {
         return BAD_FUNC_ARG;
@@ -10904,7 +10926,7 @@ int  wc_AesCcmDecrypt(Aes* aes, byte* out, const byte* in, word32 inSz,
         int crypto_cb_ret =
             wc_CryptoCb_AesCcmDecrypt(aes, out, in, inSz, nonce, nonceSz,
             authTag, authTagSz, authIn, authInSz);
-        if (crypto_cb_ret != CRYPTOCB_UNAVAILABLE)
+        if (crypto_cb_ret != WC_NO_ERR_TRACE(CRYPTOCB_UNAVAILABLE))
             return crypto_cb_ret;
         /* fall-through when unavailable */
     }
@@ -11375,6 +11397,9 @@ int wc_AesGetKeySize(Aes* aes, word32* keySize)
 #elif defined(WOLFSSL_DEVCRYPTO_AES)
     /* implemented in wolfcrypt/src/port/devcrypt/devcrypto_aes.c */
 
+#elif defined(WOLFSSL_RISCV_ASM)
+    /* implemented in wolfcrypt/src/port/riscv/riscv-64-aes.c */
+
 #elif defined(WOLFSSL_SCE) && !defined(WOLFSSL_SCE_NO_AES)
 
 /* Software AES - ECB */
@@ -11409,7 +11434,7 @@ static WARN_UNUSED_RESULT int _AesEcbEncrypt(
     #endif
     {
         ret = wc_CryptoCb_AesEcbEncrypt(aes, out, in, sz);
-        if (ret != CRYPTOCB_UNAVAILABLE)
+        if (ret != WC_NO_ERR_TRACE(CRYPTOCB_UNAVAILABLE))
             return ret;
         ret = 0;
         /* fall-through when unavailable */
@@ -11461,7 +11486,7 @@ static WARN_UNUSED_RESULT int _AesEcbDecrypt(
     #endif
     {
         ret = wc_CryptoCb_AesEcbDecrypt(aes, out, in, sz);
-        if (ret != CRYPTOCB_UNAVAILABLE)
+        if (ret != WC_NO_ERR_TRACE(CRYPTOCB_UNAVAILABLE))
             return ret;
         ret = 0;
         /* fall-through when unavailable */
@@ -12613,12 +12638,21 @@ static WARN_UNUSED_RESULT int _AesXtsHelper(
     }
 
     xorbuf(out, in, totalSz);
+#ifndef WOLFSSL_RISCV_ASM
     if (dir == AES_ENCRYPTION) {
         return _AesEcbEncrypt(aes, out, out, totalSz);
     }
     else {
         return _AesEcbDecrypt(aes, out, out, totalSz);
     }
+#else
+    if (dir == AES_ENCRYPTION) {
+        return wc_AesEcbEncrypt(aes, out, out, totalSz);
+    }
+    else {
+        return wc_AesEcbDecrypt(aes, out, out, totalSz);
+    }
+#endif
 }
 #endif /* HAVE_AES_ECB */
 
@@ -12873,10 +12907,6 @@ int wc_AesXtsEncryptInit(XtsAes* xaes, const byte* i, word32 iSz,
 
     if (aes->keylen == 0) {
         WOLFSSL_MSG("wc_AesXtsEncrypt called with unset encryption key.");
-        return BAD_FUNC_ARG;
-    }
-
-    if (iSz < AES_BLOCK_SIZE) {
         return BAD_FUNC_ARG;
     }
 

@@ -770,7 +770,7 @@ typedef struct w64wrapper {
                 defined(WOLFSSL_ZEPHYR) || defined(MICROCHIP_PIC24)
             /* XC32 version < 1.0 does not support strncasecmp. */
             #define USE_WOLF_STRNCASECMP
-            #define XSTRNCASECMP(s1,s2) wc_strncasecmp(s1,s2)
+            #define XSTRNCASECMP(s1,s2,n) wc_strncasecmp((s1),(s2),(n))
         #elif defined(USE_WINDOWS_API) || defined(FREERTOS_TCP_WINSIM)
             #define XSTRNCASECMP(s1,s2,n) _strnicmp((s1),(s2),(n))
         #else
@@ -824,6 +824,10 @@ typedef struct w64wrapper {
                         return ret;
                     }
                 #define XSNPRINTF _xsnprintf_
+            #elif defined(FREESCALE_MQX)
+                /* see wc_port.h for fio.h and nio.h includes.  MQX does not
+                   have stdio.h available, so it needs its own section. */
+                #define XSNPRINTF snprintf
             #elif defined(WOLF_C89)
                 #include <stdio.h>
                 #define XSPRINTF sprintf
@@ -1212,14 +1216,14 @@ typedef struct w64wrapper {
         WC_PK_TYPE_CURVE25519_KEYGEN = 16,
         WC_PK_TYPE_RSA_GET_SIZE = 17,
         #define _WC_PK_TYPE_MAX WC_PK_TYPE_RSA_GET_SIZE
-    #if defined(HAVE_PQC) && defined(WOLFSSL_HAVE_KYBER)
+    #if defined(WOLFSSL_HAVE_KYBER)
         WC_PK_TYPE_PQC_KEM_KEYGEN = 18,
         WC_PK_TYPE_PQC_KEM_ENCAPS = 19,
         WC_PK_TYPE_PQC_KEM_DECAPS = 20,
         #undef _WC_PK_TYPE_MAX
         #define _WC_PK_TYPE_MAX WC_PK_TYPE_PQC_KEM_DECAPS
     #endif
-    #if defined(HAVE_PQC) && (defined(HAVE_DILITHIUM) || defined(HAVE_FALCON))
+    #if defined(HAVE_DILITHIUM) || defined(HAVE_FALCON)
         WC_PK_TYPE_PQC_SIG_KEYGEN = 21,
         WC_PK_TYPE_PQC_SIG_SIGN = 22,
         WC_PK_TYPE_PQC_SIG_VERIFY = 23,
@@ -1230,7 +1234,7 @@ typedef struct w64wrapper {
         WC_PK_TYPE_MAX = _WC_PK_TYPE_MAX
     };
 
-    #if defined(HAVE_PQC)
+#if defined(WOLFSSL_HAVE_KYBER)
     /* Post quantum KEM algorithms */
     enum wc_PqcKemType {
         WC_PQC_KEM_TYPE_NONE = 0,
@@ -1242,7 +1246,9 @@ typedef struct w64wrapper {
     #endif
         WC_PQC_KEM_TYPE_MAX = _WC_PQC_KEM_TYPE_MAX
     };
+#endif
 
+#if defined(HAVE_DILITHIUM) || defined(HAVE_FALCON)
     /* Post quantum signature algorithms */
     enum wc_PqcSignatureType {
         WC_PQC_SIG_TYPE_NONE = 0,
@@ -1259,7 +1265,7 @@ typedef struct w64wrapper {
     #endif
         WC_PQC_SIG_TYPE_MAX = _WC_PQC_SIG_TYPE_MAX
     };
-    #endif
+#endif
 
     /* settings detection for compile vs runtime math incompatibilities */
     enum {

@@ -32,6 +32,12 @@
 
 #ifdef HAVE_ECC
     #include <wolfssl/wolfcrypt/ecc.h>
+    #ifdef HAVE_SELFTEST
+        /* point compression types. */
+        #define ECC_POINT_COMP_EVEN 0x02
+        #define ECC_POINT_COMP_ODD  0x03
+        #define ECC_POINT_UNCOMP    0x04
+    #endif
 #endif
 #ifndef WOLFSSL_HAVE_ECC_KEY_GET_PRIV
     /* FIPS build has replaced ecc.h. */
@@ -1798,7 +1804,7 @@ int wolfSSL_RSA_LoadDer_ex(WOLFSSL_RSA* rsa, const unsigned char* derBuf,
             rsa->pkcs8HeaderSz = (word16)idx;
         }
         /* When decoding and not PKCS#8, return will be ASN_PARSE_E. */
-        else if (res != ASN_PARSE_E) {
+        else if (res != WC_NO_ERR_TRACE(ASN_PARSE_E)) {
             /* Something went wrong while decoding. */
             WOLFSSL_ERROR_MSG("Unexpected error with trying to remove PKCS#8 "
                               "header");
@@ -2698,7 +2704,7 @@ int SetRsaInternal(WOLFSSL_RSA* rsa)
         }
 
         /* Copy down d mod q-1 if available. */
-        if ((ret == 1) && (rsa->dmp1 != NULL) &&
+        if ((ret == 1) && (rsa->dmq1 != NULL) &&
                 (wolfssl_bn_get_value(rsa->dmq1, &key->dQ) != 1)) {
             WOLFSSL_ERROR_MSG("rsa dQ key error");
             ret = -1;
@@ -3378,7 +3384,7 @@ WOLFSSL_RSA* wolfSSL_RSA_generate_key(int bits, unsigned long e,
         ret = wolfssl_rsa_generate_key_native(rsa, bits, bn, NULL);
     #ifdef HAVE_FIPS
         /* Keep trying if failed to find a prime. */
-        if (ret == PRIME_GEN_E) {
+        if (ret == WC_NO_ERR_TRACE(PRIME_GEN_E)) {
             continue;
         }
     #endif
@@ -3429,7 +3435,7 @@ int wolfSSL_RSA_generate_key_ex(WOLFSSL_RSA* rsa, int bits, WOLFSSL_BIGNUM* e,
             int gen_ret = wolfssl_rsa_generate_key_native(rsa, bits, e, cb);
         #ifdef HAVE_FIPS
             /* Keep trying again if public key value didn't work. */
-            if (gen_ret == PRIME_GEN_E) {
+            if (gen_ret == WC_NO_ERR_TRACE(PRIME_GEN_E)) {
                 continue;
             }
         #endif
@@ -3558,7 +3564,7 @@ int wolfSSL_RSA_padding_add_PKCS1_PSS(WOLFSSL_RSA *rsa, unsigned char *em,
     if (ret == 1) {
         /* Get length of RSA key - encrypted message length. */
         emLen = wolfSSL_RSA_size(rsa);
-        if (ret <= 0) {
+        if (emLen <= 0) {
             WOLFSSL_ERROR_MSG("wolfSSL_RSA_size error");
             ret = 0;
         }
@@ -5624,7 +5630,7 @@ int wolfSSL_i2d_DSAparams(const WOLFSSL_DSA* dsa,
     if (ret == 0) {
         key = (DsaKey*)dsa->internal;
         ret = wc_DsaKeyToParamsDer_ex(key, NULL, &derLen);
-        if (ret == LENGTH_ONLY_E) {
+        if (ret == WC_NO_ERR_TRACE(LENGTH_ONLY_E)) {
             ret = 0;
         }
     }
@@ -7460,7 +7466,7 @@ int wolfSSL_i2d_DHparams(const WOLFSSL_DH *dh, unsigned char **out)
             *out += len;
         }
         /* An error occurred unless only length returned. */
-        else if (ret != LENGTH_ONLY_E) {
+        else if (ret != WC_NO_ERR_TRACE(LENGTH_ONLY_E)) {
             err = 1;
         }
     }
@@ -7765,7 +7771,7 @@ static int wolfssl_dhparams_to_der(WOLFSSL_DH* dh, unsigned char** out,
         /* Use wolfSSL API to get length of DER encode DH parameters. */
         key = (DhKey*)dh->internal;
         ret = wc_DhParamsToDer(key, NULL, &derSz);
-        if (ret != LENGTH_ONLY_E) {
+        if (ret != WC_NO_ERR_TRACE(LENGTH_ONLY_E)) {
             WOLFSSL_ERROR_MSG("Failed to get size of DH params");
             err = 1;
         }
@@ -8724,7 +8730,7 @@ int wolfSSL_DH_compute_key(unsigned char* key, const WOLFSSL_BIGNUM* otherPub,
     if (ret == 0) {
         /* Get the public key into the array. */
         pubSz  = wolfSSL_BN_bn2bin(otherPub, pub);
-        if (privSz <= 0) {
+        if (pubSz <= 0) {
             ret = -1;
         }
     }
@@ -9870,7 +9876,6 @@ void wolfSSL_EC_POINT_dump(const char *msg, const WOLFSSL_EC_POINT *point)
 #endif
 }
 
-#ifndef HAVE_SELFTEST
 /* Convert EC point to hex string that as either uncompressed or compressed.
  *
  * ECC point compression types were not included in selftest ecc.h
@@ -9983,7 +9988,100 @@ char* wolfSSL_EC_POINT_point2hex(const WOLFSSL_EC_GROUP* group,
     return hex;
 }
 
-#endif /* HAVE_SELFTEST */
+static size_t hex_to_bytes(const char *hex, unsigned char *output, size_t sz)
+{
+    word32 i;
+    for (i = 0; i < sz; i++) {
+        signed char ch1, ch2;
+        ch1 = HexCharToByte(hex[i * 2]);
+        ch2 = HexCharToByte(hex[i * 2 + 1]);
+        if ((ch1 < 0) || (ch2 < 0)) {
+            WOLFSSL_MSG("hex_to_bytes: syntax error");
+            return 0;
+        }
+        output[i] = (unsigned char)((ch1 << 4) + ch2);
+    }
+    return sz;
+}
+
+WOLFSSL_EC_POINT* wolfSSL_EC_POINT_hex2point(const EC_GROUP *group,
+            const char *hex, WOLFSSL_EC_POINT*p, WOLFSSL_BN_CTX *ctx)
+{
+    /* for uncompressed mode */
+    size_t str_sz;
+    BIGNUM *Gx  = NULL;
+    BIGNUM *Gy  = NULL;
+    char   strGx[MAX_ECC_BYTES * 2 + 1];
+
+    /* for compressed mode */
+    int    key_sz;
+    byte   *octGx = (byte *)strGx; /* octGx[MAX_ECC_BYTES] */
+
+    int p_alloc = 0;
+    int ret;
+
+    WOLFSSL_ENTER("wolfSSL_EC_POINT_hex2point");
+
+    if (group == NULL || hex == NULL || ctx == NULL)
+        return NULL;
+
+    if (p == NULL) {
+        if ((p = wolfSSL_EC_POINT_new(group)) == NULL) {
+            WOLFSSL_MSG("wolfSSL_EC_POINT_new");
+            goto err;
+        }
+        p_alloc = 1;
+    }
+
+    key_sz = (wolfSSL_EC_GROUP_get_degree(group) + 7) / 8;
+    if (hex[0] ==  '0' && hex[1] == '4') { /* uncompressed mode */
+        str_sz = key_sz * 2;
+
+        XMEMSET(strGx, 0x0, str_sz + 1);
+        XMEMCPY(strGx, hex + 2, str_sz);
+
+        if (wolfSSL_BN_hex2bn(&Gx, strGx) == 0)
+            goto err;
+
+        if (wolfSSL_BN_hex2bn(&Gy, hex + 2 + str_sz) == 0)
+            goto err;
+
+        ret = wolfSSL_EC_POINT_set_affine_coordinates_GFp
+                                            (group, p, Gx, Gy, ctx);
+
+        if (ret != WOLFSSL_SUCCESS) {
+            WOLFSSL_MSG("wolfSSL_EC_POINT_set_affine_coordinates_GFp");
+            goto err;
+        }
+    }
+    else if (hex[0] == '0' && (hex[1] == '2' || hex[1] == '3')) {
+        size_t sz = XSTRLEN(hex + 2) / 2;
+        /* compressed mode */
+        octGx[0] = ECC_POINT_COMP_ODD;
+        if (hex_to_bytes(hex + 2, octGx + 1, sz) != sz) {
+            goto err;
+        }
+        if (wolfSSL_ECPoint_d2i(octGx, key_sz + 1, group, p)
+                                            != WOLFSSL_SUCCESS) {
+            goto err;
+        }
+    }
+    else
+        goto err;
+
+    wolfSSL_BN_free(Gx);
+    wolfSSL_BN_free(Gy);
+    return p;
+
+err:
+    wolfSSL_BN_free(Gx);
+    wolfSSL_BN_free(Gy);
+    if (p_alloc) {
+        EC_POINT_free(p);
+    }
+    return NULL;
+
+}
 
 /* Encode the EC point as an uncompressed point in DER.
  *
@@ -10026,7 +10124,8 @@ int wolfSSL_ECPoint_i2d(const WOLFSSL_EC_GROUP *group,
         int ret = wc_ecc_export_point_der(group->curve_idx,
             (ecc_point*)point->internal, out, len);
         /* Check return. When out is NULL, return will be length only error. */
-        if ((ret != MP_OKAY) && ((out != NULL) || (ret != LENGTH_ONLY_E))) {
+        if ((ret != MP_OKAY) && ((out != NULL) ||
+                                 (ret != WC_NO_ERR_TRACE(LENGTH_ONLY_E)))) {
             WOLFSSL_MSG("wolfSSL_ECPoint_i2d wc_ecc_export_point_der failed");
             res = 0;
         }
@@ -12161,7 +12260,7 @@ int wolfSSL_EC_KEY_LoadDer_ex(WOLFSSL_EC_KEY* key, const unsigned char* derBuf,
             res = 1;
         }
         /* Error out on parsing error. */
-        else if (ret != ASN_PARSE_E) {
+        else if (ret != WC_NO_ERR_TRACE(ASN_PARSE_E)) {
             WOLFSSL_MSG("Unexpected error with trying to remove PKCS8 header");
             res = -1;
         }
@@ -13560,6 +13659,7 @@ WOLFSSL_ECDSA_SIG* wolfSSL_d2i_ECDSA_SIG(WOLFSSL_ECDSA_SIG** sig,
 int wolfSSL_i2d_ECDSA_SIG(const WOLFSSL_ECDSA_SIG *sig, unsigned char **pp)
 {
     word32 len = 0;
+    int    update_p = 1;
 
     /* Validate parameter. */
     if (sig != NULL) {
@@ -13579,6 +13679,17 @@ int wolfSSL_i2d_ECDSA_SIG(const WOLFSSL_ECDSA_SIG *sig, unsigned char **pp)
         /* Add in the length of the SEQUENCE. */
         len += (word32)1 + ASN_LEN_SIZE(len);
 
+        #ifdef WOLFSSL_I2D_ECDSA_SIG_ALLOC
+        if ((pp != NULL) && (*pp == NULL)) {
+            *pp = (unsigned char *)XMALLOC(len, NULL, DYNAMIC_TYPE_OPENSSL);
+            if (*pp != NULL) {
+                WOLFSSL_MSG("malloc error");
+                return 0;
+            }
+            update_p = 0;
+        }
+        #endif
+
         /* Encode only if there is a buffer to encode into. */
         if ((pp != NULL) && (*pp != NULL)) {
             /* Encode using the internal representations of r and s. */
@@ -13587,7 +13698,7 @@ int wolfSSL_i2d_ECDSA_SIG(const WOLFSSL_ECDSA_SIG *sig, unsigned char **pp)
                 /* No bytes encoded. */
                 len = 0;
             }
-            else {
+            else if (update_p) {
                 /* Update pointer to after encoding. */
                 *pp += len;
             }
@@ -16161,7 +16272,7 @@ static int pem_write_mem_pkcs8privatekey(byte** pem, int* pemSz,
 
     if (res == 1) {
         /* Guestimate key size and PEM size. */
-        if (pem_pkcs8_encode(pkey, NULL, &keySz) != LENGTH_ONLY_E) {
+        if (pem_pkcs8_encode(pkey, NULL, &keySz) != WC_NO_ERR_TRACE(LENGTH_ONLY_E)) {
             res = 0;
         }
     }

@@ -244,7 +244,7 @@ int wc_Des3_CbcDecryptWithKey(byte* out, const byte* in, word32 sz,
 int wc_BufferKeyDecrypt(EncryptedInfo* info, byte* der, word32 derSz,
     const byte* password, int passwordSz, int hashType)
 {
-    int ret = NOT_COMPILED_IN;
+    int ret = WC_NO_ERR_TRACE(NOT_COMPILED_IN);
 #ifdef WOLFSSL_SMALL_STACK
     byte* key      = NULL;
 #else
@@ -318,7 +318,7 @@ int wc_BufferKeyDecrypt(EncryptedInfo* info, byte* der, word32 derSz,
 int wc_BufferKeyEncrypt(EncryptedInfo* info, byte* der, word32 derSz,
     const byte* password, int passwordSz, int hashType)
 {
-    int ret = NOT_COMPILED_IN;
+    int ret = WC_NO_ERR_TRACE(NOT_COMPILED_IN);
 #ifdef WOLFSSL_SMALL_STACK
     byte* key      = NULL;
 #else
@@ -545,9 +545,15 @@ int wc_CryptKey(const char* password, int passwordSz, byte* salt,
 
                 ret =  wc_PKCS12_PBKDF(key, unicodePasswd, idx, salt, saltSz,
                                     iterations, (int)derivedLen, typeH, 1);
+                if (ret < 0)
+                    break;
                 if (id != PBE_SHA1_RC4_128) {
-                    ret += wc_PKCS12_PBKDF(cbcIv, unicodePasswd, idx, salt,
+                    i = ret;
+                    ret = wc_PKCS12_PBKDF(cbcIv, unicodePasswd, idx, salt,
                                     saltSz, iterations, 8, typeH, 2);
+                    if (ret < 0)
+                        break;
+                    ret += i;
                 }
                 break;
             }

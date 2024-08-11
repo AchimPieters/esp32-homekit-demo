@@ -3926,7 +3926,7 @@ static int wc_xmssmt_sign_next_idx(XmssState* state, BdsState* bds, XmssIdx idx,
              * next leaf in alt state is not last. */
             if ((ret == 0) && (i > 0) && (updates > 0) &&
                     (idx_tree < ((XmssIdx)1 << (h - (hs * (i + 1))))) &&
-                    (bds[alt_i].next < ((word32)1 << h))) {
+                    (bds[alt_i].next < ((XmssIdx)1 << h))) {
                 xmss_idx_set_addr_tree(idx_tree, state->addr);
                 /* Update alternative BDS state. */
                 wc_xmss_bds_update(state, &bds[alt_i], sk_seed, pk_seed,
@@ -4055,6 +4055,7 @@ int wc_xmss_sigsleft(const XmssParams* params, unsigned char* sk)
     int ret = 0;
     wc_Idx idx;
 
+    WC_IDX_ZERO(idx);
     /* Read index from the secret key. */
     WC_IDX_DECODE(idx, params->idx_len, sk, ret);
     /* Check validity of index. */
