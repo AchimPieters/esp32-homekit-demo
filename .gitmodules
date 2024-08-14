@@ -7,3 +7,6 @@
 [submodule "components/ws2811"]
 	path = components/ws2811
 	url = https://AchimPieters@github.com/AchimPieters/esp32-ws2811.git
+[submodule "components/homekit"]
+	path = components/homekit
+	url = https://AchimPieters@github.com/AchimPieters/esp32-homekit
