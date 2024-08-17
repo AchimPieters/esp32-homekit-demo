@@ -1,5 +1,3 @@
-# WORK IN PROGRESS
-
 # Example for `LED`
 
 ## What it does
@@ -17,6 +15,18 @@ Connect `LED` pin to the following pin:
 ## Scheme
 
 ![alt text](./scheme.png)
+
+## Requirements
+
+Currently, a preview release is available, and can be installed like this:
+
+```
+idf.py add-dependency "wolfssl/wolfssl^5.7.1-preview2e"
+```
+
+To enable support for Apple HomeKit, be sure to check the respective box in `idf.py menuconfig`.
+
+The local `sdkconfig.defaults` has been edited to enable the wolfSSL support for Apple HomeKit by default.
 
 ## Notes
 
