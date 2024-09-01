@@ -1,28 +1,3 @@
-/**
-
-   Copyright 2024 Achim Pieters | StudioPieters®
-
-   Permission is hereby granted, free of charge, to any person obtaining a copy
-   of this software and associated documentation files (the "Software"), to deal
-   in the Software without restriction, including without limitation the rights
-   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-   copies of the Software, and to permit persons to whom the Software is
-   furnished to do so, subject to the following conditions:
-
-   The above copyright notice and this permission notice shall be included in all
-   copies or substantial portions of the Software.
-
-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-   FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
-   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-   WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-   for more information visit https://www.studiopieters.nl
-
- **/
-
 #include <stdio.h>
 #include <esp_wifi.h>
 #include <esp_event.h>
@@ -30,11 +5,73 @@
 #include <nvs_flash.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <freertos/semphr.h>
 #include <driver/gpio.h>
 #include <homekit/homekit.h>
 #include <homekit/characteristics.h>
-
 #include <dht.h>
+
+// Custom error handling macro
+#define CHECK_ERROR(x) do {                        \
+                esp_err_t __err_rc = (x);                  \
+                if (__err_rc != ESP_OK) {                  \
+                        ESP_LOGE("ERROR", "Error: %s", esp_err_to_name(__err_rc)); \
+                        handle_error(__err_rc);                \
+                }                                          \
+} while(0)
+
+static void handle_error(esp_err_t err) {
+        // Custom error handling logic
+        switch (err) {
+        case ESP_ERR_WIFI_NOT_STARTED:
+        case ESP_ERR_WIFI_CONN:
+                ESP_LOGI("INFORMATION", "Restarting WiFi...");
+                esp_wifi_stop();
+                esp_wifi_start();
+                break;
+        default:
+                ESP_LOGE("ERROR", "Critical error, restarting device...");
+                esp_restart();
+                break;
+        }
+}
+
+static void on_wifi_ready();
+
+static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
+        if (event_base == WIFI_EVENT && (event_id == WIFI_EVENT_STA_START || event_id == WIFI_EVENT_STA_DISCONNECTED)) {
+                ESP_LOGI("INFORMATION", "Connecting to WiFi...");
+                esp_wifi_connect();
+        } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
+                ESP_LOGI("INFORMATION", "WiFi connected, IP obtained");
+                on_wifi_ready();
+        }
+}
+
+static void wifi_init() {
+        CHECK_ERROR(esp_netif_init());
+        CHECK_ERROR(esp_event_loop_create_default());
+        esp_netif_create_default_wifi_sta();
+
+        CHECK_ERROR(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
+        CHECK_ERROR(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL));
+
+        wifi_init_config_t wifi_init_config = WIFI_INIT_CONFIG_DEFAULT();
+        CHECK_ERROR(esp_wifi_init(&wifi_init_config));
+        CHECK_ERROR(esp_wifi_set_storage(WIFI_STORAGE_RAM));
+
+        wifi_config_t wifi_config = {
+                .sta = {
+                        .ssid = CONFIG_ESP_WIFI_SSID,
+                        .password = CONFIG_ESP_WIFI_PASSWORD,
+                        .threshold.authmode = WIFI_AUTH_WPA2_PSK,
+                },
+        };
+
+        CHECK_ERROR(esp_wifi_set_mode(WIFI_MODE_STA));
+        CHECK_ERROR(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
+        CHECK_ERROR(esp_wifi_start());
+}
 
 #if defined(CONFIG_EXAMPLE_TYPE_DHT11)
 #define SENSOR_TYPE DHT_TYPE_DHT11
@@ -45,74 +82,37 @@
 #if defined(CONFIG_EXAMPLE_TYPE_SI7021)
 #define SENSOR_TYPE DHT_TYPE_SI7021
 #endif
-// WiFi setup
-void on_wifi_ready();
-
-static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
-        if (event_base == WIFI_EVENT && (event_id == WIFI_EVENT_STA_START || event_id == WIFI_EVENT_STA_DISCONNECTED)) {
-                ESP_LOGI("WIFI_EVENT", "STA start");
-                esp_wifi_connect();
-        } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
-                ESP_LOGI("IP_EVENT", "WiFI ready");
-                on_wifi_ready();
-        }
-}
-
-static void wifi_init() {
-        ESP_ERROR_CHECK(esp_netif_init());
-        ESP_ERROR_CHECK(esp_event_loop_create_default());
-        esp_netif_create_default_wifi_sta();
-
-        ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
-        ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL));
-
-        wifi_init_config_t wifi_init_config = WIFI_INIT_CONFIG_DEFAULT();
-        ESP_ERROR_CHECK(esp_wifi_init(&wifi_init_config));
-        ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
-
-        wifi_config_t wifi_config = {
-                .sta = {
-                        .ssid = CONFIG_ESP_WIFI_SSID,
-                        .password = CONFIG_ESP_WIFI_PASSWORD,
-                },
-        };
-
-        ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-        ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
-        ESP_ERROR_CHECK(esp_wifi_start());
-}
-
 #define TEMP_SENSOR_GPIO CONFIG_ESP_TEMP_SENSOR_GPIO
 
-// LED control
+// GPIO control
 #define LED_GPIO CONFIG_ESP_LED_GPIO
-bool led_on = false;
+static bool led_on = false;
 #define FAN_GPIO CONFIG_ESP_FAN_GPIO
-bool fan_on = false;
+static bool fan_on = false;
 #define COOLER_GPIO CONFIG_ESP_COOLER_GPIO
-bool cooler_on = false;
+static bool cooler_on = false;
 #define HEATER_GPIO CONFIG_ESP_HEATER_GPIO
-bool heater_on = false;
+static bool heater_on = false;
 
 #define TEMPERATURE_POLL_PERIOD 10000
 #define HEATER_FAN_DELAY 3000
 #define COOLER_FAN_DELAY 0
 
-void led_write(bool on) {
+static void led_write(bool on) {
         gpio_set_level(LED_GPIO, on ? 1 : 0);
 }
-void heater_write(bool on) {
+static void heater_write(bool on) {
         gpio_set_level(HEATER_GPIO, on ? 1 : 0);
 }
-void cooler_write(bool on) {
+static void cooler_write(bool on) {
         gpio_set_level(COOLER_GPIO, on ? 1 : 0);
 }
-void fan_write(bool on) {
+static void fan_write(bool on) {
         gpio_set_level(FAN_GPIO, on ? 1 : 0);
 }
 
 // All GPIO Settings
-void gpio_init() {
+static void gpio_init() {
         gpio_set_direction(LED_GPIO, GPIO_MODE_OUTPUT);
         led_write(led_on);
         gpio_set_direction(FAN_GPIO, GPIO_MODE_OUTPUT);
@@ -124,7 +124,7 @@ void gpio_init() {
 }
 
 // Accessory identification
-void accessory_identify_task(void *args) {
+static void accessory_identify_task(void *args) {
         for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 2; j++) {
                         led_write(true);
@@ -138,14 +138,14 @@ void accessory_identify_task(void *args) {
         vTaskDelete(NULL);
 }
 
-void accessory_identify(homekit_value_t _value) {
-        ESP_LOGI("ACCESSORY_IDENTIFY", "Accessory identify");
-        xTaskCreate(accessory_identify_task, "Accessory identify", 2048, NULL, 2, NULL);
+static void accessory_identify(homekit_value_t _value) {
+        ESP_LOGI("INFORMATION", "Accessory identify");
+        xTaskCreate(accessory_identify_task, "Accessory identify", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
 }
 
-void update_state();
+static void update_state();
 
-void on_update(homekit_characteristic_t *ch, homekit_value_t value, void *context) {
+static void on_update(homekit_characteristic_t *ch, homekit_value_t value, void *context) {
         update_state();
 }
 
@@ -158,7 +158,7 @@ homekit_characteristic_t cooling_threshold = HOMEKIT_CHARACTERISTIC_(COOLING_THR
 homekit_characteristic_t heating_threshold = HOMEKIT_CHARACTERISTIC_(HEATING_THRESHOLD_TEMPERATURE, 15, .callback=HOMEKIT_CHARACTERISTIC_CALLBACK(on_update));
 homekit_characteristic_t current_humidity = HOMEKIT_CHARACTERISTIC_(CURRENT_RELATIVE_HUMIDITY, 0);
 
-void update_state() {
+static void update_state() {
         uint8_t state = target_state.value.int_value;
         if ((state == 1 && current_temperature.value.float_value < target_temperature.value.float_value) ||
             (state == 3 && current_temperature.value.float_value < heating_threshold.value.float_value)) {
@@ -169,7 +169,7 @@ void update_state() {
                         cooler_write(false);
                         vTaskDelay(pdMS_TO_TICKS(HEATER_FAN_DELAY));
                         fan_write(true);
-                        ESP_LOGI("HEATER_ON", "Heater On");
+                        ESP_LOGI("INFORMATION", "Heater On");
 
                 }
         } else if ((state == 2 && current_temperature.value.float_value > target_temperature.value.float_value) ||
@@ -181,7 +181,7 @@ void update_state() {
                         heater_write(false);
                         vTaskDelay(pdMS_TO_TICKS(COOLER_FAN_DELAY));
                         fan_write(true);
-                        ESP_LOGI("COOLER_ON", "Cooler On");
+                        ESP_LOGI("INFORMATION", "Cooler On");
                 }
         } else {
                 if (current_state.value.int_value != 0) {
@@ -190,14 +190,12 @@ void update_state() {
                         cooler_write(false);
                         heater_write(false);
                         fan_write(false);
-                        ESP_LOGI("OFF", "Off");
+                        ESP_LOGI("INFORMATION", "Off");
                 }
         }
 }
 
-#define TAG "TEMPERATURE_SENSOR"
-
-void temperature_sensor_task(void *pvParameters) {
+static void temperature_sensor_task(void *pvParameters) {
 
     #ifdef CONFIG_EXAMPLE_INTERNAL_PULLUP
         gpio_set_pull_mode(dht_gpio, GPIO_PULLUP_ONLY);
@@ -207,7 +205,7 @@ void temperature_sensor_task(void *pvParameters) {
 
         while (1) {
                 if (dht_read_float_data(SENSOR_TYPE, CONFIG_ESP_TEMP_SENSOR_GPIO, &humidity_value, &temperature_value) == ESP_OK) {
-                        ESP_LOGI(TAG, "Humidity: %.1f%% Temperature: %.1fC", humidity_value, temperature_value);
+                        ESP_LOGI("INFORMATION", "Humidity: %.1f%% Temperature: %.1fC", humidity_value, temperature_value);
 
                         current_temperature.value = HOMEKIT_FLOAT(temperature_value);
                         current_humidity.value = HOMEKIT_FLOAT(humidity_value);
@@ -215,14 +213,14 @@ void temperature_sensor_task(void *pvParameters) {
                         homekit_characteristic_notify(&current_temperature, current_temperature.value);
                         homekit_characteristic_notify(&current_humidity, current_humidity.value);
                 } else {
-                        ESP_LOGE(TAG, "Can not read data from sensor");
+                        ESP_LOGE("ERROR", "Can not read data from sensor");
 
                 }
                 vTaskDelay(pdMS_TO_TICKS(2000));
         }
 }
 
-void temperature_sensor_init() {
+static void temperature_sensor_init() {
         xTaskCreate(temperature_sensor_task, "read data from sensor", configMINIMAL_STACK_SIZE * 3, NULL, 5, NULL);
 }
 
@@ -272,23 +270,25 @@ homekit_accessory_t *accessories[] = {
 
 #pragma GCC diagnostic pop
 
-homekit_server_config_t config = {
+static homekit_server_config_t config = {
         .accessories = accessories,
         .password = CONFIG_ESP_SETUP_CODE,
         .setupId = CONFIG_ESP_SETUP_ID,
 };
 
-void on_wifi_ready() {
+static void on_wifi_ready() {
+        ESP_LOGI("INFORMATION", "Starting HomeKit server...");
         homekit_server_init(&config);
 }
 
 void app_main(void) {
         esp_err_t ret = nvs_flash_init();
-        if (ret == ESP_ERR_NVS_NO_FREE_PAGES) {
-                ESP_ERROR_CHECK(nvs_flash_erase());
+        if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+                ESP_LOGW("WARNING", "NVS flash initialization failed, erasing...");
+                CHECK_ERROR(nvs_flash_erase());
                 ret = nvs_flash_init();
         }
-        ESP_ERROR_CHECK(ret);
+        CHECK_ERROR(ret);
 
         wifi_init();
         gpio_init();

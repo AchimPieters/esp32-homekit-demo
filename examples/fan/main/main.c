@@ -1,5 +1,4 @@
 /**
-
    Copyright 2024 Achim Pieters | StudioPieters®
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,7 +19,6 @@
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
    for more information visit https://www.studiopieters.nl
-
  **/
 
 #include <stdio.h>
@@ -36,104 +34,113 @@
 #include <homekit/characteristics.h>
 #include <math.h>
 
-// WiFi setup
-void on_wifi_ready();
+// Custom error handling macro
+#define CHECK_ERROR(x) do {                        \
+                esp_err_t __err_rc = (x);                  \
+                if (__err_rc != ESP_OK) {                  \
+                        ESP_LOGE("INFORMATION", "Error: %s", esp_err_to_name(__err_rc)); \
+                        handle_error(__err_rc);                \
+                }                                          \
+} while(0)
 
+static void handle_error(esp_err_t err) {
+        switch (err) {
+        case ESP_ERR_WIFI_NOT_STARTED:
+        case ESP_ERR_WIFI_CONN:
+                ESP_LOGI("INFORMATION", "Restarting WiFi...");
+                esp_wifi_stop();
+                esp_wifi_start();
+                break;
+        default:
+                ESP_LOGE("ERROR", "Critical error, restarting device...");
+                esp_restart();
+                break;
+        }
+}
+
+// Wi-Fi event handler
 static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
         if (event_base == WIFI_EVENT && (event_id == WIFI_EVENT_STA_START || event_id == WIFI_EVENT_STA_DISCONNECTED)) {
-                ESP_LOGI("WIFI_EVENT", "STA start");
+                ESP_LOGI("INFORMATION", "Connecting to WiFi...");
                 esp_wifi_connect();
         } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
-                ESP_LOGI("IP_EVENT", "WiFI ready");
+                ESP_LOGI("INFORMATION", "WiFi connected, IP obtained");
                 on_wifi_ready();
         }
 }
 
+// Wi-Fi initialization
 static void wifi_init() {
-        ESP_ERROR_CHECK(esp_netif_init());
-        ESP_ERROR_CHECK(esp_event_loop_create_default());
+        CHECK_ERROR(esp_netif_init());
+        CHECK_ERROR(esp_event_loop_create_default());
         esp_netif_create_default_wifi_sta();
 
-        ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
-        ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL));
+        CHECK_ERROR(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
+        CHECK_ERROR(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL));
 
         wifi_init_config_t wifi_init_config = WIFI_INIT_CONFIG_DEFAULT();
-        ESP_ERROR_CHECK(esp_wifi_init(&wifi_init_config));
-        ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
+        CHECK_ERROR(esp_wifi_init(&wifi_init_config));
+        CHECK_ERROR(esp_wifi_set_storage(WIFI_STORAGE_RAM));
 
         wifi_config_t wifi_config = {
                 .sta = {
                         .ssid = CONFIG_ESP_WIFI_SSID,
                         .password = CONFIG_ESP_WIFI_PASSWORD,
+                        .threshold.authmode = WIFI_AUTH_WPA2_PSK,
                 },
         };
 
-        ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-        ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
-        ESP_ERROR_CHECK(esp_wifi_start());
+        CHECK_ERROR(esp_wifi_set_mode(WIFI_MODE_STA));
+        CHECK_ERROR(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
+        CHECK_ERROR(esp_wifi_start());
 }
 
 // LED control
-#define LED_GPIO CONFIG_ESP_LED_GPIO
-bool led_on = false;
-
-void led_write(bool on) {
-        gpio_set_level(LED_GPIO, on ? 1 : 0);
+static void led_write(bool on) {
+        gpio_set_level(CONFIG_ESP_LED_GPIO, on ? 1 : 0);
 }
 
-// FAN control
-#define FAN_GPIO CONFIG_ESP_FAN_GPIO
-bool fan_on = false;
-float fan_speed = 100;  // Default speed
-
-// PWM Settings
-#define LEDC_TIMER          LEDC_TIMER_0
-#define LEDC_MODE           LEDC_HIGH_SPEED_MODE
-#define LEDC_CHANNEL        LEDC_CHANNEL_0
-#define LEDC_RESOLUTION     LEDC_TIMER_13_BIT
-#define LEDC_FREQUENCY      (5000)
-
-// Initialize PWM
+// PWM Settings for FAN control
 static void pwm_init() {
         ledc_timer_config_t ledc_timer = {
-                .duty_resolution = LEDC_RESOLUTION,
-                .freq_hz = LEDC_FREQUENCY,
-                .speed_mode = LEDC_MODE,
-                .timer_num = LEDC_TIMER,
+                .duty_resolution = LEDC_TIMER_13_BIT,
+                .freq_hz = 5000,
+                .speed_mode = LEDC_HIGH_SPEED_MODE,
+                .timer_num = LEDC_TIMER_0,
         };
         ledc_timer_config(&ledc_timer);
 
         ledc_channel_config_t ledc_channel = {
-                .channel    = LEDC_CHANNEL,
+                .channel    = LEDC_CHANNEL_0,
                 .duty       = 0,
-                .gpio_num   = FAN_GPIO,
-                .speed_mode = LEDC_MODE,
-                .timer_sel  = LEDC_TIMER,
+                .gpio_num   = CONFIG_ESP_FAN_GPIO,
+                .speed_mode = LEDC_HIGH_SPEED_MODE,
+                .timer_sel  = LEDC_TIMER_0,
         };
         ledc_channel_config(&ledc_channel);
 }
 
-// Map the speed linearly to the PWM duty cycle
-uint32_t map_speed(uint32_t speed) {
-        return (speed * (1 << LEDC_RESOLUTION)) / 100; // Map 0-100 to the entire range of duty cycle
+// Map speed linearly to PWM duty cycle
+static uint32_t map_speed(uint32_t speed) {
+        return (speed * (1 << LEDC_TIMER_13_BIT)) / 100;
 }
 
-void fan_write(bool on, uint32_t speed) {
+static void fan_write(bool on, uint32_t speed) {
         uint32_t mapped_speed = on ? map_speed(speed) : 0;
-        ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, mapped_speed);
-        ledc_update_duty(LEDC_MODE, LEDC_CHANNEL);
+        ledc_set_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, mapped_speed);
+        ledc_update_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0);
 }
 
-// All GPIO Settings
-void gpio_init() {
-        gpio_set_direction(LED_GPIO, GPIO_MODE_OUTPUT);
-        led_write(led_on);
-        pwm_init(); // Initialize PWM for FAN control
-        fan_write(fan_on, fan_speed);
+// GPIO initialization
+static void gpio_init() {
+        gpio_set_direction(CONFIG_ESP_LED_GPIO, GPIO_MODE_OUTPUT);
+        led_write(false); // Initial LED state
+        pwm_init();       // Initialize PWM for FAN control
+        fan_write(false, 100); // Initial FAN state
 }
 
-// Accessory identification
-void accessory_identify_task(void *args) {
+// Accessory identification task
+static void accessory_identify_task(void *args) {
         for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 2; j++) {
                         led_write(true);
@@ -143,36 +150,37 @@ void accessory_identify_task(void *args) {
                 }
                 vTaskDelay(pdMS_TO_TICKS(250));
         }
-        led_write(led_on);
+        led_write(false);
         vTaskDelete(NULL);
 }
 
-void accessory_identify(homekit_value_t _value) {
-        ESP_LOGI("ACCESSORY_IDENTIFY", "Accessory identify");
-        xTaskCreate(accessory_identify_task, "Accessory identify", 2048, NULL, 2, NULL);
+// Accessory identification
+static void accessory_identify(homekit_value_t _value) {
+        ESP_LOGI("INFORMATION", "Accessory identify");
+        xTaskCreate(accessory_identify_task, "Accessory identify", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
 }
 
-
-homekit_value_t fan_on_get() {
+// HomeKit characteristic getters and setters
+static homekit_value_t fan_on_get() {
         return HOMEKIT_BOOL(fan_on);
 }
 
-void fan_on_set(homekit_value_t value) {
+static void fan_on_set(homekit_value_t value) {
         if (value.format != homekit_format_bool) {
-                ESP_LOGE("fan_on_set", "Invalid value format: %d", value.format);
+                ESP_LOGE("ERROR", "Invalid on/off value format: %d", value.format);
                 return;
         }
         fan_on = value.bool_value;
         fan_write(fan_on, fan_speed);
 }
 
-homekit_value_t fan_speed_get() {
+static homekit_value_t fan_speed_get() {
         return HOMEKIT_FLOAT(fan_speed);
 }
 
-void fan_speed_set(homekit_value_t value) {
+static void fan_speed_set(homekit_value_t value) {
         if (value.format != homekit_format_float) {
-                ESP_LOGE("fan_speed_set", "Invalid value format: %d", value.format);
+                ESP_LOGE("ERROR", "Invalid speed value format: %d", value.format);
                 return;
         }
         fan_speed = value.float_value;
@@ -180,21 +188,14 @@ void fan_speed_set(homekit_value_t value) {
 }
 
 // HomeKit characteristics
-#define DEVICE_NAME "HomeKit Fan"
-#define DEVICE_MANUFACTURER "StudioPieters®"
-#define DEVICE_SERIAL "NLDA4SQN1466"
-#define DEVICE_MODEL "SD466NL/A"
-#define FW_VERSION "0.0.1"
+static homekit_characteristic_t name = HOMEKIT_CHARACTERISTIC_(NAME, "HomeKit Fan");
+static homekit_characteristic_t manufacturer = HOMEKIT_CHARACTERISTIC_(MANUFACTURER, "StudioPieters®");
+static homekit_characteristic_t serial = HOMEKIT_CHARACTERISTIC_(SERIAL_NUMBER, "NLDA4SQN1466");
+static homekit_characteristic_t model = HOMEKIT_CHARACTERISTIC_(MODEL, "SD466NL/A");
+static homekit_characteristic_t revision = HOMEKIT_CHARACTERISTIC_(FIRMWARE_REVISION, "0.0.1");
 
-homekit_characteristic_t name = HOMEKIT_CHARACTERISTIC_(NAME, DEVICE_NAME);
-homekit_characteristic_t manufacturer = HOMEKIT_CHARACTERISTIC_(MANUFACTURER,  DEVICE_MANUFACTURER);
-homekit_characteristic_t serial = HOMEKIT_CHARACTERISTIC_(SERIAL_NUMBER, DEVICE_SERIAL);
-homekit_characteristic_t model = HOMEKIT_CHARACTERISTIC_(MODEL, DEVICE_MODEL);
-homekit_characteristic_t revision = HOMEKIT_CHARACTERISTIC_(FIRMWARE_REVISION, FW_VERSION);
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Woverride-init"
-homekit_accessory_t *accessories[] = {
+// HomeKit accessory configuration
+static homekit_accessory_t *accessories[] = {
         HOMEKIT_ACCESSORY(.id = 1, .category = homekit_accessory_category_fans, .services = (homekit_service_t*[]) {
                 HOMEKIT_SERVICE(ACCESSORY_INFORMATION, .characteristics = (homekit_characteristic_t*[]) {
                         &name,
@@ -223,25 +224,29 @@ homekit_accessory_t *accessories[] = {
         }),
         NULL
 };
-#pragma GCC diagnostic pop
 
-homekit_server_config_t config = {
+// HomeKit server configuration
+static homekit_server_config_t config = {
         .accessories = accessories,
         .password = CONFIG_ESP_SETUP_CODE,
         .setupId = CONFIG_ESP_SETUP_ID,
 };
 
-void on_wifi_ready() {
+// Callback when Wi-Fi is ready
+static void on_wifi_ready() {
+        ESP_LOGI("INFORMATION", "Starting HomeKit server...");
         homekit_server_init(&config);
 }
 
+// Main application entry point
 void app_main(void) {
         esp_err_t ret = nvs_flash_init();
-        if (ret == ESP_ERR_NVS_NO_FREE_PAGES) {
-                ESP_ERROR_CHECK(nvs_flash_erase());
+        if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+                ESP_LOGW("WARNING", "NVS flash initialization failed, erasing...");
+                CHECK_ERROR(nvs_flash_erase());
                 ret = nvs_flash_init();
         }
-        ESP_ERROR_CHECK(ret);
+        CHECK_ERROR(ret);
 
         wifi_init();
         gpio_init();

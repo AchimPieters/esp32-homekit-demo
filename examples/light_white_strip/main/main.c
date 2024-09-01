@@ -1,28 +1,3 @@
-/**
-
-   Copyright 2024 Achim Pieters | StudioPieters®
-
-   Permission is hereby granted, free of charge, to any person obtaining a copy
-   of this software and associated documentation files (the "Software"), to deal
-   in the Software without restriction, including without limitation the rights
-   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-   copies of the Software, and to permit persons to whom the Software is
-   furnished to do so, subject to the following conditions:
-
-   The above copyright notice and this permission notice shall be included in all
-   copies or substantial portions of the Software.
-
-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-   FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
-   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-   WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-   for more information visit https://www.studiopieters.nl
-
- **/
-
 #include <stdio.h>
 #include <esp_wifi.h>
 #include <esp_event.h>
@@ -34,41 +9,64 @@
 #include <homekit/homekit.h>
 #include <homekit/characteristics.h>
 
-// WiFi setup
-void on_wifi_ready();
+#define CHECK_ERROR(x) do {                        \
+                esp_err_t __err_rc = (x);                  \
+                if (__err_rc != ESP_OK) {                  \
+                        ESP_LOGE("INFORMATION", "Error: %s", esp_err_to_name(__err_rc)); \
+                        handle_error(__err_rc);                \
+                }                                          \
+} while(0)
+
+static void handle_error(esp_err_t err) {
+        switch (err) {
+        case ESP_ERR_WIFI_NOT_STARTED:
+        case ESP_ERR_WIFI_CONN:
+                ESP_LOGI("INFORMATION", "Restarting WiFi...");
+                esp_wifi_stop();
+                esp_wifi_start();
+                break;
+        default:
+                ESP_LOGE("ERROR", "Critical error, restarting device...");
+                esp_restart();
+                break;
+        }
+}
+
+static void on_wifi_ready();
 
 static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
         if (event_base == WIFI_EVENT && (event_id == WIFI_EVENT_STA_START || event_id == WIFI_EVENT_STA_DISCONNECTED)) {
-                ESP_LOGI("WIFI_EVENT", "STA start");
+                ESP_LOGI("INFORMATION", "Connecting to WiFi...");
                 esp_wifi_connect();
         } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
-                ESP_LOGI("IP_EVENT", "WiFI ready");
+                ESP_LOGI("INFORMATION", "WiFi connected, IP obtained");
                 on_wifi_ready();
         }
 }
 
 static void wifi_init() {
-        ESP_ERROR_CHECK(esp_netif_init());
-        ESP_ERROR_CHECK(esp_event_loop_create_default());
+        CHECK_ERROR(esp_netif_init());
+        CHECK_ERROR(esp_event_loop_create_default());
         esp_netif_create_default_wifi_sta();
 
-        ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
-        ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL));
+        CHECK_ERROR(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
+        CHECK_ERROR(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL));
 
         wifi_init_config_t wifi_init_config = WIFI_INIT_CONFIG_DEFAULT();
-        ESP_ERROR_CHECK(esp_wifi_init(&wifi_init_config));
-        ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
+        CHECK_ERROR(esp_wifi_init(&wifi_init_config));
+        CHECK_ERROR(esp_wifi_set_storage(WIFI_STORAGE_RAM));
 
         wifi_config_t wifi_config = {
                 .sta = {
                         .ssid = CONFIG_ESP_WIFI_SSID,
                         .password = CONFIG_ESP_WIFI_PASSWORD,
+                        .threshold.authmode = WIFI_AUTH_WPA2_PSK,
                 },
         };
 
-        ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-        ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
-        ESP_ERROR_CHECK(esp_wifi_start());
+        CHECK_ERROR(esp_wifi_set_mode(WIFI_MODE_STA));
+        CHECK_ERROR(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
+        CHECK_ERROR(esp_wifi_start());
 }
 
 #define LPF_SHIFT 4  // divide by 16
@@ -77,18 +75,16 @@ static void wifi_init() {
 #define WW_PWM_PIN CONFIG_ESP_WW_LED_GPIO
 #define CW_PWM_PIN CONFIG_ESP_CW_LED_GPIO
 
-// Color smoothing variables
-uint16_t current_ww = 0;
-uint16_t target_ww = 0;
-uint16_t current_cw = 0;
-uint16_t target_cw = 0;
+static uint16_t current_ww = 0;
+static uint16_t target_ww = 0;
+static uint16_t current_cw = 0;
+static uint16_t target_cw = 0;
 
-// Global variables
-float led_brightness_ww = 100; // brightness is scaled 0 to 100
-float led_brightness_cw = 100; // brightness is scaled 0 to 100
-bool led_on = false;           // on is boolean on or off
+static float led_brightness_ww = 100; // brightness is scaled 0 to 100
+static float led_brightness_cw = 100; // brightness is scaled 0 to 100
+static bool led_on = false;           // on is boolean on or off
 
-void ledc_task(void *pvParameters) {
+static void ledc_task(void *pvParameters) {
         const TickType_t xPeriod = pdMS_TO_TICKS(LPF_INTERVAL);
         TickType_t xLastWakeTime = xTaskGetTickCount();
 
@@ -145,60 +141,54 @@ void ledc_task(void *pvParameters) {
         }
 }
 
-void ledc() {
-        ESP_LOGI("LEDC", "Start ledc");
-        xTaskCreate(ledc_task, "ledc_task", 4096, NULL, 2, NULL);
-}
+static void led_identify_task(void *_args) {
+        ESP_LOGI("LED", "Starting identification sequence");
 
-void led_identify_task(void *_args) {
-        ESP_LOGI("LED_IDENTIFY_TASK", "Starting LED identify task");
-
-        uint16_t original_ww = target_ww;
-        uint16_t original_cw = target_cw;
-        uint16_t off = 0;
-        uint16_t on = 4096;
+        const uint16_t original_ww = target_ww;
+        const uint16_t original_cw = target_cw;
+        const uint16_t off = 0;
+        const uint16_t on = 4096;
 
         for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 2; j++) {
+                        // Turn LEDs on
                         led_on = true;
-                        led_brightness_ww = 50;
-                        led_brightness_cw = 50;
-                        target_ww = on;
-                        target_cw = on;
-                        ESP_LOGI("LED_IDENTIFY_TASK", "Setting LEDs to on");
+                        led_brightness_ww = led_brightness_cw = 50;
+                        target_ww = target_cw = on;
+                        ESP_LOGI("LED", "LEDs ON");
                         vTaskDelay(pdMS_TO_TICKS(100));
 
+                        // Turn LEDs off
                         led_on = false;
-                        led_brightness_ww = 0;
-                        led_brightness_cw = 0;
-                        target_ww = off;
-                        target_cw = off;
-                        ESP_LOGI("LED_IDENTIFY_TASK", "Setting LEDs to off");
+                        led_brightness_ww = led_brightness_cw = 0;
+                        target_ww = target_cw = off;
+                        ESP_LOGI("LED", "LEDs OFF");
                         vTaskDelay(pdMS_TO_TICKS(100));
                 }
                 vTaskDelay(pdMS_TO_TICKS(250));
         }
 
+        // Restore original LED states
         led_on = false;
-        led_brightness_ww = 100;
-        led_brightness_cw = 100;
+        led_brightness_ww = led_brightness_cw = 100;
         target_ww = original_ww;
         target_cw = original_cw;
-        ESP_LOGI("LED_IDENTIFY_TASK", "LED identify task completed");
+        ESP_LOGI("LED", "Identification sequence completed");
 
         vTaskDelete(NULL);
 }
 
-void led_identify(homekit_value_t _value) {
-        ESP_LOGI("ACCESSORY_IDENTIFY", "Accessory identify");
-        xTaskCreate(led_identify_task, "LED identify", 2048, NULL, 2, NULL);
+static void led_identify(homekit_value_t _value) {
+        ESP_LOGI("LED", "Accessory identified");
+        xTaskCreate(led_identify_task, "LED_identify_task", 1024, NULL, 2, NULL);
 }
 
-homekit_value_t led_on_get() {
+
+static homekit_value_t led_on_get() {
         return HOMEKIT_BOOL(led_on);
 }
 
-void led_on_set(homekit_value_t value) {
+static void led_on_set(homekit_value_t value) {
         if (value.format != homekit_format_bool) {
                 return;
         }
@@ -206,44 +196,31 @@ void led_on_set(homekit_value_t value) {
         led_on = value.bool_value;
 }
 
-homekit_value_t led_brightness_ww_get() {
+static homekit_value_t led_brightness_ww_get() {
         return HOMEKIT_INT(led_brightness_ww);
 }
 
-void led_brightness_ww_set(homekit_value_t value) {
+static void led_brightness_ww_set(homekit_value_t value) {
         if (value.format != homekit_format_int) {
                 return;
         }
         led_brightness_ww = value.int_value;
 }
 
-homekit_value_t led_brightness_cw_get() {
+static homekit_value_t led_brightness_cw_get() {
         return HOMEKIT_INT(led_brightness_cw);
 }
 
-void led_brightness_cw_set(homekit_value_t value) {
+static void led_brightness_cw_set(homekit_value_t value) {
         if (value.format != homekit_format_int) {
                 return;
         }
         led_brightness_cw = value.int_value;
 }
 
-// HomeKit characteristics
-#define DEVICE_NAME "HomeKit White Strip"
-#define DEVICE_MANUFACTURER "StudioPieters®"
-#define DEVICE_SERIAL "NLDA4SQN1466"
-#define DEVICE_MODEL "SD466NL/A"
-#define FW_VERSION "0.0.1"
-s
-homekit_characteristic_t name = HOMEKIT_CHARACTERISTIC_(NAME, DEVICE_NAME);
-homekit_characteristic_t manufacturer = HOMEKIT_CHARACTERISTIC_(MANUFACTURER,  DEVICE_MANUFACTURER);
-homekit_characteristic_t serial = HOMEKIT_CHARACTERISTIC_(SERIAL_NUMBER, DEVICE_SERIAL);
-homekit_characteristic_t model = HOMEKIT_CHARACTERISTIC_(MODEL, DEVICE_MODEL);
-homekit_characteristic_t revision = HOMEKIT_CHARACTERISTIC_(FIRMWARE_REVISION, FW_VERSION);
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverride-init"
-homekit_accessory_t *accessories[] = {
+static homekit_accessory_t *accessories[] = {
         HOMEKIT_ACCESSORY(.id = 1, .category = homekit_accessory_category_lighting, .services = (homekit_service_t*[]) {
                 HOMEKIT_SERVICE(ACCESSORY_INFORMATION, .characteristics = (homekit_characteristic_t*[]) {
                         &name,
@@ -279,23 +256,27 @@ homekit_accessory_t *accessories[] = {
 };
 #pragma GCC diagnostic pop
 
-homekit_server_config_t config = {
+static homekit_server_config_t config = {
         .accessories = accessories,
         .password = CONFIG_ESP_SETUP_CODE,
         .setupId = CONFIG_ESP_SETUP_ID,
 };
 
-void on_wifi_ready() {
+static void on_wifi_ready() {
+        ESP_LOGI("INFORMATION", "Starting HomeKit server...");
         homekit_server_init(&config);
 }
 
 void app_main(void) {
         esp_err_t ret = nvs_flash_init();
-        if (ret == ESP_ERR_NVS_NO_FREE_PAGES) {
-                ESP_ERROR_CHECK(nvs_flash_erase());
+        if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+                ESP_LOGW("WARNING", "NVS flash initialization failed, erasing...");
+                CHECK_ERROR(nvs_flash_erase());
                 ret = nvs_flash_init();
         }
-        ESP_ERROR_CHECK(ret);
-        ledc();
+        CHECK_ERROR(ret);
+
         wifi_init();
+        gpio_init();
+        ledc();
 }

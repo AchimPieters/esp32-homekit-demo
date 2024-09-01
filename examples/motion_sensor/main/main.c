@@ -34,57 +34,82 @@
 #include <homekit/homekit.h>
 #include <homekit/characteristics.h>
 
-void on_wifi_ready();
+// Custom error handling macro
+#define CHECK_ERROR(x) do {                                \
+                esp_err_t __err_rc = (x);                              \
+                if (__err_rc != ESP_OK) {                              \
+                        ESP_LOGE("INFORMATION", "Error: %s", esp_err_to_name(__err_rc)); \
+                        handle_error(__err_rc);                            \
+                }                                                      \
+} while(0)
 
+// Improved error handling function
+static void handle_error(esp_err_t err) {
+        switch (err) {
+        case ESP_ERR_WIFI_NOT_STARTED:
+        case ESP_ERR_WIFI_CONN:
+                ESP_LOGI("INFORMATION", "Restarting WiFi...");
+                esp_wifi_stop();
+                esp_wifi_start();
+                break;
+        default:
+                ESP_LOGE("ERROR", "Critical error, restarting device...");
+                esp_restart();
+                break;
+        }
+}
+
+// Forward declaration of functions
+static void on_wifi_ready();
+
+// Event handler for WiFi and IP events
 static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
-        if (event_base == WIFI_EVENT && (event_id == WIFI_EVENT_STA_START || event_id == WIFI_EVENT_STA_DISCONNECTED)) {
-                ESP_LOGI("WIFI_EVENT", "STA start");
-                esp_wifi_connect();
+        if (event_base == WIFI_EVENT) {
+                if (event_id == WIFI_EVENT_STA_START || event_id == WIFI_EVENT_STA_DISCONNECTED) {
+                        ESP_LOGI("INFORMATION", "Connecting to WiFi...");
+                        esp_wifi_connect();
+                }
         } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
-                ESP_LOGI("IP_EVENT", "WiFI ready");
+                ESP_LOGI("INFORMATION", "WiFi connected, IP obtained");
                 on_wifi_ready();
         }
 }
 
+// WiFi initialization function
 static void wifi_init() {
-        ESP_ERROR_CHECK(esp_netif_init());
-        ESP_ERROR_CHECK(esp_event_loop_create_default());
+        CHECK_ERROR(esp_netif_init());
+        CHECK_ERROR(esp_event_loop_create_default());
         esp_netif_create_default_wifi_sta();
 
-        ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
-        ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL));
+        CHECK_ERROR(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
+        CHECK_ERROR(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL));
 
         wifi_init_config_t wifi_init_config = WIFI_INIT_CONFIG_DEFAULT();
-        ESP_ERROR_CHECK(esp_wifi_init(&wifi_init_config));
-        ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
+        CHECK_ERROR(esp_wifi_init(&wifi_init_config));
+        CHECK_ERROR(esp_wifi_set_storage(WIFI_STORAGE_RAM));
 
         wifi_config_t wifi_config = {
                 .sta = {
                         .ssid = CONFIG_ESP_WIFI_SSID,
                         .password = CONFIG_ESP_WIFI_PASSWORD,
+                        .threshold.authmode = WIFI_AUTH_WPA2_PSK,
                 },
         };
 
-        ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-        ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
-        ESP_ERROR_CHECK(esp_wifi_start());
+        CHECK_ERROR(esp_wifi_set_mode(WIFI_MODE_STA));
+        CHECK_ERROR(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
+        CHECK_ERROR(esp_wifi_start());
 }
 
-#define LED_GPIO CONFIG_ESP_LED_GPIO
-bool led_on = false;
-#define MOTION_SENSOR_GPIO CONFIG_ESP_MOTION_SENSOR_GPIO
-
-void led_write(bool on) {
-        gpio_set_level(LED_GPIO, on ? 1 : 0);
-}
-
-void gpio_init() {
+// GPIO initialization function
+static void gpio_init() {
         gpio_set_direction(LED_GPIO, GPIO_MODE_OUTPUT);
         gpio_set_direction(MOTION_SENSOR_GPIO, GPIO_MODE_INPUT);
         led_write(led_on);
 }
 
-void accessory_identify_task(void *args) {
+// Accessory identification task
+static void accessory_identify_task(void *args) {
         for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 2; j++) {
                         led_write(true);
@@ -98,38 +123,38 @@ void accessory_identify_task(void *args) {
         vTaskDelete(NULL);
 }
 
-void accessory_identify(homekit_value_t _value) {
-        ESP_LOGI("ACCESSORY_IDENTIFY", "Accessory identify");
-        xTaskCreate(accessory_identify_task, "Accessory identify", 2048, NULL, 2, NULL);
+// Accessory identify function
+static void accessory_identify(homekit_value_t _value) {
+        ESP_LOGI("INFORMATION", "Accessory identify");
+        xTaskCreate(accessory_identify_task, "Accessory identify", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
 }
 
+// HomeKit characteristic for motion detection
 homekit_characteristic_t Motion_detected = HOMEKIT_CHARACTERISTIC_(MOTION_DETECTED, 0);
 
-void motion_sensor_task(void *pvParameters) {
+// Motion sensor task
+static void motion_sensor_task(void *pvParameters) {
         while (1) {
                 bool motion_detected = gpio_get_level(MOTION_SENSOR_GPIO) == 1;
                 homekit_characteristic_notify(&Motion_detected, HOMEKIT_BOOL(motion_detected));
-                vTaskDelay(pdMS_TO_TICKS(1000));
+                vTaskDelay(pdMS_TO_TICKS(1000)); // Delay task for 1 second
         }
 }
 
-void motion_sensor() {
-        ESP_LOGI("MOTION_SENSOR", "Motion Sensor Task");
-        xTaskCreate(motion_sensor_task, "Motion Sensor Task", 2048, NULL, 2, NULL);
+// Motion sensor initialization function
+static void motion_sensor_init() {
+        ESP_LOGI("INFORMATION", "Initializing Motion Sensor Task");
+        xTaskCreate(motion_sensor_task, "MotionSensorTask", 1024, NULL, 2, NULL); // Use a smaller stack size
 }
 
-#define DEVICE_NAME "HomeKit Motion Sensor"
-#define DEVICE_MANUFACTURER "StudioPieters®"
-#define DEVICE_SERIAL "NLDA4SQN1466"
-#define DEVICE_MODEL "SD466NL/A"
-#define FW_VERSION "0.0.1"
-
+// HomeKit accessory information
 homekit_characteristic_t name = HOMEKIT_CHARACTERISTIC_(NAME, DEVICE_NAME);
 homekit_characteristic_t manufacturer = HOMEKIT_CHARACTERISTIC_(MANUFACTURER, DEVICE_MANUFACTURER);
 homekit_characteristic_t serial = HOMEKIT_CHARACTERISTIC_(SERIAL_NUMBER, DEVICE_SERIAL);
 homekit_characteristic_t model = HOMEKIT_CHARACTERISTIC_(MODEL, DEVICE_MODEL);
 homekit_characteristic_t revision = HOMEKIT_CHARACTERISTIC_(FIRMWARE_REVISION, FW_VERSION);
 
+// HomeKit accessories definition
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverride-init"
 homekit_accessory_t *accessories[] = {
@@ -154,25 +179,30 @@ homekit_accessory_t *accessories[] = {
 };
 #pragma GCC diagnostic pop
 
-homekit_server_config_t config = {
+// HomeKit server configuration
+static homekit_server_config_t config = {
         .accessories = accessories,
         .password = CONFIG_ESP_SETUP_CODE,
         .setupId = CONFIG_ESP_SETUP_ID,
 };
 
-void on_wifi_ready() {
+// Callback function when WiFi is ready
+static void on_wifi_ready() {
+        ESP_LOGI("INFORMATION", "Starting HomeKit server...");
         homekit_server_init(&config);
 }
 
+// Application entry point
 void app_main(void) {
         esp_err_t ret = nvs_flash_init();
-        if (ret == ESP_ERR_NVS_NO_FREE_PAGES) {
-                ESP_ERROR_CHECK(nvs_flash_erase());
+        if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+                ESP_LOGW("WARNING", "NVS flash initialization failed, erasing...");
+                CHECK_ERROR(nvs_flash_erase());
                 ret = nvs_flash_init();
         }
-        ESP_ERROR_CHECK(ret);
+        CHECK_ERROR(ret);
 
         wifi_init();
         gpio_init();
-        motion_sensor();
+        motion_sensor_init();
 }

@@ -25,7 +25,7 @@ void handle_error(esp_err_t err) {
                 esp_wifi_stop();
                 esp_wifi_start();
         } else {
-                ESP_LOGE("INFORMATION", "Critical error, restarting device...");
+                ESP_LOGE("ERROR", "Critical error, restarting device...");
                 esp_restart();
         }
 }
@@ -99,7 +99,7 @@ void accessory_identify_task(void *args) {
 
 void accessory_identify(homekit_value_t _value) {
         ESP_LOGI("INFORMATION", "Accessory identify");
-        xTaskCreate(accessory_identify_task, "Accessory identify", 2048, NULL, 2, NULL);
+        xTaskCreate(accessory_identify_task, "Accessory identify", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
 }
 
 homekit_value_t led_on_get() {
@@ -108,7 +108,7 @@ homekit_value_t led_on_get() {
 
 void led_on_set(homekit_value_t value) {
         if (value.format != homekit_format_bool) {
-                ESP_LOGE("INFORMATION", "Invalid value format: %d", value.format);
+                ESP_LOGE("ERROR", "Invalid value format: %d", value.format);
                 return;
         }
         led_on = value.bool_value;
@@ -166,7 +166,7 @@ void on_wifi_ready() {
 void app_main(void) {
         esp_err_t ret = nvs_flash_init();
         if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-                ESP_LOGW("INFORMATION", "NVS flash initialization failed, erasing...");
+                ESP_LOGW("WARNING", "NVS flash initialization failed, erasing...");
                 CHECK_ERROR(nvs_flash_erase());
                 ret = nvs_flash_init();
         }
