@@ -4,7 +4,7 @@ dependencies:
 description: mDNS
 repository: git://github.com/espressif/esp-protocols.git
 repository_info:
-  commit_sha: 5d69d3f0ac34da638e8cb99eacb19d5b862afa8b
+  commit_sha: 73c48307a367565f69e724df8641f8cbac45251d
   path: components/mdns
 url: https://github.com/espressif/esp-protocols/tree/master/components/mdns
-version: 1.3.2
+version: 1.4.0
