@@ -94,6 +94,8 @@ static void wifi_init() {
         CHECK_ERROR(esp_wifi_start());
 }
 
+#define BUTTON_GPIO CONFIG_ESP_BUTTON_GPIO
+
 // LED control
 #define LED_GPIO CONFIG_ESP_LED_GPIO
 bool led_on = false;
@@ -130,7 +132,7 @@ void accessory_identify(homekit_value_t _value) {
 }
 
 void button_identify(homekit_value_t _value) {
-        ESP_LOGI("BUTTON_INDENTIFY", "Button identify");
+        ESP_LOGI("INFORMATION", "Button identify");
 }
 
 
@@ -152,7 +154,7 @@ void button_callback(button_event_t event, void *context) {
                 homekit_characteristic_notify(&button_event, HOMEKIT_UINT8(2));
                 break;
         default:
-                ESP_LOGI("UNKNOWN_BUTTON_EVENT", "unknown button event: %d", event);
+                ESP_LOGI("INFORMATION", "unknown button event: %d", event);
         }
 }
 
@@ -226,6 +228,6 @@ void app_main(void) {
         #pragma GCC diagnostic pop
 
         if (button_create(BUTTON_GPIO, button_config, button_callback, NULL)) {
-                ESP_LOGI("FAILED_TO_INITIALIZE_BUTTON", "Failed to initialize button");
+                ESP_LOGE("ERROR", "Failed to initialize button");
         }
 }

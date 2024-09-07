@@ -9,4 +9,4 @@
 	url = https://AchimPieters@github.com/AchimPieters/esp32-ws2811.git
 [submodule "components/homekit"]
 	path = components/homekit
-	url = https://AchimPieters@github.com/AchimPieters/esp32-homekit
+	url = https://AchimPieters@github.com/AchimPieters/esp32-homekit.git

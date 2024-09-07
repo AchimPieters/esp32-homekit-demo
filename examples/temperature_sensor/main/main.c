@@ -9,6 +9,8 @@
 #include <homekit/homekit.h>
 #include <homekit/characteristics.h>
 
+#include <dht.h>
+
 // Custom error handling macro
 #define CHECK_ERROR(x) do {                        \
                 esp_err_t __err_rc = (x);                  \
@@ -72,6 +74,16 @@ static void wifi_init() {
         CHECK_ERROR(esp_wifi_start());
 }
 
+#if defined(CONFIG_EXAMPLE_TYPE_DHT11)
+#define SENSOR_TYPE DHT_TYPE_DHT11
+#endif
+#if defined(CONFIG_EXAMPLE_TYPE_AM2301)
+#define SENSOR_TYPE DHT_TYPE_AM2301
+#endif
+#if defined(CONFIG_EXAMPLE_TYPE_SI7021)
+#define SENSOR_TYPE DHT_TYPE_SI7021
+#endif
+
 // LED control
 #define LED_GPIO CONFIG_ESP_LED_GPIO
 static bool led_on = false;
@@ -133,12 +145,21 @@ void temperature_sensor_init() {
         xTaskCreate(temperature_sensor_task, "Temperature Sensor Task", configMINIMAL_STACK_SIZE * 3, NULL, 5, NULL);
 }
 
+// HomeKit characteristics
+ #define DEVICE_NAME "HomeKit Temperature Sensor"
+ #define DEVICE_MANUFACTURER "StudioPieters®"
+ #define DEVICE_SERIAL "NLDA4SQN1466"
+ #define DEVICE_MODEL "SD466NL/A"
+ #define FW_VERSION "0.0.1"
+
 homekit_characteristic_t name = HOMEKIT_CHARACTERISTIC_(NAME, DEVICE_NAME);
 homekit_characteristic_t manufacturer = HOMEKIT_CHARACTERISTIC_(MANUFACTURER, DEVICE_MANUFACTURER);
 homekit_characteristic_t serial = HOMEKIT_CHARACTERISTIC_(SERIAL_NUMBER, DEVICE_SERIAL);
 homekit_characteristic_t model = HOMEKIT_CHARACTERISTIC_(MODEL, DEVICE_MODEL);
 homekit_characteristic_t revision = HOMEKIT_CHARACTERISTIC_(FIRMWARE_REVISION, FW_VERSION);
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverride-init"
 homekit_accessory_t *accessories[] = {
         HOMEKIT_ACCESSORY(.id = 1, .category = homekit_accessory_category_sensors, .services = (homekit_service_t*[]) {
                 HOMEKIT_SERVICE(ACCESSORY_INFORMATION, .characteristics = (homekit_characteristic_t*[]) {
@@ -164,6 +185,7 @@ homekit_accessory_t *accessories[] = {
         }),
         NULL
 };
+#pragma GCC diagnostic pop
 
 homekit_server_config_t config = {
         .accessories = accessories,
