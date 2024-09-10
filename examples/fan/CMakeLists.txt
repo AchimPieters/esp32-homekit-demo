@@ -33,7 +33,7 @@ message(STATUS "Partition table file: ${PARTITION_TABLE_DEFAULT}")
 
 set(EXTRA_COMPONENT_DIRS
     ../../components
-    ../../components/esp-idf
+
 )
 
 set(COMPONENTS main)
