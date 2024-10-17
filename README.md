@@ -5,14 +5,14 @@
 Open a terminal window on your mac.
 
 ```
-docker pull espressif/idf:v5.2.2
+docker pull espressif/idf:v5.3
 ```
-- At this point idf (ESP-IDF v5.2.2 Stable)
+- At this point idf (ESP-IDF v5.3 Stable)
 ```
 git clone --recursive https://github.com/AchimPieters/esp32-homekit-demo.git
 ```
 ```
-docker run -it -v ~/esp32-homekit-demo:/project -w /project espressif/idf:v5.2.2
+docker run -it -v ~/esp32-homekit-demo:/project -w /project espressif/idf:v5.3
 ```
 ```
 cd examples/led
