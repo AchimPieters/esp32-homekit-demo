@@ -1,23 +1,6 @@
-/* wolfssl-component include/user_settings.h
- *
- * Copyright (C) 2006-2024 wolfSSL Inc.
- *
- * This file is part of wolfSSL.
- *
- * wolfSSL is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * wolfSSL is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
- */
+#ifdef WOLFSSL_USER_SETTINGS
+// Your custom configurations
+
 
 #include <sdkconfig.h> /* essential to chip set detection */
 
@@ -41,14 +24,14 @@
 */
 
 /* Optionally enable Apple HomeKit from compiler directive or Kconfig setting */
-#if defined(WOLFSSL_APPLE_HOMEKIT) || defined(CONFIG_WOLFSSL_APPLE_HOMEKIT)
+// #if defined(WOLFSSL_APPLE_HOMEKIT) || defined(CONFIG_WOLFSSL_APPLE_HOMEKIT) //TODO: make this negative so default is enable
      /* SRP is known to need 8K; slow on some devices */
      #define FP_MAX_BITS (8192 * 2)
      #define WOLFCRYPT_HAVE_SRP
      #define HAVE_CHACHA
      #define HAVE_POLY1305
      #define WOLFSSL_BASE64_ENCODE
- #endif /* Apple HoeKit settings */
+// #endif /* Apple HomeKit settings */
 
 /* Optionally enable some wolfSSH settings */
 #if defined(ESP_ENABLE_WOLFSSH) || defined(CONFIG_ESP_ENABLE_WOLFSSH)
@@ -666,3 +649,5 @@
  *  #define HAVE_AES_ECB
  *  #define HAVE_AES_DIRECT
  */
+
+ #endif

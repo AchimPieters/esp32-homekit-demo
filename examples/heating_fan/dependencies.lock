@@ -1,0 +1,52 @@
+dependencies:
+  achimpieters/esp32-sht3x:
+    component_hash: 66e20f2492760df2c6389836bbb43bf597c2cca604e0b7cc8d150c6d3651bd2f
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    targets:
+    - esp32
+    - esp32c2
+    - esp32c3
+    - esp32c5
+    - esp32c6
+    - esp32c61
+    - esp32s2
+    - esp32s3
+    version: 1.0.5
+  espressif/led_strip:
+    component_hash: f907c58f722c58ab8545366668cfd8769cefb7d97a631a14e9d16234cc72bdff
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 3.0.0
+  espressif/mdns:
+    component_hash: f5267872ed0c810d1b281c41a567cace7b3a3695c0df9dff89f631e9ba426ed0
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.4.2
+  idf:
+    source:
+      type: idf
+    version: 5.5.0
+direct_dependencies:
+- achimpieters/esp32-sht3x
+- espressif/led_strip
+- espressif/mdns
+- idf
+manifest_hash: b368e86e689c990678873254fada14627fa3f12e01f6df878a2f3d2d6068f556
+target: esp32
+version: 2.0.0
