@@ -1,12 +1,9 @@
-[submodule "components/esp32-button"]
-	path = components/esp32-button
-	url = https://AchimPieters@github.com/AchimPieters/esp32-button.git
-[submodule "components/esp32-library"]
-	path = components/esp32-library
-	url = https://AchimPieters@github.com/UncleRus/esp-idf-lib.git
-[submodule "components/ws2811"]
-	path = components/ws2811
-	url = https://AchimPieters@github.com/AchimPieters/esp32-ws2811.git
 [submodule "components/homekit"]
 	path = components/homekit
-	url = https://AchimPieters@github.com/AchimPieters/esp32-homekit.git
+	url = https://Achim%20Pieters@github.com/AchimPieters/esp32-homekit-demo.git
+[submodule "components/esp32-button"]
+	path = components/esp32-button
+	url = https://Achim%20Pieters@github.com/AchimPieters/esp32-button.git
+[submodule "components/ws2811"]
+	path = components/ws2811
+	url = https://Achim%20Pieters@github.com/AchimPieters/esp32-ws2811.git
