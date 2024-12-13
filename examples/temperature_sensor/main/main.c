@@ -32,7 +32,7 @@
 #include <homekit/homekit.h>
 #include <homekit/characteristics.h>
 
-#include <dht.h>
+#include <ht.h>
 
 // Custom error handling macro
 #define CHECK_ERROR(x) do {                        \

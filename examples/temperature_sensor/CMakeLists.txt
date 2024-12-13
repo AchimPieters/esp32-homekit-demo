@@ -33,7 +33,6 @@ message(STATUS "Partition table file: ${PARTITION_TABLE_DEFAULT}")
 
 set(EXTRA_COMPONENT_DIRS
     ../../components
-    ../../components/esp32-library/components
 )
 
 set(COMPONENTS main)
