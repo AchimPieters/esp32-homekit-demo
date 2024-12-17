@@ -1,49 +1,53 @@
 -- Configuring for ESP32 variant: 
 -- Partition table file: 
--- IDF_TARGET not set, using default target: esp32
--- Found Git: /usr/bin/git (found version "2.43.0")
--- Component directory /project/components/esp32-library does not contain a CMakeLists.txt file. No component will be added
+-- IDF_TARGET is not set, guessed 'esp32' from sdkconfig '/project/examples/lcm/sdkconfig'
+-- Found Git: /usr/bin/git (found version "2.34.1")
 -- ccache will be used for faster recompilation
--- The C compiler identification is GNU 14.2.0
--- The CXX compiler identification is GNU 14.2.0
+-- The C compiler identification is GNU 13.2.0
+-- The CXX compiler identification is GNU 13.2.0
 -- The ASM compiler identification is GNU
--- Found assembler: /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc
+-- Found assembler: /opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc
 -- Detecting C compiler ABI info
 -- Detecting C compiler ABI info - done
--- Check for working C compiler: /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc - skipped
+-- Check for working C compiler: /opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc - skipped
 -- Detecting C compile features
 -- Detecting C compile features - done
 -- Detecting CXX compiler ABI info
 -- Detecting CXX compiler ABI info - done
--- Check for working CXX compiler: /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-g++ - skipped
+-- Check for working CXX compiler: /opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-g++ - skipped
 -- Detecting CXX compile features
 -- Detecting CXX compile features - done
 -- Building ESP-IDF components for target esp32
-Dependencies lock doesn't exist, solving dependencies.
-...NOTICE: Updating lock file at /project/examples/lcm/dependencies.lock
-Processing 2 dependencies:
-[1/2] espressif/mdns (1.4.2)
-[2/2] idf (5.5.0)
+NOTICE: Processing 3 dependencies:
+NOTICE: [1/3] espressif/mdns (1.4.0)
+NOTICE: [2/3] wolfssl/wolfssl (5.7.4-preview1f)
+NOTICE: [3/3] idf (5.3.2)
+-- Begin wolfssl 
+-- /project/examples/lcm/managed_components/wolfssl__wolfssl is not within IDF_PATH.
+-- Detected UNIX
+-- Detected Linux
 -- CONFIG_TARGET_PLATFORM = 
 -- No conflicting wolfSSL components found.
 -- USERNAME = 
 -- could not find USER or USERNAME
 -- THIS_USER = 
+-- CONFIG_TARGET_PLATFORM = 
+-- Environment variable GENERATE_MACHINE_PARSEABLE_REPORT not detected, not appending compile definition.
+-- Environment variable WOLFSSL_BENCHMARK_FIXED_CSV not detected, not appending compile definition.
+-- Early expansion includes esp_timer: 
+-- Early expansion includes driver: 
 -- wolfssl component CMAKE_BUILD_EARLY_EXPANSION:
 -- Project sdkconfig file /project/examples/lcm/sdkconfig
 Loading defaults file /project/examples/lcm/sdkconfig.defaults...
 Loading defaults file /project/examples/lcm/sdkconfig.defaults.esp32...
-warning: unknown kconfig symbol 'ESPTOOLPY_FLASHFREQ_60M' assigned to 'y' in /project/examples/lcm/sdkconfig.defaults.esp32
-warning: unknown kconfig symbol 'ESPTOOLPY_FLASHFREQ_30M' assigned to 'n' in /project/examples/lcm/sdkconfig.defaults.esp32
-warning: unknown kconfig symbol 'ESPTOOLPY_FLASHFREQ_15M' assigned to 'n' in /project/examples/lcm/sdkconfig.defaults.esp32
 -- Compiler supported targets: xtensa-esp-elf
--- Found Python3: /opt/esp/python_env/idf5.5_py3.12_env/bin/python (found version "3.12.3") found components: Interpreter
+-- Found Python3: /opt/esp/python_env/idf5.3_py3.10_env/bin/python (found version "3.10.12") found components: Interpreter
 -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
 -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
 -- Found Threads: TRUE
 -- Performing Test C_COMPILER_SUPPORTS_WFORMAT_SIGNEDNESS
 -- Performing Test C_COMPILER_SUPPORTS_WFORMAT_SIGNEDNESS - Success
--- App "main" version: f72f5e3-dirty
+-- App "main" version: b49464b-dirty
 -- Adding linker script /project/examples/lcm/build/esp-idf/esp_system/ld/memory.ld
 -- Adding linker script /project/examples/lcm/build/esp-idf/esp_system/ld/sections.ld.in
 -- Adding linker script /opt/esp/idf/components/esp_rom/esp32/ld/esp32.rom.ld
@@ -53,31 +57,44 @@ warning: unknown kconfig symbol 'ESPTOOLPY_FLASHFREQ_15M' assigned to 'n' in /pr
 -- Adding linker script /opt/esp/idf/components/esp_rom/esp32/ld/esp32.rom.syscalls.ld
 -- Adding linker script /opt/esp/idf/components/esp_rom/esp32/ld/esp32.rom.newlib-funcs.ld
 -- Adding linker script /opt/esp/idf/components/soc/esp32/ld/esp32.peripherals.ld
+-- Begin wolfssl 
+-- /project/examples/lcm/managed_components/wolfssl__wolfssl is not within IDF_PATH.
+-- Detected UNIX
+-- Detected Linux
 -- CONFIG_TARGET_PLATFORM = 
 -- No conflicting wolfSSL components found.
 -- USERNAME = 
 -- could not find USER or USERNAME
 -- THIS_USER = 
+-- CONFIG_TARGET_PLATFORM = 
+-- Environment variable GENERATE_MACHINE_PARSEABLE_REPORT not detected, not appending compile definition.
+-- Environment variable WOLFSSL_BENCHMARK_FIXED_CSV not detected, not appending compile definition.
+-- Early expansion includes esp_timer: 
+-- Early expansion includes driver: 
 -- ************************************************************************************************
 -- wolfssl component config:
 -- ************************************************************************************************
--- Searching for wolfSL source code...
 -- Starting FIND_WOLFSSL_DIRECTORY: 
 -- The WOLFSSL_ROOT environment variable is not set. Searching...
+-- wolfSSL not defined in [Component Config] [wolfssl]. Continuing search...
 -- CMAKE_CURRENT_SOURCE_DIR = .
--- CURRENT_SEARCH_DIR = /project/components/wolfssl
--- Found wolfssl in CURRENT_SEARCH_DIR = /project/components/wolfssl
--- Confirmed wolfssl directory at: /project/components/wolfssl
--- This COMPONENT_SRCDIRS = "/project/components/wolfssl/src/";"/project/components/wolfssl/wolfcrypt/src";"/project/components/wolfssl/wolfcrypt/src/port/Espressif";"/project/components/wolfssl/wolfcrypt/src/port/atmel";"/project/components/wolfssl/src/"
+-- CURRENT_SEARCH_DIR = /project/examples/lcm/managed_components/wolfssl__wolfssl
+-- Found wolfSSL source code via setting: /project/examples/lcm/managed_components/wolfssl__wolfssl
+-- Found WOLFSSL_ROOT via CMake specification.
+-- Confirmed wolfssl directory at: /project/examples/lcm/managed_components/wolfssl__wolfssl
+-- WOLFSSL_EXTRA_PROJECT_DIR = /project/examples/lcm/managed_components/wolfssl__wolfssl/src/
+-- This COMPONENT_SRCDIRS = "/project/examples/lcm/managed_components/wolfssl__wolfssl/src/";"/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src";"/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/port/Espressif";"/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/port/Espressif/esp_crt_bundle";"/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/port/atmel";"/project/examples/lcm/managed_components/wolfssl__wolfssl/src/"
+-- Added definition for user_settings.h: -DWOLFSSL_USER_SETTINGS_DIR="//project//examples//lcm//components//wolfssl//include//user_settings.h"
 -- IDF_PATH = /opt/esp/idf
 -- PROJECT_SOURCE_DIR = /opt/esp/idf
 -- EXCLUDE_ASM = /project/examples/lcm
 -- wolfSSL found IDF. Project Source:/opt/esp/idf
 -- Found current RTOS path: /opt/esp/idf/components/freertos/FreeRTOS-Kernel/include/freertos
--- COMPONENT_SRCDIRS = /project/components/wolfssl/src/\;/project/components/wolfssl/wolfcrypt/src\;/project/components/wolfssl/wolfcrypt/src/port/Espressif\;/project/components/wolfssl/wolfcrypt/src/port/atmel\;/project/components/wolfssl/src/
--- COMPONENT_ADD_INCLUDEDIRS = ./include\;/project/components/wolfssl/\;/project/components/wolfssl/wolfssl/\;/project/components/wolfssl/wolfssl/wolfcrypt/\;/project/components/wolfssl/wolfssl/wolfcrypt/port/Espressif\;/opt/esp/idf/components/freertos/FreeRTOS-Kernel/include/freertos/\;/project/components/wolfssl/wolfssl/\;/project/components/wolfssl/wolfssl/wolfcrypt/
--- COMPONENT_REQUIRES = lwip
--- COMPONENT_SRCEXCLUDE = /project/components/wolfssl/src/bio.c\;/project/components/wolfssl/src/conf.c\;/project/components/wolfssl/src/misc.c\;/project/components/wolfssl/src/pk.c\;/project/components/wolfssl/src/ssl_asn1.c\;/project/components/wolfssl/src/ssl_bn.c\;/project/components/wolfssl/src/ssl_certman.c\;/project/components/wolfssl/src/ssl_crypto.c\;/project/components/wolfssl/src/ssl_misc.c\;/project/components/wolfssl/src/x509.c\;/project/components/wolfssl/src/x509_str.c\;/project/components/wolfssl/wolfcrypt/src/evp.c\;/project/components/wolfssl/wolfcrypt/src/misc.c\;/project/components/wolfssl/wolfcrypt/src/sp_sm2_arm32.c\;/project/components/wolfssl/wolfcrypt/src/sp_sm2_arm64.c\;/project/components/wolfssl/wolfcrypt/src/sp_sm2_armthumb.c\;/project/components/wolfssl/wolfcrypt/src/sp_sm2_c32.c\;/project/components/wolfssl/wolfcrypt/src/sp_sm2_c64.c\;/project/components/wolfssl/wolfcrypt/src/sp_sm2_cortexm.c\;/project/components/wolfssl/wolfcrypt/src/sp_sm2_x86_64.c\;/project/components/wolfssl/wolfcrypt/src/sp_sm2_x86_64_asm.S\;/project/examples/lcm
+-- THIS_IDF_PATH = $THIS_IDF_PATH
+-- COMPONENT_SRCDIRS = /project/examples/lcm/managed_components/wolfssl__wolfssl/src/\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/port/Espressif\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/port/Espressif/esp_crt_bundle\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/port/atmel\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/
+-- COMPONENT_ADD_INCLUDEDIRS = ./include\;/project/examples/lcm/managed_components/wolfssl__wolfssl/\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfssl/\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfssl/wolfcrypt/\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfssl/wolfcrypt/port/Espressif\;/opt/esp/idf/components/freertos/FreeRTOS-Kernel/include/freertos/\;/opt/esp/idf/components/esp_event/include\;/opt/esp/idf/components/esp_netif/include\;/opt/esp/idf/components/esp_wifi/include\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfssl/\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfssl/wolfcrypt/
+-- COMPONENT_REQUIRES = lwip;
+-- COMPONENT_SRCEXCLUDE = /project/examples/lcm/managed_components/wolfssl__wolfssl/src/bio.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/conf.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/misc.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/pk.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/ssl_asn1.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/ssl_bn.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/ssl_certman.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/ssl_crypto.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/ssl_load.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/ssl_misc.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/ssl_p7p12.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/ssl_sess.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/x509.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/x509_str.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/ext_kyber.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfssl/wolfcrypt/ext_kyber.h\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/evp.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/misc.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_sm2_arm32.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_sm2_arm64.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_sm2_armthumb.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_sm2_c32.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_sm2_c64.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_sm2_cortexm.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_sm2_x86_64.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_sm2_x86_64_asm.S\;/project/examples/lcm/managed_components/wolfssl__wolfssl/examples\;/project/examples/lcm
 -- 
 -- ALL VARIABLES BEGIN
 -- 
@@ -86,20 +103,20 @@ warning: unknown kconfig symbol 'ESPTOOLPY_FLASHFREQ_15M' assigned to 'n' in /pr
 -- BOOTLOADER_ELF_FILE=/project/examples/lcm/build/bootloader/bootloader.elf
 -- BOOTLOADER_IGNORE_EXTRA_COMPONENT=
 -- BOOTLOADER_OFFSET=0x1000
--- BUILD_COMPONENTS=xtensa;esp_driver_gpio;esp_timer;esp_pm;mbedtls;bootloader;esptool_py;partition_table;esp_app_format;esp_bootloader_format;app_update;esp_partition;efuse;bootloader_support;esp_mm;spi_flash;esp_system;esp_common;esp_rom;hal;log;heap;soc;esp_security;esp_hw_support;newlib;pthread;cxx;freertos;esp_event;nvs_flash;esp_phy;esp_ringbuf;esp_driver_uart;esp_driver_usb_serial_jtag;esp_vfs_console;vfs;lwip;esp_netif_stack;esp_netif;wpa_supplicant;esp_coex;esp_wifi;esp_driver_pcnt;esp_driver_gptimer;esp_driver_spi;esp_driver_mcpwm;esp_driver_ana_cmpr;esp_driver_i2s;sdmmc;esp_driver_sdmmc;esp_driver_sdspi;esp_driver_sdio;esp_driver_dac;esp_driver_rmt;esp_driver_tsens;esp_driver_sdm;esp_driver_i2c;esp_driver_ledc;esp_driver_parlio;driver;wolfssl;json;http_parser;console;espressif__mdns;homekit;main
--- BUILD_COMPONENT_ALIASES=idf::xtensa;idf::esp_driver_gpio;idf::esp_timer;idf::esp_pm;idf::mbedtls;idf::bootloader;idf::esptool_py;idf::partition_table;idf::esp_app_format;idf::esp_bootloader_format;idf::app_update;idf::esp_partition;idf::efuse;idf::bootloader_support;idf::esp_mm;idf::spi_flash;idf::esp_system;idf::esp_common;idf::esp_rom;idf::hal;idf::log;idf::heap;idf::soc;idf::esp_security;idf::esp_hw_support;idf::newlib;idf::pthread;idf::cxx;idf::freertos;idf::esp_event;idf::nvs_flash;idf::esp_phy;idf::esp_ringbuf;idf::esp_driver_uart;idf::esp_driver_usb_serial_jtag;idf::esp_vfs_console;idf::vfs;idf::lwip;idf::esp_netif_stack;idf::esp_netif;idf::wpa_supplicant;idf::esp_coex;idf::esp_wifi;idf::esp_driver_pcnt;idf::esp_driver_gptimer;idf::esp_driver_spi;idf::esp_driver_mcpwm;idf::esp_driver_ana_cmpr;idf::esp_driver_i2s;idf::sdmmc;idf::esp_driver_sdmmc;idf::esp_driver_sdspi;idf::esp_driver_sdio;idf::esp_driver_dac;idf::esp_driver_rmt;idf::esp_driver_tsens;idf::esp_driver_sdm;idf::esp_driver_i2c;idf::esp_driver_ledc;idf::esp_driver_parlio;idf::driver;idf::wolfssl;idf::json;idf::http_parser;idf::console;idf::espressif__mdns;idf::homekit;idf::main
--- BUILD_COMPONENT_DIRS=/opt/esp/idf/components/app_trace;/opt/esp/idf/components/app_update;/opt/esp/idf/components/bootloader;/opt/esp/idf/components/bootloader_support;/opt/esp/idf/components/bt;/opt/esp/idf/components/cmock;/opt/esp/idf/components/console;/opt/esp/idf/components/cxx;/opt/esp/idf/components/driver;/opt/esp/idf/components/efuse;/opt/esp/idf/components/esp-tls;/opt/esp/idf/components/esp_adc;/opt/esp/idf/components/esp_app_format;/opt/esp/idf/components/esp_bootloader_format;/opt/esp/idf/components/esp_coex;/opt/esp/idf/components/esp_common;/opt/esp/idf/components/esp_driver_ana_cmpr;/opt/esp/idf/components/esp_driver_cam;/opt/esp/idf/components/esp_driver_dac;/opt/esp/idf/components/esp_driver_gpio;/opt/esp/idf/components/esp_driver_gptimer;/opt/esp/idf/components/esp_driver_i2c;/opt/esp/idf/components/esp_driver_i2s;/opt/esp/idf/components/esp_driver_isp;/opt/esp/idf/components/esp_driver_jpeg;/opt/esp/idf/components/esp_driver_ledc;/opt/esp/idf/components/esp_driver_mcpwm;/opt/esp/idf/components/esp_driver_parlio;/opt/esp/idf/components/esp_driver_pcnt;/opt/esp/idf/components/esp_driver_ppa;/opt/esp/idf/components/esp_driver_rmt;/opt/esp/idf/components/esp_driver_sdio;/opt/esp/idf/components/esp_driver_sdm;/opt/esp/idf/components/esp_driver_sdmmc;/opt/esp/idf/components/esp_driver_sdspi;/opt/esp/idf/components/esp_driver_spi;/opt/esp/idf/components/esp_driver_touch_sens;/opt/esp/idf/components/esp_driver_tsens;/opt/esp/idf/components/esp_driver_uart;/opt/esp/idf/components/esp_driver_usb_serial_jtag;/opt/esp/idf/components/esp_eth;/opt/esp/idf/components/esp_event;/opt/esp/idf/components/esp_gdbstub;/opt/esp/idf/components/esp_hid;/opt/esp/idf/components/esp_http_client;/opt/esp/idf/components/esp_http_server;/opt/esp/idf/components/esp_https_ota;/opt/esp/idf/components/esp_https_server;/opt/esp/idf/components/esp_hw_support;/opt/esp/idf/components/esp_lcd;/opt/esp/idf/components/esp_local_ctrl;/opt/esp/idf/components/esp_mm;/opt/esp/idf/components/esp_netif;/opt/esp/idf/components/esp_netif_stack;/opt/esp/idf/components/esp_partition;/opt/esp/idf/components/esp_phy;/opt/esp/idf/components/esp_pm;/opt/esp/idf/components/esp_psram;/opt/esp/idf/components/esp_ringbuf;/opt/esp/idf/components/esp_rom;/opt/esp/idf/components/esp_security;/opt/esp/idf/components/esp_system;/opt/esp/idf/components/esp_timer;/opt/esp/idf/components/esp_vfs_console;/opt/esp/idf/components/esp_wifi;/opt/esp/idf/components/espcoredump;/opt/esp/idf/components/esptool_py;/opt/esp/idf/components/fatfs;/opt/esp/idf/components/freertos;/opt/esp/idf/components/hal;/opt/esp/idf/components/heap;/opt/esp/idf/components/http_parser;/opt/esp/idf/components/idf_test;/opt/esp/idf/components/ieee802154;/opt/esp/idf/components/json;/opt/esp/idf/components/linux;/opt/esp/idf/components/log;/opt/esp/idf/components/lwip;/opt/esp/idf/components/mbedtls;/opt/esp/idf/components/mqtt;/opt/esp/idf/components/newlib;/opt/esp/idf/components/nvs_flash;/opt/esp/idf/components/nvs_sec_provider;/opt/esp/idf/components/openthread;/opt/esp/idf/components/partition_table;/opt/esp/idf/components/perfmon;/opt/esp/idf/components/protobuf-c;/opt/esp/idf/components/protocomm;/opt/esp/idf/components/pthread;/opt/esp/idf/components/riscv;/opt/esp/idf/components/rt;/opt/esp/idf/components/sdmmc;/opt/esp/idf/components/soc;/opt/esp/idf/components/spi_flash;/opt/esp/idf/components/spiffs;/opt/esp/idf/components/tcp_transport;/opt/esp/idf/components/touch_element;/opt/esp/idf/components/ulp;/opt/esp/idf/components/unity;/opt/esp/idf/components/usb;/opt/esp/idf/components/vfs;/opt/esp/idf/components/wear_levelling;/opt/esp/idf/components/wifi_provisioning;/opt/esp/idf/components/wpa_supplicant;/opt/esp/idf/components/xtensa;/project/examples/lcm/main;/project/components/esp32-button;/project/components/homekit;/project/components/wolfssl;/project/components/ws2811;/project/examples/lcm/managed_components/espressif__mdns
--- BUILD_COMPONENT_TARGETS=___idf_app_trace;___idf_app_update;___idf_bootloader;___idf_bootloader_support;___idf_bt;___idf_cmock;___idf_console;___idf_cxx;___idf_driver;___idf_efuse;___idf_esp-tls;___idf_esp_adc;___idf_esp_app_format;___idf_esp_bootloader_format;___idf_esp_coex;___idf_esp_common;___idf_esp_driver_ana_cmpr;___idf_esp_driver_cam;___idf_esp_driver_dac;___idf_esp_driver_gpio;___idf_esp_driver_gptimer;___idf_esp_driver_i2c;___idf_esp_driver_i2s;___idf_esp_driver_isp;___idf_esp_driver_jpeg;___idf_esp_driver_ledc;___idf_esp_driver_mcpwm;___idf_esp_driver_parlio;___idf_esp_driver_pcnt;___idf_esp_driver_ppa;___idf_esp_driver_rmt;___idf_esp_driver_sdio;___idf_esp_driver_sdm;___idf_esp_driver_sdmmc;___idf_esp_driver_sdspi;___idf_esp_driver_spi;___idf_esp_driver_touch_sens;___idf_esp_driver_tsens;___idf_esp_driver_uart;___idf_esp_driver_usb_serial_jtag;___idf_esp_eth;___idf_esp_event;___idf_esp_gdbstub;___idf_esp_hid;___idf_esp_http_client;___idf_esp_http_server;___idf_esp_https_ota;___idf_esp_https_server;___idf_esp_hw_support;___idf_esp_lcd;___idf_esp_local_ctrl;___idf_esp_mm;___idf_esp_netif;___idf_esp_netif_stack;___idf_esp_partition;___idf_esp_phy;___idf_esp_pm;___idf_esp_psram;___idf_esp_ringbuf;___idf_esp_rom;___idf_esp_security;___idf_esp_system;___idf_esp_timer;___idf_esp_vfs_console;___idf_esp_wifi;___idf_espcoredump;___idf_esptool_py;___idf_fatfs;___idf_freertos;___idf_hal;___idf_heap;___idf_http_parser;___idf_idf_test;___idf_ieee802154;___idf_json;___idf_linux;___idf_log;___idf_lwip;___idf_mbedtls;___idf_mqtt;___idf_newlib;___idf_nvs_flash;___idf_nvs_sec_provider;___idf_openthread;___idf_partition_table;___idf_perfmon;___idf_protobuf-c;___idf_protocomm;___idf_pthread;___idf_riscv;___idf_rt;___idf_sdmmc;___idf_soc;___idf_spi_flash;___idf_spiffs;___idf_tcp_transport;___idf_touch_element;___idf_ulp;___idf_unity;___idf_usb;___idf_vfs;___idf_wear_levelling;___idf_wifi_provisioning;___idf_wpa_supplicant;___idf_xtensa;___idf_main;___idf_esp32-button;___idf_homekit;___idf_wolfssl;___idf_ws2811;___idf_espressif__mdns
+-- BUILD_COMPONENTS=xtensa;esp_driver_gpio;esp_timer;esp_pm;mbedtls;bootloader;esptool_py;partition_table;esp_app_format;esp_bootloader_format;app_update;esp_partition;efuse;bootloader_support;esp_mm;spi_flash;esp_system;esp_common;esp_rom;hal;log;heap;soc;esp_hw_support;newlib;pthread;cxx;freertos;esp_event;nvs_flash;esp_ringbuf;esp_driver_pcnt;esp_driver_gptimer;esp_driver_spi;esp_driver_mcpwm;esp_driver_ana_cmpr;esp_driver_i2s;sdmmc;esp_driver_sdmmc;esp_driver_sdspi;esp_driver_sdio;esp_driver_dac;esp_driver_rmt;esp_driver_tsens;esp_driver_sdm;esp_driver_i2c;esp_driver_uart;esp_driver_ledc;esp_driver_parlio;esp_driver_usb_serial_jtag;driver;esp_phy;esp_vfs_console;vfs;lwip;esp_netif_stack;esp_netif;wpa_supplicant;esp_coex;esp_wifi;http_parser;esp-tls;wolfssl__wolfssl;json;console;espressif__mdns;homekit;esp_http_server;main
+-- BUILD_COMPONENT_ALIASES=idf::xtensa;idf::esp_driver_gpio;idf::esp_timer;idf::esp_pm;idf::mbedtls;idf::bootloader;idf::esptool_py;idf::partition_table;idf::esp_app_format;idf::esp_bootloader_format;idf::app_update;idf::esp_partition;idf::efuse;idf::bootloader_support;idf::esp_mm;idf::spi_flash;idf::esp_system;idf::esp_common;idf::esp_rom;idf::hal;idf::log;idf::heap;idf::soc;idf::esp_hw_support;idf::newlib;idf::pthread;idf::cxx;idf::freertos;idf::esp_event;idf::nvs_flash;idf::esp_ringbuf;idf::esp_driver_pcnt;idf::esp_driver_gptimer;idf::esp_driver_spi;idf::esp_driver_mcpwm;idf::esp_driver_ana_cmpr;idf::esp_driver_i2s;idf::sdmmc;idf::esp_driver_sdmmc;idf::esp_driver_sdspi;idf::esp_driver_sdio;idf::esp_driver_dac;idf::esp_driver_rmt;idf::esp_driver_tsens;idf::esp_driver_sdm;idf::esp_driver_i2c;idf::esp_driver_uart;idf::esp_driver_ledc;idf::esp_driver_parlio;idf::esp_driver_usb_serial_jtag;idf::driver;idf::esp_phy;idf::esp_vfs_console;idf::vfs;idf::lwip;idf::esp_netif_stack;idf::esp_netif;idf::wpa_supplicant;idf::esp_coex;idf::esp_wifi;idf::http_parser;idf::esp-tls;idf::wolfssl__wolfssl;idf::json;idf::console;idf::espressif__mdns;idf::homekit;idf::esp_http_server;idf::main
+-- BUILD_COMPONENT_DIRS=/opt/esp/idf/components/app_trace;/opt/esp/idf/components/app_update;/opt/esp/idf/components/bootloader;/opt/esp/idf/components/bootloader_support;/opt/esp/idf/components/bt;/opt/esp/idf/components/cmock;/opt/esp/idf/components/console;/opt/esp/idf/components/cxx;/opt/esp/idf/components/driver;/opt/esp/idf/components/efuse;/opt/esp/idf/components/esp-tls;/opt/esp/idf/components/esp_adc;/opt/esp/idf/components/esp_app_format;/opt/esp/idf/components/esp_bootloader_format;/opt/esp/idf/components/esp_coex;/opt/esp/idf/components/esp_common;/opt/esp/idf/components/esp_driver_ana_cmpr;/opt/esp/idf/components/esp_driver_cam;/opt/esp/idf/components/esp_driver_dac;/opt/esp/idf/components/esp_driver_gpio;/opt/esp/idf/components/esp_driver_gptimer;/opt/esp/idf/components/esp_driver_i2c;/opt/esp/idf/components/esp_driver_i2s;/opt/esp/idf/components/esp_driver_isp;/opt/esp/idf/components/esp_driver_jpeg;/opt/esp/idf/components/esp_driver_ledc;/opt/esp/idf/components/esp_driver_mcpwm;/opt/esp/idf/components/esp_driver_parlio;/opt/esp/idf/components/esp_driver_pcnt;/opt/esp/idf/components/esp_driver_ppa;/opt/esp/idf/components/esp_driver_rmt;/opt/esp/idf/components/esp_driver_sdio;/opt/esp/idf/components/esp_driver_sdm;/opt/esp/idf/components/esp_driver_sdmmc;/opt/esp/idf/components/esp_driver_sdspi;/opt/esp/idf/components/esp_driver_spi;/opt/esp/idf/components/esp_driver_touch_sens;/opt/esp/idf/components/esp_driver_tsens;/opt/esp/idf/components/esp_driver_uart;/opt/esp/idf/components/esp_driver_usb_serial_jtag;/opt/esp/idf/components/esp_eth;/opt/esp/idf/components/esp_event;/opt/esp/idf/components/esp_gdbstub;/opt/esp/idf/components/esp_hid;/opt/esp/idf/components/esp_http_client;/opt/esp/idf/components/esp_http_server;/opt/esp/idf/components/esp_https_ota;/opt/esp/idf/components/esp_https_server;/opt/esp/idf/components/esp_hw_support;/opt/esp/idf/components/esp_lcd;/opt/esp/idf/components/esp_local_ctrl;/opt/esp/idf/components/esp_mm;/opt/esp/idf/components/esp_netif;/opt/esp/idf/components/esp_netif_stack;/opt/esp/idf/components/esp_partition;/opt/esp/idf/components/esp_phy;/opt/esp/idf/components/esp_pm;/opt/esp/idf/components/esp_psram;/opt/esp/idf/components/esp_ringbuf;/opt/esp/idf/components/esp_rom;/opt/esp/idf/components/esp_system;/opt/esp/idf/components/esp_timer;/opt/esp/idf/components/esp_vfs_console;/opt/esp/idf/components/esp_wifi;/opt/esp/idf/components/espcoredump;/opt/esp/idf/components/esptool_py;/opt/esp/idf/components/fatfs;/opt/esp/idf/components/freertos;/opt/esp/idf/components/hal;/opt/esp/idf/components/heap;/opt/esp/idf/components/http_parser;/opt/esp/idf/components/idf_test;/opt/esp/idf/components/ieee802154;/opt/esp/idf/components/json;/opt/esp/idf/components/linux;/opt/esp/idf/components/log;/opt/esp/idf/components/lwip;/opt/esp/idf/components/mbedtls;/opt/esp/idf/components/mqtt;/opt/esp/idf/components/newlib;/opt/esp/idf/components/nvs_flash;/opt/esp/idf/components/nvs_sec_provider;/opt/esp/idf/components/openthread;/opt/esp/idf/components/partition_table;/opt/esp/idf/components/perfmon;/opt/esp/idf/components/protobuf-c;/opt/esp/idf/components/protocomm;/opt/esp/idf/components/pthread;/opt/esp/idf/components/riscv;/opt/esp/idf/components/sdmmc;/opt/esp/idf/components/soc;/opt/esp/idf/components/spi_flash;/opt/esp/idf/components/spiffs;/opt/esp/idf/components/tcp_transport;/opt/esp/idf/components/touch_element;/opt/esp/idf/components/ulp;/opt/esp/idf/components/unity;/opt/esp/idf/components/usb;/opt/esp/idf/components/vfs;/opt/esp/idf/components/wear_levelling;/opt/esp/idf/components/wifi_provisioning;/opt/esp/idf/components/wpa_supplicant;/opt/esp/idf/components/xtensa;/project/examples/lcm/main;/project/components/esp32-button;/project/components/homekit;/project/examples/lcm/managed_components/espressif__mdns;/project/examples/lcm/managed_components/wolfssl__wolfssl
+-- BUILD_COMPONENT_TARGETS=___idf_app_trace;___idf_app_update;___idf_bootloader;___idf_bootloader_support;___idf_bt;___idf_cmock;___idf_console;___idf_cxx;___idf_driver;___idf_efuse;___idf_esp-tls;___idf_esp_adc;___idf_esp_app_format;___idf_esp_bootloader_format;___idf_esp_coex;___idf_esp_common;___idf_esp_driver_ana_cmpr;___idf_esp_driver_cam;___idf_esp_driver_dac;___idf_esp_driver_gpio;___idf_esp_driver_gptimer;___idf_esp_driver_i2c;___idf_esp_driver_i2s;___idf_esp_driver_isp;___idf_esp_driver_jpeg;___idf_esp_driver_ledc;___idf_esp_driver_mcpwm;___idf_esp_driver_parlio;___idf_esp_driver_pcnt;___idf_esp_driver_ppa;___idf_esp_driver_rmt;___idf_esp_driver_sdio;___idf_esp_driver_sdm;___idf_esp_driver_sdmmc;___idf_esp_driver_sdspi;___idf_esp_driver_spi;___idf_esp_driver_touch_sens;___idf_esp_driver_tsens;___idf_esp_driver_uart;___idf_esp_driver_usb_serial_jtag;___idf_esp_eth;___idf_esp_event;___idf_esp_gdbstub;___idf_esp_hid;___idf_esp_http_client;___idf_esp_http_server;___idf_esp_https_ota;___idf_esp_https_server;___idf_esp_hw_support;___idf_esp_lcd;___idf_esp_local_ctrl;___idf_esp_mm;___idf_esp_netif;___idf_esp_netif_stack;___idf_esp_partition;___idf_esp_phy;___idf_esp_pm;___idf_esp_psram;___idf_esp_ringbuf;___idf_esp_rom;___idf_esp_system;___idf_esp_timer;___idf_esp_vfs_console;___idf_esp_wifi;___idf_espcoredump;___idf_esptool_py;___idf_fatfs;___idf_freertos;___idf_hal;___idf_heap;___idf_http_parser;___idf_idf_test;___idf_ieee802154;___idf_json;___idf_linux;___idf_log;___idf_lwip;___idf_mbedtls;___idf_mqtt;___idf_newlib;___idf_nvs_flash;___idf_nvs_sec_provider;___idf_openthread;___idf_partition_table;___idf_perfmon;___idf_protobuf-c;___idf_protocomm;___idf_pthread;___idf_riscv;___idf_sdmmc;___idf_soc;___idf_spi_flash;___idf_spiffs;___idf_tcp_transport;___idf_touch_element;___idf_ulp;___idf_unity;___idf_usb;___idf_vfs;___idf_wear_levelling;___idf_wifi_provisioning;___idf_wpa_supplicant;___idf_xtensa;___idf_main;___idf_esp32-button;___idf_homekit;___idf_espressif__mdns;___idf_wolfssl__wolfssl
 -- BUILD_DIR=/project/examples/lcm/build
 -- CCACHE_ENABLE=1
 -- CCACHE_FOUND=/usr/bin/ccache
--- CMAKE_ADDR2LINE=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-addr2line
--- CMAKE_AR=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-ar
--- CMAKE_AR=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-ar
--- CMAKE_ASM_COMPILER=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc
--- CMAKE_ASM_COMPILER=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc
--- CMAKE_ASM_COMPILER_AR=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ar
--- CMAKE_ASM_COMPILER_AR=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ar
+-- CMAKE_ADDR2LINE=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-addr2line
+-- CMAKE_AR=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-ar
+-- CMAKE_AR=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-ar
+-- CMAKE_ASM_COMPILER=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc
+-- CMAKE_ASM_COMPILER=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc
+-- CMAKE_ASM_COMPILER_AR=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ar
+-- CMAKE_ASM_COMPILER_AR=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ar
 -- CMAKE_ASM_COMPILER_ARG1=
 -- CMAKE_ASM_COMPILER_ENV_VAR=ASM
 -- CMAKE_ASM_COMPILER_ID=GNU
@@ -145,9 +162,9 @@ warning: unknown kconfig symbol 'ESPTOOLPY_FLASHFREQ_15M' assigned to 'n' in /pr
 -- CMAKE_ASM_COMPILER_LINKER=
 -- CMAKE_ASM_COMPILER_LINKER_ID=
 -- CMAKE_ASM_COMPILER_LOADED=1
--- CMAKE_ASM_COMPILER_RANLIB=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ranlib
--- CMAKE_ASM_COMPILER_RANLIB=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ranlib
--- CMAKE_ASM_COMPILER_SYSROOT=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/../xtensa-esp-elf/usr
+-- CMAKE_ASM_COMPILER_RANLIB=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ranlib
+-- CMAKE_ASM_COMPILER_RANLIB=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ranlib
+-- CMAKE_ASM_COMPILER_SYSROOT=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/../xtensa-esp-elf/usr
 -- CMAKE_ASM_COMPILER_VERSION=
 -- CMAKE_ASM_COMPILER_WORKS=1
 -- CMAKE_ASM_COMPILE_OBJECT=<CMAKE_ASM_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>
@@ -214,13 +231,13 @@ warning: unknown kconfig symbol 'ESPTOOLPY_FLASHFREQ_15M' assigned to 'n' in /pr
 -- CMAKE_COMMAND=/opt/esp/tools/cmake/3.30.2/bin/cmake
 -- CMAKE_COMPILER_IS_GNUCC=1
 -- CMAKE_COMPILER_IS_GNUCXX=1
--- CMAKE_COMPILER_SYSROOT=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/../xtensa-esp-elf/usr
+-- CMAKE_COMPILER_SYSROOT=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/../xtensa-esp-elf/usr
 -- CMAKE_CPACK_COMMAND=/opt/esp/tools/cmake/3.30.2/bin/cpack
 -- CMAKE_CROSSCOMPILING=TRUE
 -- CMAKE_CTEST_COMMAND=/opt/esp/tools/cmake/3.30.2/bin/ctest
--- CMAKE_CURRENT_BINARY_DIR=/project/examples/lcm/build/esp-idf/wolfssl
--- CMAKE_CURRENT_LIST_DIR=/project/components/wolfssl
--- CMAKE_CURRENT_LIST_FILE=/project/components/wolfssl/CMakeLists.txt
+-- CMAKE_CURRENT_BINARY_DIR=/project/examples/lcm/build/esp-idf/wolfssl__wolfssl
+-- CMAKE_CURRENT_LIST_DIR=/project/examples/lcm/managed_components/wolfssl__wolfssl
+-- CMAKE_CURRENT_LIST_FILE=/project/examples/lcm/managed_components/wolfssl__wolfssl/CMakeLists.txt
 -- CMAKE_CURRENT_SOURCE_DIR=.
 -- CMAKE_CXX11_COMPILE_FEATURES=cxx_std_11;cxx_alias_templates;cxx_alignas;cxx_alignof;cxx_attributes;cxx_auto_type;cxx_constexpr;cxx_decltype;cxx_decltype_incomplete_return_types;cxx_default_function_template_args;cxx_defaulted_functions;cxx_defaulted_move_initializers;cxx_delegating_constructors;cxx_deleted_functions;cxx_enum_forward_declarations;cxx_explicit_conversions;cxx_extended_friend_declarations;cxx_extern_templates;cxx_final;cxx_func_identifier;cxx_generalized_initializers;cxx_inheriting_constructors;cxx_inline_namespaces;cxx_lambdas;cxx_local_type_template_args;cxx_long_long_type;cxx_noexcept;cxx_nonstatic_member_init;cxx_nullptr;cxx_override;cxx_range_for;cxx_raw_string_literals;cxx_reference_qualified_functions;cxx_right_angle_brackets;cxx_rvalue_references;cxx_sizeof_member;cxx_static_assert;cxx_strong_enums;cxx_thread_local;cxx_trailing_return_types;cxx_unicode_literals;cxx_uniform_initialization;cxx_unrestricted_unions;cxx_user_literals;cxx_variadic_macros;cxx_variadic_templates
 -- CMAKE_CXX11_EXTENSION_COMPILE_OPTION=-std=gnu++11
@@ -240,28 +257,25 @@ warning: unknown kconfig symbol 'ESPTOOLPY_FLASHFREQ_15M' assigned to 'n' in /pr
 -- CMAKE_CXX23_COMPILE_FEATURES=cxx_std_23
 -- CMAKE_CXX23_EXTENSION_COMPILE_OPTION=-std=gnu++23
 -- CMAKE_CXX23_STANDARD_COMPILE_OPTION=-std=c++23
--- CMAKE_CXX26_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE=Toolchain does not support discovering `import std` support
--- CMAKE_CXX26_COMPILE_FEATURES=cxx_std_26
--- CMAKE_CXX26_EXTENSION_COMPILE_OPTION=-std=gnu++26
--- CMAKE_CXX26_STANDARD_COMPILE_OPTION=-std=c++26
+-- CMAKE_CXX26_COMPILE_FEATURES=
 -- CMAKE_CXX98_COMPILE_FEATURES=cxx_std_98;cxx_template_template_parameters
 -- CMAKE_CXX98_EXTENSION_COMPILE_OPTION=-std=gnu++98
 -- CMAKE_CXX98_STANDARD_COMPILE_OPTION=-std=c++98
 -- CMAKE_CXX98_STANDARD__HAS_FULL_SUPPORT=ON
 -- CMAKE_CXX_ABI_COMPILED=TRUE
 -- CMAKE_CXX_ARCHIVE_APPEND=<CMAKE_AR> q <TARGET> <LINK_FLAGS> <OBJECTS>
--- CMAKE_CXX_ARCHIVE_APPEND_IPO="/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ar" q <TARGET> <LINK_FLAGS> <OBJECTS>
+-- CMAKE_CXX_ARCHIVE_APPEND_IPO="/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ar" q <TARGET> <LINK_FLAGS> <OBJECTS>
 -- CMAKE_CXX_ARCHIVE_CREATE=<CMAKE_AR> qc <TARGET> <LINK_FLAGS> <OBJECTS>
--- CMAKE_CXX_ARCHIVE_CREATE_IPO="/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ar" qc <TARGET> <LINK_FLAGS> <OBJECTS>
+-- CMAKE_CXX_ARCHIVE_CREATE_IPO="/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ar" qc <TARGET> <LINK_FLAGS> <OBJECTS>
 -- CMAKE_CXX_ARCHIVE_FINISH=<CMAKE_RANLIB> <TARGET>
--- CMAKE_CXX_ARCHIVE_FINISH_IPO="/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ranlib" <TARGET>
+-- CMAKE_CXX_ARCHIVE_FINISH_IPO="/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ranlib" <TARGET>
 -- CMAKE_CXX_BYTE_ORDER=LITTLE_ENDIAN
 -- CMAKE_CXX_CL_SHOWINCLUDES_PREFIX=
--- CMAKE_CXX_COMPILER=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-g++
--- CMAKE_CXX_COMPILER=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-g++
+-- CMAKE_CXX_COMPILER=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-g++
+-- CMAKE_CXX_COMPILER=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-g++
 -- CMAKE_CXX_COMPILER_ABI=ELF
--- CMAKE_CXX_COMPILER_AR=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ar
--- CMAKE_CXX_COMPILER_AR=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ar
+-- CMAKE_CXX_COMPILER_AR=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ar
+-- CMAKE_CXX_COMPILER_AR=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ar
 -- CMAKE_CXX_COMPILER_ARCHITECTURE_ID=
 -- CMAKE_CXX_COMPILER_ARG1=
 -- CMAKE_CXX_COMPILER_CLANG_RESOURCE_DIR=
@@ -649,17 +663,17 @@ Ld[^
 -- CMAKE_CXX_COMPILER_LINKER_ID=
 -- CMAKE_CXX_COMPILER_LOADED=1
 -- CMAKE_CXX_COMPILER_NAMES=CC
--- CMAKE_CXX_COMPILER_PREDEFINES_COMMAND=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-g++;-dM;-E;-c;/opt/esp/tools/cmake/3.30.2/share/cmake-3.30/Modules/CMakeCXXCompilerABI.cpp
+-- CMAKE_CXX_COMPILER_PREDEFINES_COMMAND=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-g++;-dM;-E;-c;/opt/esp/tools/cmake/3.30.2/share/cmake-3.30/Modules/CMakeCXXCompilerABI.cpp
 -- CMAKE_CXX_COMPILER_PRODUCED_FILES=a.out
 -- CMAKE_CXX_COMPILER_PRODUCED_OUTPUT=
--- CMAKE_CXX_COMPILER_RANLIB=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ranlib
--- CMAKE_CXX_COMPILER_RANLIB=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ranlib
--- CMAKE_CXX_COMPILER_SYSROOT=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/../xtensa-esp-elf/usr
--- CMAKE_CXX_COMPILER_VERSION=14.2.0
+-- CMAKE_CXX_COMPILER_RANLIB=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ranlib
+-- CMAKE_CXX_COMPILER_RANLIB=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ranlib
+-- CMAKE_CXX_COMPILER_SYSROOT=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/../xtensa-esp-elf/usr
+-- CMAKE_CXX_COMPILER_VERSION=13.2.0
 -- CMAKE_CXX_COMPILER_VERSION_INTERNAL=
 -- CMAKE_CXX_COMPILER_WORKS=TRUE
 -- CMAKE_CXX_COMPILER_WRAPPER=
--- CMAKE_CXX_COMPILE_FEATURES=cxx_std_98;cxx_template_template_parameters;cxx_std_11;cxx_alias_templates;cxx_alignas;cxx_alignof;cxx_attributes;cxx_auto_type;cxx_constexpr;cxx_decltype;cxx_decltype_incomplete_return_types;cxx_default_function_template_args;cxx_defaulted_functions;cxx_defaulted_move_initializers;cxx_delegating_constructors;cxx_deleted_functions;cxx_enum_forward_declarations;cxx_explicit_conversions;cxx_extended_friend_declarations;cxx_extern_templates;cxx_final;cxx_func_identifier;cxx_generalized_initializers;cxx_inheriting_constructors;cxx_inline_namespaces;cxx_lambdas;cxx_local_type_template_args;cxx_long_long_type;cxx_noexcept;cxx_nonstatic_member_init;cxx_nullptr;cxx_override;cxx_range_for;cxx_raw_string_literals;cxx_reference_qualified_functions;cxx_right_angle_brackets;cxx_rvalue_references;cxx_sizeof_member;cxx_static_assert;cxx_strong_enums;cxx_thread_local;cxx_trailing_return_types;cxx_unicode_literals;cxx_uniform_initialization;cxx_unrestricted_unions;cxx_user_literals;cxx_variadic_macros;cxx_variadic_templates;cxx_std_14;cxx_aggregate_default_initializers;cxx_attribute_deprecated;cxx_binary_literals;cxx_contextual_conversions;cxx_decltype_auto;cxx_digit_separators;cxx_generic_lambdas;cxx_lambda_init_captures;cxx_relaxed_constexpr;cxx_return_type_deduction;cxx_variable_templates;cxx_std_17;cxx_std_20;cxx_std_23;cxx_std_26
+-- CMAKE_CXX_COMPILE_FEATURES=cxx_std_98;cxx_template_template_parameters;cxx_std_11;cxx_alias_templates;cxx_alignas;cxx_alignof;cxx_attributes;cxx_auto_type;cxx_constexpr;cxx_decltype;cxx_decltype_incomplete_return_types;cxx_default_function_template_args;cxx_defaulted_functions;cxx_defaulted_move_initializers;cxx_delegating_constructors;cxx_deleted_functions;cxx_enum_forward_declarations;cxx_explicit_conversions;cxx_extended_friend_declarations;cxx_extern_templates;cxx_final;cxx_func_identifier;cxx_generalized_initializers;cxx_inheriting_constructors;cxx_inline_namespaces;cxx_lambdas;cxx_local_type_template_args;cxx_long_long_type;cxx_noexcept;cxx_nonstatic_member_init;cxx_nullptr;cxx_override;cxx_range_for;cxx_raw_string_literals;cxx_reference_qualified_functions;cxx_right_angle_brackets;cxx_rvalue_references;cxx_sizeof_member;cxx_static_assert;cxx_strong_enums;cxx_thread_local;cxx_trailing_return_types;cxx_unicode_literals;cxx_uniform_initialization;cxx_unrestricted_unions;cxx_user_literals;cxx_variadic_macros;cxx_variadic_templates;cxx_std_14;cxx_aggregate_default_initializers;cxx_attribute_deprecated;cxx_binary_literals;cxx_contextual_conversions;cxx_decltype_auto;cxx_digit_separators;cxx_generic_lambdas;cxx_lambda_init_captures;cxx_relaxed_constexpr;cxx_return_type_deduction;cxx_variable_templates;cxx_std_17;cxx_std_20;cxx_std_23
 -- CMAKE_CXX_COMPILE_OBJECT=<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>
 -- CMAKE_CXX_COMPILE_OPTIONS_COLOR_DIAGNOSTICS=-fdiagnostics-color=always
 -- CMAKE_CXX_COMPILE_OPTIONS_COLOR_DIAGNOSTICS_OFF=-fno-diagnostics-color
@@ -680,7 +694,8 @@ Ld[^
 -- CMAKE_CXX_CREATE_SHARED_MODULE=<CMAKE_CXX_COMPILER> <CMAKE_SHARED_LIBRARY_CXX_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS> <SONAME_FLAG><TARGET_SONAME> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>
 -- CMAKE_CXX_EXTENSIONS_COMPUTED_DEFAULT=ON
 -- CMAKE_CXX_EXTENSIONS_DEFAULT=ON
--- CMAKE_CXX_FLAGS=-mlongcalls -Wno-frame-address  -fno-builtin-memcpy -fno-builtin-memset -fno-builtin-bzero -fno-builtin-stpcpy -fno-builtin-strncpy
+-- CMAKE_CXX_FLAGS=-mlongcalls -Wno-frame-address  -fno-builtin-memcpy -fno-builtin-memset -fno-builtin-bzero -fno-builtin-stpcpy -fno-builtin-strncpy -DWOLFSSL_USER_SETTINGS
+-- CMAKE_CXX_FLAGS=-mlongcalls -Wno-frame-address  -fno-builtin-memcpy -fno-builtin-memset -fno-builtin-bzero -fno-builtin-stpcpy -fno-builtin-strncpy -DWOLFSSL_USER_SETTINGS
 -- CMAKE_CXX_FLAGS_DEBUG=-g
 -- CMAKE_CXX_FLAGS_DEBUG_INIT= -g
 -- CMAKE_CXX_FLAGS_INIT=  
@@ -691,16 +706,12 @@ Ld[^
 -- CMAKE_CXX_FLAGS_RELWITHDEBINFO=-O2 -g -DNDEBUG
 -- CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT= -O2 -g -DNDEBUG
 -- CMAKE_CXX_IGNORE_EXTENSIONS=inl;h;hpp;HPP;H;o;O;obj;OBJ;def;DEF;rc;RC
--- CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/xtensa-esp-elf/include/c++/14.2.0;/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/xtensa-esp-elf/include/c++/14.2.0/xtensa-esp-elf/esp32;/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/xtensa-esp-elf/include/c++/14.2.0/backward;/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/lib/gcc/xtensa-esp-elf/14.2.0/include;/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/lib/gcc/xtensa-esp-elf/14.2.0/include-fixed;/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/xtensa-esp-elf/include
--- CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/lib/gcc/xtensa-esp-elf/14.2.0/esp32;/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/xtensa-esp-elf/lib/esp32;/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/lib/gcc/xtensa-esp-elf/14.2.0;/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/lib/gcc;/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/xtensa-esp-elf/lib;/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/xtensa-esp-elf/usr/lib
+-- CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/xtensa-esp-elf/include/c++/13.2.0;/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/xtensa-esp-elf/include/c++/13.2.0/xtensa-esp-elf/esp32;/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/xtensa-esp-elf/include/c++/13.2.0/backward;/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/lib/gcc/xtensa-esp-elf/13.2.0/include;/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/lib/gcc/xtensa-esp-elf/13.2.0/include-fixed;/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/xtensa-esp-elf/include
+-- CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/lib/gcc/xtensa-esp-elf/13.2.0/esp32;/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/xtensa-esp-elf/lib/esp32;/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/lib/gcc/xtensa-esp-elf/13.2.0;/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/lib/gcc;/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/xtensa-esp-elf/lib;/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/xtensa-esp-elf/usr/lib
 -- CMAKE_CXX_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES=
 -- CMAKE_CXX_IMPLICIT_LINK_LIBRARIES=stdc++;m;gcc;c;nosys;c;gcc
 -- CMAKE_CXX_IMPORT_STD=### Imported target for C++23 standard library
 set(CMAKE_CXX23_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE "Toolchain does not support discovering `import std` support")
-
-
-### Imported target for C++26 standard library
-set(CMAKE_CXX26_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE "Toolchain does not support discovering `import std` support")
 
 
 
@@ -718,36 +729,32 @@ set(CMAKE_CXX26_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE "Toolchain does not suppor
 -- CMAKE_CXX_LINK_OPTIONS_NO_PIE=-no-pie
 -- CMAKE_CXX_LINK_OPTIONS_PIE=-fPIE;-pie
 -- CMAKE_CXX_LINK_WHAT_YOU_USE_FLAG=LINKER:--no-as-needed
--- CMAKE_CXX_MODULE_BMI_ONLY_FLAG=-fmodule-only
--- CMAKE_CXX_MODULE_MAP_FLAG=-fmodules-ts -fmodule-mapper=<MODULE_MAP_FILE> -MD -fdeps-format=p1689r5 -x c++
--- CMAKE_CXX_MODULE_MAP_FORMAT=gcc
 -- CMAKE_CXX_OUTPUT_EXTENSION=.obj
 -- CMAKE_CXX_PLATFORM_ID=
--- CMAKE_CXX_SCANDEP_SOURCE=<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -E -x c++ <SOURCE> -MT <DYNDEP_FILE> -MD -MF <DEP_FILE> -fmodules-ts -fdeps-file=<DYNDEP_FILE> -fdeps-target=<OBJECT> -fdeps-format=p1689r5 -o <PREPROCESSED_SOURCE>
 -- CMAKE_CXX_SIMULATE_ID=
 -- CMAKE_CXX_SIMULATE_VERSION=
 -- CMAKE_CXX_SIZEOF_DATA_PTR=4
 -- CMAKE_CXX_SOURCE_FILE_EXTENSIONS=C;M;c++;cc;cpp;cxx;mm;mpp;CPP;ixx;cppm;ccm;cxxm;c++m
 -- CMAKE_CXX_STANDARD_COMPUTED_DEFAULT=17
 -- CMAKE_CXX_STANDARD_DEFAULT=17
--- CMAKE_CXX_STANDARD_LATEST=26
+-- CMAKE_CXX_STANDARD_LATEST=23
 -- CMAKE_CXX_STANDARD_LIBRARY=
 -- CMAKE_CXX_VERBOSE_FLAG=-v
 -- CMAKE_CXX_XCODE_ARCHS=
 -- CMAKE_C_ABI_COMPILED=TRUE
 -- CMAKE_C_ARCHIVE_APPEND=<CMAKE_AR> q <TARGET> <LINK_FLAGS> <OBJECTS>
--- CMAKE_C_ARCHIVE_APPEND_IPO="/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ar" q <TARGET> <LINK_FLAGS> <OBJECTS>
+-- CMAKE_C_ARCHIVE_APPEND_IPO="/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ar" q <TARGET> <LINK_FLAGS> <OBJECTS>
 -- CMAKE_C_ARCHIVE_CREATE=<CMAKE_AR> qc <TARGET> <LINK_FLAGS> <OBJECTS>
--- CMAKE_C_ARCHIVE_CREATE_IPO="/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ar" qc <TARGET> <LINK_FLAGS> <OBJECTS>
+-- CMAKE_C_ARCHIVE_CREATE_IPO="/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ar" qc <TARGET> <LINK_FLAGS> <OBJECTS>
 -- CMAKE_C_ARCHIVE_FINISH=<CMAKE_RANLIB> <TARGET>
--- CMAKE_C_ARCHIVE_FINISH_IPO="/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ranlib" <TARGET>
+-- CMAKE_C_ARCHIVE_FINISH_IPO="/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ranlib" <TARGET>
 -- CMAKE_C_BYTE_ORDER=LITTLE_ENDIAN
 -- CMAKE_C_CL_SHOWINCLUDES_PREFIX=
--- CMAKE_C_COMPILER=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc
--- CMAKE_C_COMPILER=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc
+-- CMAKE_C_COMPILER=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc
+-- CMAKE_C_COMPILER=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc
 -- CMAKE_C_COMPILER_ABI=ELF
--- CMAKE_C_COMPILER_AR=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ar
--- CMAKE_C_COMPILER_AR=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ar
+-- CMAKE_C_COMPILER_AR=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ar
+-- CMAKE_C_COMPILER_AR=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ar
 -- CMAKE_C_COMPILER_ARCHITECTURE_ID=
 -- CMAKE_C_COMPILER_ARG1=
 -- CMAKE_C_COMPILER_CLANG_RESOURCE_DIR=
@@ -1136,10 +1143,10 @@ Ld[^
 -- CMAKE_C_COMPILER_NAMES=cc
 -- CMAKE_C_COMPILER_PRODUCED_FILES=a.out
 -- CMAKE_C_COMPILER_PRODUCED_OUTPUT=
--- CMAKE_C_COMPILER_RANLIB=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ranlib
--- CMAKE_C_COMPILER_RANLIB=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ranlib
--- CMAKE_C_COMPILER_SYSROOT=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/../xtensa-esp-elf/usr
--- CMAKE_C_COMPILER_VERSION=14.2.0
+-- CMAKE_C_COMPILER_RANLIB=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ranlib
+-- CMAKE_C_COMPILER_RANLIB=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc-ranlib
+-- CMAKE_C_COMPILER_SYSROOT=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/../xtensa-esp-elf/usr
+-- CMAKE_C_COMPILER_VERSION=13.2.0
 -- CMAKE_C_COMPILER_VERSION_INTERNAL=
 -- CMAKE_C_COMPILER_WORKS=TRUE
 -- CMAKE_C_COMPILER_WRAPPER=
@@ -1163,8 +1170,8 @@ Ld[^
 -- CMAKE_C_CREATE_SHARED_MODULE=<CMAKE_C_COMPILER> <CMAKE_SHARED_LIBRARY_C_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS> <SONAME_FLAG><TARGET_SONAME> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>
 -- CMAKE_C_EXTENSIONS_COMPUTED_DEFAULT=ON
 -- CMAKE_C_EXTENSIONS_DEFAULT=ON
--- CMAKE_C_FLAGS=-mlongcalls -Wno-frame-address  -fno-builtin-memcpy -fno-builtin-memset -fno-builtin-bzero -fno-builtin-stpcpy -fno-builtin-strncpy -DWOLFSSL_USER_SETTINGS -DWOLFSSL_CMAKE_SYSTEM_NAME_LINUX
--- CMAKE_C_FLAGS=-mlongcalls -Wno-frame-address  -fno-builtin-memcpy -fno-builtin-memset -fno-builtin-bzero -fno-builtin-stpcpy -fno-builtin-strncpy -DWOLFSSL_USER_SETTINGS -DWOLFSSL_CMAKE_SYSTEM_NAME_LINUX
+-- CMAKE_C_FLAGS=-mlongcalls -Wno-frame-address  -fno-builtin-memcpy -fno-builtin-memset -fno-builtin-bzero -fno-builtin-stpcpy -fno-builtin-strncpy -DWOLFSSL_USER_SETTINGS -DWOLFSSL_CMAKE_SYSTEM_NAME_LINUX -DWOLFSSL_CMAKE_REQUIRED_ESP_TLS=1
+-- CMAKE_C_FLAGS=-mlongcalls -Wno-frame-address  -fno-builtin-memcpy -fno-builtin-memset -fno-builtin-bzero -fno-builtin-stpcpy -fno-builtin-strncpy -DWOLFSSL_USER_SETTINGS -DWOLFSSL_CMAKE_SYSTEM_NAME_LINUX -DWOLFSSL_CMAKE_REQUIRED_ESP_TLS=1
 -- CMAKE_C_FLAGS_DEBUG=-g
 -- CMAKE_C_FLAGS_DEBUG_INIT= -g
 -- CMAKE_C_FLAGS_INIT=  
@@ -1175,8 +1182,8 @@ Ld[^
 -- CMAKE_C_FLAGS_RELWITHDEBINFO=-O2 -g -DNDEBUG
 -- CMAKE_C_FLAGS_RELWITHDEBINFO_INIT= -O2 -g -DNDEBUG
 -- CMAKE_C_IGNORE_EXTENSIONS=h;H;o;O;obj;OBJ;def;DEF;rc;RC
--- CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/lib/gcc/xtensa-esp-elf/14.2.0/include;/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/lib/gcc/xtensa-esp-elf/14.2.0/include-fixed;/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/xtensa-esp-elf/include
--- CMAKE_C_IMPLICIT_LINK_DIRECTORIES=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/lib/gcc/xtensa-esp-elf/14.2.0/esp32;/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/xtensa-esp-elf/lib/esp32;/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/lib/gcc/xtensa-esp-elf/14.2.0;/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/lib/gcc;/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/xtensa-esp-elf/lib;/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/xtensa-esp-elf/usr/lib
+-- CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/lib/gcc/xtensa-esp-elf/13.2.0/include;/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/lib/gcc/xtensa-esp-elf/13.2.0/include-fixed;/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/xtensa-esp-elf/include
+-- CMAKE_C_IMPLICIT_LINK_DIRECTORIES=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/lib/gcc/xtensa-esp-elf/13.2.0/esp32;/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/xtensa-esp-elf/lib/esp32;/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/lib/gcc/xtensa-esp-elf/13.2.0;/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/lib/gcc;/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/xtensa-esp-elf/lib;/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/xtensa-esp-elf/usr/lib
 -- CMAKE_C_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES=
 -- CMAKE_C_IMPLICIT_LINK_LIBRARIES=gcc;c;nosys;c;gcc
 -- CMAKE_C_INFORMATION_LOADED=1
@@ -1265,8 +1272,8 @@ Ld[^
 -- CMAKE_INTERNAL_PLATFORM_ABI=ELF
 -- CMAKE_LIBRARY_PATH_FLAG=-L
 -- CMAKE_LIBRARY_PATH_TERMINATOR=
--- CMAKE_LINKER=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-ld
--- CMAKE_LINKER=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-ld
+-- CMAKE_LINKER=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-ld
+-- CMAKE_LINKER=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-ld
 -- CMAKE_LINKER_LINK=
 -- CMAKE_LINKER_LLD=
 -- CMAKE_LINK_LIBRARY_FLAG=-l
@@ -1288,10 +1295,10 @@ Ld[^
 -- CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO=
 -- CMAKE_MODULE_PATH=/opt/esp/idf/tools/cmake;/opt/esp/idf/tools/cmake/third_party
 -- CMAKE_MT=
--- CMAKE_NM=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-nm
--- CMAKE_OBJCOPY=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-objcopy
--- CMAKE_OBJDUMP=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-objdump
--- CMAKE_PARENT_LIST_FILE=/project/components/wolfssl/CMakeLists.txt
+-- CMAKE_NM=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-nm
+-- CMAKE_OBJCOPY=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-objcopy
+-- CMAKE_OBJDUMP=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-objdump
+-- CMAKE_PARENT_LIST_FILE=/project/examples/lcm/managed_components/wolfssl__wolfssl/CMakeLists.txt
 -- CMAKE_PATCH_VERSION=2
 -- CMAKE_PCH_EXTENSION=.gch
 -- CMAKE_PCH_PROLOGUE=#pragma GCC system_header
@@ -1305,9 +1312,9 @@ Ld[^
 -- CMAKE_PROJECT_VERSION_MINOR=6
 -- CMAKE_PROJECT_VERSION_PATCH=2
 -- CMAKE_PROJECT_VERSION_TWEAK=
--- CMAKE_RANLIB=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-ranlib
--- CMAKE_RANLIB=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-ranlib
--- CMAKE_READELF=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-readelf
+-- CMAKE_RANLIB=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-ranlib
+-- CMAKE_RANLIB=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-ranlib
+-- CMAKE_READELF=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-readelf
 -- CMAKE_ROOT=/opt/esp/tools/cmake/3.30.2/share/cmake-3.30
 -- CMAKE_SHARED_LIBRARY_ASM_FLAGS=-fPIC
 -- CMAKE_SHARED_LIBRARY_CREATE_ASM_FLAGS=-shared
@@ -1343,7 +1350,7 @@ Ld[^
 -- CMAKE_STATIC_LINKER_FLAGS_MINSIZEREL=
 -- CMAKE_STATIC_LINKER_FLAGS_RELEASE=
 -- CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO=
--- CMAKE_STRIP=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-strip
+-- CMAKE_STRIP=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-strip
 -- CMAKE_SYSTEM=Generic
 -- CMAKE_SYSTEM_INCLUDE_PATH=/include
 -- CMAKE_SYSTEM_INFO_FILE=Platform/Generic
@@ -1362,19 +1369,19 @@ Ld[^
 -- CMAKE_UNAME=/usr/bin/uname
 -- CMAKE_VERBOSE_MAKEFILE=FALSE
 -- CMAKE_VERSION=3.30.2
--- COMPILE_DEFINITIONS=_GLIBCXX_USE_POSIX_SEMAPHORE;_GLIBCXX_HAVE_POSIX_SEMAPHORE;_GNU_SOURCE;IDF_VER="v5.4-dev-4375-gf420609c33";ESP_PLATFORM
--- COMPILE_OPTIONS=-ffunction-sections;-fdata-sections;-Wall;-Werror;-Wno-error=unused-function;-Wno-error=unused-variable;-Wno-error=unused-but-set-variable;-Wno-error=deprecated-declarations;-Wextra;-Wno-error=extra;-Wno-unused-parameter;-Wno-sign-compare;-Wno-enum-conversion;-gdwarf-4;-ggdb
+-- COMPILE_DEFINITIONS=_GLIBCXX_USE_POSIX_SEMAPHORE;_GLIBCXX_HAVE_POSIX_SEMAPHORE;_GNU_SOURCE;IDF_VER="v5.3.2-174-g083aad99cf";ESP_PLATFORM
+-- COMPILE_OPTIONS=-ffunction-sections;-fdata-sections;-Wall;-Werror=all;-Wno-error=unused-function;-Wno-error=unused-variable;-Wno-error=unused-but-set-variable;-Wno-error=deprecated-declarations;-Wextra;-Wno-unused-parameter;-Wno-sign-compare;-Wno-enum-conversion;-gdwarf-4;-ggdb
 -- COMPONENTS=main
--- COMPONENT_ADD_INCLUDEDIRS=./include\;/project/components/wolfssl/\;/project/components/wolfssl/wolfssl/\;/project/components/wolfssl/wolfssl/wolfcrypt/\;/project/components/wolfssl/wolfssl/wolfcrypt/port/Espressif\;/opt/esp/idf/components/freertos/FreeRTOS-Kernel/include/freertos/\;/project/components/wolfssl/wolfssl/\;/project/components/wolfssl/wolfssl/wolfcrypt/
--- COMPONENT_ALIAS=idf::wolfssl
--- COMPONENT_DIR=/project/components/wolfssl
--- COMPONENT_LIB=__idf_wolfssl
--- COMPONENT_NAME=wolfssl
--- COMPONENT_PATH=/project/components/wolfssl
--- COMPONENT_REQUIRES=lwip
--- COMPONENT_SRCDIRS=/project/components/wolfssl/src/\;/project/components/wolfssl/wolfcrypt/src\;/project/components/wolfssl/wolfcrypt/src/port/Espressif\;/project/components/wolfssl/wolfcrypt/src/port/atmel\;/project/components/wolfssl/src/
--- COMPONENT_SRCEXCLUDE=/project/components/wolfssl/src/bio.c\;/project/components/wolfssl/src/conf.c\;/project/components/wolfssl/src/misc.c\;/project/components/wolfssl/src/pk.c\;/project/components/wolfssl/src/ssl_asn1.c\;/project/components/wolfssl/src/ssl_bn.c\;/project/components/wolfssl/src/ssl_certman.c\;/project/components/wolfssl/src/ssl_crypto.c\;/project/components/wolfssl/src/ssl_misc.c\;/project/components/wolfssl/src/x509.c\;/project/components/wolfssl/src/x509_str.c\;/project/components/wolfssl/wolfcrypt/src/evp.c\;/project/components/wolfssl/wolfcrypt/src/misc.c\;/project/components/wolfssl/wolfcrypt/src/sp_sm2_arm32.c\;/project/components/wolfssl/wolfcrypt/src/sp_sm2_arm64.c\;/project/components/wolfssl/wolfcrypt/src/sp_sm2_armthumb.c\;/project/components/wolfssl/wolfcrypt/src/sp_sm2_c32.c\;/project/components/wolfssl/wolfcrypt/src/sp_sm2_c64.c\;/project/components/wolfssl/wolfcrypt/src/sp_sm2_cortexm.c\;/project/components/wolfssl/wolfcrypt/src/sp_sm2_x86_64.c\;/project/components/wolfssl/wolfcrypt/src/sp_sm2_x86_64_asm.S\;/project/examples/lcm
--- COMPONENT_TARGET=__idf_wolfssl
+-- COMPONENT_ADD_INCLUDEDIRS=./include\;/project/examples/lcm/managed_components/wolfssl__wolfssl/\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfssl/\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfssl/wolfcrypt/\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfssl/wolfcrypt/port/Espressif\;/opt/esp/idf/components/freertos/FreeRTOS-Kernel/include/freertos/\;/opt/esp/idf/components/esp_event/include\;/opt/esp/idf/components/esp_netif/include\;/opt/esp/idf/components/esp_wifi/include\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfssl/\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfssl/wolfcrypt/
+-- COMPONENT_ALIAS=idf::wolfssl__wolfssl
+-- COMPONENT_DIR=/project/examples/lcm/managed_components/wolfssl__wolfssl
+-- COMPONENT_LIB=__idf_wolfssl__wolfssl
+-- COMPONENT_NAME=wolfssl__wolfssl
+-- COMPONENT_PATH=/project/examples/lcm/managed_components/wolfssl__wolfssl
+-- COMPONENT_REQUIRES=lwip;
+-- COMPONENT_SRCDIRS=/project/examples/lcm/managed_components/wolfssl__wolfssl/src/\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/port/Espressif\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/port/Espressif/esp_crt_bundle\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/port/atmel\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/
+-- COMPONENT_SRCEXCLUDE=/project/examples/lcm/managed_components/wolfssl__wolfssl/src/bio.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/conf.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/misc.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/pk.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/ssl_asn1.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/ssl_bn.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/ssl_certman.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/ssl_crypto.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/ssl_load.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/ssl_misc.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/ssl_p7p12.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/ssl_sess.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/x509.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/x509_str.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/ext_kyber.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfssl/wolfcrypt/ext_kyber.h\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/evp.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/misc.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_sm2_arm32.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_sm2_arm64.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_sm2_armthumb.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_sm2_c32.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_sm2_c64.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_sm2_cortexm.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_sm2_x86_64.c\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_sm2_x86_64_asm.S\;/project/examples/lcm/managed_components/wolfssl__wolfssl/examples\;/project/examples/lcm
+-- COMPONENT_TARGET=__idf_wolfssl__wolfssl
 -- CONFIGS_LIST = CONFIG_SOC_BROWNOUT_RESET_SUPPORTED;CONFIG_SOC_TWAI_BRP_DIV_SUPPORTED; ... (truncated)
 -- CONFIG_ADC2_DISABLE_DAC=y
 -- CONFIG_ADC_CALI_SUPPRESS_DEPRECATE_WARN=
@@ -1410,7 +1417,6 @@ Ld[^
 -- CONFIG_BOOTLOADER_FACTORY_RESET=
 -- CONFIG_BOOTLOADER_FLASH_DC_AWARE=
 -- CONFIG_BOOTLOADER_FLASH_XMC_SUPPORT=y
--- CONFIG_BOOTLOADER_LOG_COLORS=
 -- CONFIG_BOOTLOADER_LOG_LEVEL=3
 -- CONFIG_BOOTLOADER_LOG_LEVEL_DEBUG=
 -- CONFIG_BOOTLOADER_LOG_LEVEL_ERROR=
@@ -1418,7 +1424,6 @@ Ld[^
 -- CONFIG_BOOTLOADER_LOG_LEVEL_NONE=
 -- CONFIG_BOOTLOADER_LOG_LEVEL_VERBOSE=
 -- CONFIG_BOOTLOADER_LOG_LEVEL_WARN=
--- CONFIG_BOOTLOADER_LOG_TIMESTAMP_SOURCE_CPU_TICKS=y
 -- CONFIG_BOOTLOADER_OFFSET_IN_FLASH=0x1000
 -- CONFIG_BOOTLOADER_PROJECT_VER=1
 -- CONFIG_BOOTLOADER_REGION_PROTECTION_ENABLE=y
@@ -1441,17 +1446,13 @@ Ld[^
 -- CONFIG_BROWNOUT_DET_LVL_SEL_5=
 -- CONFIG_BROWNOUT_DET_LVL_SEL_6=
 -- CONFIG_BROWNOUT_DET_LVL_SEL_7=
--- CONFIG_COMPILER_ASSERT_NDEBUG_EVALUATE=y
 -- CONFIG_COMPILER_CXX_EXCEPTIONS=
 -- CONFIG_COMPILER_CXX_RTTI=
--- CONFIG_COMPILER_DISABLE_DEFAULT_ERRORS=y
 -- CONFIG_COMPILER_DISABLE_GCC12_WARNINGS=
 -- CONFIG_COMPILER_DISABLE_GCC13_WARNINGS=
--- CONFIG_COMPILER_DISABLE_GCC14_WARNINGS=
 -- CONFIG_COMPILER_DUMP_RTL_FILES=
 -- CONFIG_COMPILER_FLOAT_LIB_FROM_GCCLIB=y
 -- CONFIG_COMPILER_HIDE_PATHS_MACROS=y
--- CONFIG_COMPILER_NO_MERGE_CONSTANTS=
 -- CONFIG_COMPILER_OPTIMIZATION_ASSERTIONS_DISABLE=
 -- CONFIG_COMPILER_OPTIMIZATION_ASSERTIONS_ENABLE=y
 -- CONFIG_COMPILER_OPTIMIZATION_ASSERTIONS_SILENT=
@@ -1464,15 +1465,14 @@ Ld[^
 -- CONFIG_COMPILER_OPTIMIZATION_NONE=
 -- CONFIG_COMPILER_OPTIMIZATION_PERF=
 -- CONFIG_COMPILER_OPTIMIZATION_SIZE=y
--- CONFIG_COMPILER_ORPHAN_SECTIONS_PLACE=
--- CONFIG_COMPILER_ORPHAN_SECTIONS_WARNING=y
+-- CONFIG_COMPILER_ORPHAN_SECTIONS_PLACE=y
+-- CONFIG_COMPILER_ORPHAN_SECTIONS_WARNING=
 -- CONFIG_COMPILER_RT_LIB_GCCLIB=y
 -- CONFIG_COMPILER_RT_LIB_NAME=gcc
 -- CONFIG_COMPILER_STACK_CHECK_MODE_ALL=
 -- CONFIG_COMPILER_STACK_CHECK_MODE_NONE=y
 -- CONFIG_COMPILER_STACK_CHECK_MODE_NORM=
 -- CONFIG_COMPILER_STACK_CHECK_MODE_STRONG=
--- CONFIG_COMPILER_STATIC_ANALYZER=
 -- CONFIG_COMPILER_WARN_WRITE_STRINGS=
 -- CONFIG_CONSOLE_SORTED_HELP=
 -- CONFIG_CONSOLE_UART=y
@@ -1671,15 +1671,13 @@ Ld[^
 -- CONFIG_ESP_MAIN_TASK_AFFINITY_CPU0=y
 -- CONFIG_ESP_MAIN_TASK_AFFINITY_CPU1=
 -- CONFIG_ESP_MAIN_TASK_AFFINITY_NO_AFFINITY=
--- CONFIG_ESP_MAIN_TASK_STACK_SIZE=3584
+-- CONFIG_ESP_MAIN_TASK_STACK_SIZE=10500
 -- CONFIG_ESP_MINIMAL_SHARED_STACK_SIZE=2048
 -- CONFIG_ESP_NETIF_BRIDGE_EN=
 -- CONFIG_ESP_NETIF_IP_LOST_TIMER_INTERVAL=120
 -- CONFIG_ESP_NETIF_L2_TAP=
 -- CONFIG_ESP_NETIF_LOOPBACK=
--- CONFIG_ESP_NETIF_PROVIDE_CUSTOM_IMPLEMENTATION=
 -- CONFIG_ESP_NETIF_RECEIVE_REPORT_ERRORS=
--- CONFIG_ESP_NETIF_REPORT_DATA_TRAFFIC=y
 -- CONFIG_ESP_NETIF_SET_DNS_PER_DEFAULT_NETIF=
 -- CONFIG_ESP_NETIF_TCPIP_LWIP=y
 -- CONFIG_ESP_NETIF_USES_TCPIP_WITH_BSD_API=y
@@ -1692,7 +1690,6 @@ Ld[^
 -- CONFIG_ESP_PHY_MAX_TX_POWER=20
 -- CONFIG_ESP_PHY_MAX_WIFI_TX_POWER=20
 -- CONFIG_ESP_PHY_PLL_TRACK_DEBUG=
--- CONFIG_ESP_PHY_RECORD_USED_TIME=
 -- CONFIG_ESP_PHY_REDUCE_TX_POWER=
 -- CONFIG_ESP_PHY_RF_CAL_FULL=
 -- CONFIG_ESP_PHY_RF_CAL_NONE=
@@ -1706,7 +1703,6 @@ Ld[^
 -- CONFIG_ESP_ROM_HAS_NEWLIB=y
 -- CONFIG_ESP_ROM_HAS_NEWLIB_32BIT_TIME=y
 -- CONFIG_ESP_ROM_HAS_NEWLIB_NANO_FORMAT=y
--- CONFIG_ESP_ROM_HAS_OUTPUT_PUTC_FUNC=y
 -- CONFIG_ESP_ROM_HAS_SW_FLOAT=y
 -- CONFIG_ESP_ROM_HAS_UART_BUF_SWITCH=y
 -- CONFIG_ESP_ROM_NEEDS_SWSETUP_WORKAROUND=y
@@ -1755,6 +1751,15 @@ Ld[^
 -- CONFIG_ESP_TIMER_TASK_STACK_SIZE=3584
 -- CONFIG_ESP_TIME_FUNCS_USE_ESP_TIMER=y
 -- CONFIG_ESP_TIME_FUNCS_USE_RTC_TIMER=y
+-- CONFIG_ESP_TLS_CLIENT_SESSION_TICKETS=
+-- CONFIG_ESP_TLS_INSECURE=
+-- CONFIG_ESP_TLS_PSK_VERIFICATION=
+-- CONFIG_ESP_TLS_SERVER_CERT_SELECT_HOOK=
+-- CONFIG_ESP_TLS_SERVER_MIN_AUTH_MODE_OPTIONAL=
+-- CONFIG_ESP_TLS_SERVER_SESSION_TICKETS=
+-- CONFIG_ESP_TLS_USE_SECURE_ELEMENT=
+-- CONFIG_ESP_TLS_USING_MBEDTLS=y
+-- CONFIG_ESP_TLS_USING_WOLFSSL=
 -- CONFIG_ESP_WIFI_11KV_SUPPORT=
 -- CONFIG_ESP_WIFI_11R_SUPPORT=
 -- CONFIG_ESP_WIFI_AMPDU_RX_ENABLED=y
@@ -1809,6 +1814,15 @@ Ld[^
 -- CONFIG_ESP_WIFI_WPS_PASSPHRASE=
 -- CONFIG_ESP_WIFI_WPS_SOFTAP_REGISTRAR=
 -- CONFIG_ESP_WIFI_WPS_STRICT=
+-- CONFIG_ESP_WOLFSSL_BENCHMARK=
+-- CONFIG_ESP_WOLFSSL_NO_ESP32_CRYPT=
+-- CONFIG_ESP_WOLFSSL_NO_USE_FAST_MATH=
+-- CONFIG_ESP_WOLFSSL_NO_WOLFSSL_ESP32_CRYPT_AES=
+-- CONFIG_ESP_WOLFSSL_NO_WOLFSSL_ESP32_CRYPT_HASH=
+-- CONFIG_ESP_WOLFSSL_NO_WOLFSSL_ESP32_CRYPT_RSA_PRI=
+-- CONFIG_ESP_WOLFSSL_NO_WOLFSSL_ESP32_CRYPT_RSA_PRI_EXPTMOD=
+-- CONFIG_ESP_WOLFSSL_NO_WOLFSSL_ESP32_CRYPT_RSA_PRI_MP_MUL=
+-- CONFIG_ESP_WOLFSSL_NO_WOLFSSL_ESP32_CRYPT_RSA_PRI_MULMOD=
 -- CONFIG_EVENT_LOOP_PROFILING=
 -- CONFIG_FLASHMODE_DIO=y
 -- CONFIG_FLASHMODE_DOUT=
@@ -1861,7 +1875,6 @@ Ld[^
 -- CONFIG_FREERTOS_USE_IDLE_HOOK=
 -- CONFIG_FREERTOS_USE_LIST_DATA_INTEGRITY_CHECK_BYTES=
 -- CONFIG_FREERTOS_USE_TICK_HOOK=
--- CONFIG_FREERTOS_USE_TIMERS=y
 -- CONFIG_FREERTOS_USE_TRACE_FACILITY=
 -- CONFIG_FREERTOS_WATCHPOINT_END_OF_STACK=
 -- CONFIG_GARP_TMR_INTERVAL=60
@@ -1894,8 +1907,14 @@ Ld[^
 -- CONFIG_HOMEKIT_DEBUG=y
 -- CONFIG_HOMEKIT_MAX_CLIENTS=16
 -- CONFIG_HOMEKIT_SMALL=y
+-- CONFIG_HTTPD_ERR_RESP_NO_DELAY=y
+-- CONFIG_HTTPD_LOG_PURGE_DATA=
+-- CONFIG_HTTPD_MAX_REQ_HDR_LEN=512
+-- CONFIG_HTTPD_MAX_URI_LEN=512
+-- CONFIG_HTTPD_PURGE_BUF_LEN=32
+-- CONFIG_HTTPD_QUEUE_WORK_BLOCKING=
+-- CONFIG_HTTPD_WS_SUPPORT=
 -- CONFIG_I2C_ENABLE_DEBUG_LOG=
--- CONFIG_I2C_ENABLE_SLAVE_DRIVER_VERSION_2=
 -- CONFIG_I2C_ISR_IRAM_SAFE=
 -- CONFIG_I2S_ENABLE_DEBUG_LOG=
 -- CONFIG_I2S_ISR_IRAM_SAFE=
@@ -1903,13 +1922,12 @@ Ld[^
 -- CONFIG_IDF_CMAKE=y
 -- CONFIG_IDF_EXPERIMENTAL_FEATURES=
 -- CONFIG_IDF_FIRMWARE_CHIP_ID=0x0
--- CONFIG_IDF_INIT_VERSION=5.5.0
+-- CONFIG_IDF_INIT_VERSION=5.3.2
 -- CONFIG_IDF_TARGET=esp32
 -- CONFIG_IDF_TARGET_ARCH=xtensa
 -- CONFIG_IDF_TARGET_ARCH_XTENSA=y
 -- CONFIG_IDF_TARGET_ESP32=y
 -- CONFIG_IDF_TOOLCHAIN=gcc
--- CONFIG_IDF_TOOLCHAIN_GCC=y
 -- CONFIG_INT_WDT=y
 -- CONFIG_INT_WDT_CHECK_CPU1=y
 -- CONFIG_INT_WDT_TIMEOUT_MS=300
@@ -1923,7 +1941,7 @@ Ld[^
 -- CONFIG_LOG_BOOTLOADER_LEVEL_NONE=
 -- CONFIG_LOG_BOOTLOADER_LEVEL_VERBOSE=
 -- CONFIG_LOG_BOOTLOADER_LEVEL_WARN=
--- CONFIG_LOG_COLORS=
+-- CONFIG_LOG_COLORS=y
 -- CONFIG_LOG_DEFAULT_LEVEL=1
 -- CONFIG_LOG_DEFAULT_LEVEL_DEBUG=
 -- CONFIG_LOG_DEFAULT_LEVEL_ERROR=y
@@ -1931,7 +1949,6 @@ Ld[^
 -- CONFIG_LOG_DEFAULT_LEVEL_NONE=
 -- CONFIG_LOG_DEFAULT_LEVEL_VERBOSE=
 -- CONFIG_LOG_DEFAULT_LEVEL_WARN=
--- CONFIG_LOG_DYNAMIC_LEVEL_CONTROL=y
 -- CONFIG_LOG_MASTER_LEVEL=
 -- CONFIG_LOG_MAXIMUM_EQUALS_DEFAULT=y
 -- CONFIG_LOG_MAXIMUM_LEVEL=1
@@ -1939,12 +1956,6 @@ Ld[^
 -- CONFIG_LOG_MAXIMUM_LEVEL_INFO=
 -- CONFIG_LOG_MAXIMUM_LEVEL_VERBOSE=
 -- CONFIG_LOG_MAXIMUM_LEVEL_WARN=
--- CONFIG_LOG_TAG_LEVEL_CACHE_ARRAY=
--- CONFIG_LOG_TAG_LEVEL_CACHE_BINARY_MIN_HEAP=y
--- CONFIG_LOG_TAG_LEVEL_IMPL_CACHE_AND_LINKED_LIST=y
--- CONFIG_LOG_TAG_LEVEL_IMPL_CACHE_SIZE=31
--- CONFIG_LOG_TAG_LEVEL_IMPL_LINKED_LIST=
--- CONFIG_LOG_TAG_LEVEL_IMPL_NONE=
 -- CONFIG_LOG_TIMESTAMP_SOURCE_RTOS=y
 -- CONFIG_LOG_TIMESTAMP_SOURCE_SYSTEM=
 -- CONFIG_LWIP_AUTOIP=
@@ -1956,16 +1967,13 @@ Ld[^
 -- CONFIG_LWIP_CHECK_THREAD_SAFETY=
 -- CONFIG_LWIP_DEBUG=
 -- CONFIG_LWIP_DHCPS=y
--- CONFIG_LWIP_DHCPS_ADD_DNS=y
 -- CONFIG_LWIP_DHCPS_LEASE_UNIT=60
 -- CONFIG_LWIP_DHCPS_MAX_STATION_NUM=8
 -- CONFIG_LWIP_DHCPS_STATIC_ENTRIES=y
 -- CONFIG_LWIP_DHCP_COARSE_TIMER_SECS=1
 -- CONFIG_LWIP_DHCP_DISABLE_CLIENT_ID=
 -- CONFIG_LWIP_DHCP_DISABLE_VENDOR_CLASS_ID=y
--- CONFIG_LWIP_DHCP_DOES_ACD_CHECK=
 -- CONFIG_LWIP_DHCP_DOES_ARP_CHECK=y
--- CONFIG_LWIP_DHCP_DOES_NOT_CHECK_OFFERED_IP=
 -- CONFIG_LWIP_DHCP_GET_NTP_SRV=
 -- CONFIG_LWIP_DHCP_OPTIONS_LEN=68
 -- CONFIG_LWIP_DHCP_RESTORE_LAST_IP=
@@ -2077,7 +2085,7 @@ Ld[^
 -- CONFIG_LWIP_TIMERS_ONDEMAND=y
 -- CONFIG_LWIP_UDP_RECVMBOX_SIZE=6
 -- CONFIG_LWIP_USE_ONLY_LWIP_SELECT=
--- CONFIG_MAIN_TASK_STACK_SIZE=3584
+-- CONFIG_MAIN_TASK_STACK_SIZE=10500
 -- CONFIG_MBEDTLS_AES_C=y
 -- CONFIG_MBEDTLS_ASYMMETRIC_CONTENT_LEN=y
 -- CONFIG_MBEDTLS_ATCA_HW_ECDSA_SIGN=
@@ -2143,8 +2151,6 @@ Ld[^
 -- CONFIG_MBEDTLS_PEM_PARSE_C=y
 -- CONFIG_MBEDTLS_PEM_WRITE_C=y
 -- CONFIG_MBEDTLS_PKCS7_C=y
--- CONFIG_MBEDTLS_PK_PARSE_EC_COMPRESSED=y
--- CONFIG_MBEDTLS_PK_PARSE_EC_EXTENDED=y
 -- CONFIG_MBEDTLS_PLATFORM_TIME_ALT=
 -- CONFIG_MBEDTLS_POLY1305_C=
 -- CONFIG_MBEDTLS_PSK_MODES=
@@ -2233,7 +2239,6 @@ Ld[^
 -- CONFIG_PARTITION_TABLE_SINGLE_APP=
 -- CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE=
 -- CONFIG_PARTITION_TABLE_TWO_OTA=
--- CONFIG_PARTITION_TABLE_TWO_OTA_LARGE=
 -- CONFIG_PCNT_CTRL_FUNC_IN_IRAM=
 -- CONFIG_PCNT_ENABLE_DEBUG_LOG=
 -- CONFIG_PCNT_ISR_IRAM_SAFE=
@@ -2305,7 +2310,6 @@ Ld[^
 -- CONFIG_SOC_CAPS_ECO_VER_MAX=301
 -- CONFIG_SOC_CCOMP_TIMER_SUPPORTED=y
 -- CONFIG_SOC_CLK_APLL_SUPPORTED=y
--- CONFIG_SOC_CLK_LP_FAST_SUPPORT_XTAL_D4=y
 -- CONFIG_SOC_CLK_RC_FAST_D256_SUPPORTED=y
 -- CONFIG_SOC_CLK_RC_FAST_SUPPORT_CALIBRATION=y
 -- CONFIG_SOC_CLK_TREE_SUPPORTED=y
@@ -2378,7 +2382,6 @@ Ld[^
 -- CONFIG_SOC_LEDC_SUPPORT_HS_MODE=y
 -- CONFIG_SOC_LEDC_SUPPORT_REF_TICK=y
 -- CONFIG_SOC_LEDC_TIMER_BIT_WIDTH=20
--- CONFIG_SOC_LEDC_TIMER_NUM=4
 -- CONFIG_SOC_LIGHT_SLEEP_SUPPORTED=y
 -- CONFIG_SOC_LP_PERIPH_SHARE_INTERRUPT=y
 -- CONFIG_SOC_MCPWM_CAPTURE_CHANNELS_PER_TIMER=3
@@ -2412,7 +2415,6 @@ Ld[^
 -- CONFIG_SOC_PHY_COMBO_MODULE=y
 -- CONFIG_SOC_PHY_DIG_REGS_MEM_SIZE=21
 -- CONFIG_SOC_PHY_SUPPORTED=y
--- CONFIG_SOC_PM_MODEM_PD_BY_SW=y
 -- CONFIG_SOC_PM_SUPPORTED=y
 -- CONFIG_SOC_PM_SUPPORT_EXT0_WAKEUP=y
 -- CONFIG_SOC_PM_SUPPORT_EXT1_WAKEUP=y
@@ -2581,7 +2583,6 @@ Ld[^
 -- CONFIG_TIMER_TASK_STACK_DEPTH=2048
 -- CONFIG_TIMER_TASK_STACK_SIZE=3584
 -- CONFIG_TLS_STACK_WOLFSSL=y
--- CONFIG_TOUCH_SUPPRESS_DEPRECATE_WARN=
 -- CONFIG_TRACEMEM_RESERVE_DRAM=0x0
 -- CONFIG_TWAI_ERRATA_FIX_BUS_OFF_REC=y
 -- CONFIG_TWAI_ERRATA_FIX_LISTEN_ONLY_DOM=y
@@ -2592,7 +2593,6 @@ Ld[^
 -- CONFIG_TWO_UNIVERSAL_MAC_ADDRESS=
 -- CONFIG_UART_ISR_IN_IRAM=
 -- CONFIG_UDP_RECVMBOX_SIZE=6
--- CONFIG_VFS_INITIALIZE_DEV_NULL=y
 -- CONFIG_VFS_MAX_COUNT=8
 -- CONFIG_VFS_SELECT_IN_RAM=
 -- CONFIG_VFS_SEMIHOSTFS_MAX_MOUNT_POINTS=1
@@ -2617,7 +2617,6 @@ Ld[^
 -- CONFIG_WPA_WPS_STRICT=
 -- CONFIG_XTAL_FREQ=40
 -- CONFIG_XTAL_FREQ_26=
--- CONFIG_XTAL_FREQ_32=
 -- CONFIG_XTAL_FREQ_40=y
 -- CONFIG_XTAL_FREQ_AUTO=
 -- CXX_COMPILE_OPTIONS=-std=gnu++2b
@@ -2626,28 +2625,29 @@ Ld[^
 -- DISABLE_PACKAGE_CONFIG_AND_INSTALL=ON
 -- ENABLE_PROGRAMS=
 -- ENABLE_TESTING=
--- ESPEFUSEPY=/opt/esp/python_env/idf5.5_py3.12_env/bin/python;/opt/esp/idf/components/esptool_py/esptool/espefuse.py
+-- ESPEFUSEPY=/opt/esp/python_env/idf5.3_py3.10_env/bin/python;/opt/esp/idf/components/esptool_py/esptool/espefuse.py
 -- ESPFLASHFREQ=40m
 -- ESPFLASHMODE=dio
 -- ESPFLASHSIZE=2MB
--- ESPMONITOR=/opt/esp/python_env/idf5.5_py3.12_env/bin/python;-m;esp_idf_monitor
--- ESPSECUREPY=/opt/esp/python_env/idf5.5_py3.12_env/bin/python;/opt/esp/idf/components/esptool_py/esptool/espsecure.py
--- ESPTOOLPY=/opt/esp/python_env/idf5.5_py3.12_env/bin/python;;/opt/esp/idf/components/esptool_py/esptool/esptool.py;--chip;esp32
+-- ESPMONITOR=/opt/esp/python_env/idf5.3_py3.10_env/bin/python;-m;esp_idf_monitor
+-- ESPSECUREPY=/opt/esp/python_env/idf5.3_py3.10_env/bin/python;/opt/esp/idf/components/esptool_py/esptool/espsecure.py
+-- ESPTOOLPY=/opt/esp/python_env/idf5.3_py3.10_env/bin/python;;/opt/esp/idf/components/esptool_py/esptool/esptool.py;--chip;esp32
 -- ESPTOOLPY_CHIP=esp32
 -- ESP_PLATFORM=1
 -- ESP_PLATFORM=1
 -- EXCLUDE_ASM=/project/examples/lcm
 -- EXTRA_CMAKE_ARGS=
--- EXTRA_COMPONENT_DIRS=/project/components/wolfssl/src/\;/project/components/wolfssl/wolfcrypt/src\;/project/components/wolfssl/wolfcrypt/src/port/Espressif\;/project/components/wolfssl/wolfcrypt/src/port/atmel\;/project/components/wolfssl/src/
--- FIND_PACKAGE_MESSAGE_DETAILS_Git=[/usr/bin/git][v2.43.0()]
--- FIND_PACKAGE_MESSAGE_DETAILS_Python3=[/opt/esp/python_env/idf5.5_py3.12_env/bin/python][cfound components: Interpreter ][v3.12.3()]
+-- EXTRA_COMPONENT_DIRS=/project/examples/lcm/managed_components/wolfssl__wolfssl/src/\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/port/Espressif\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/port/Espressif/esp_crt_bundle\;/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/port/atmel\;/project/examples/lcm/managed_components/wolfssl__wolfssl/src/
+-- FIND_PACKAGE_MESSAGE_DETAILS_Git=[/usr/bin/git][v2.34.1()]
+-- FIND_PACKAGE_MESSAGE_DETAILS_Python3=[/opt/esp/python_env/idf5.3_py3.10_env/bin/python][cfound components: Interpreter ][v3.10.12()]
 -- FIND_PACKAGE_MESSAGE_DETAILS_Threads=[TRUE][v()]
+-- FOUND_WOLFSSL=/project/examples/lcm/managed_components/wolfssl__wolfssl
 -- GEN_FILES=
 -- GIT_EXECUTABLE=/usr/bin/git
 -- GIT_FOUND=TRUE
--- GIT_VERSION_STRING=2.43.0
+-- GIT_VERSION_STRING=2.34.1
 -- Git_FOUND=TRUE
--- IDFTOOL=/opt/esp/python_env/idf5.5_py3.12_env/bin/python;/opt/esp/idf/tools/idf.py
+-- IDFTOOL=/opt/esp/python_env/idf5.3_py3.10_env/bin/python;/opt/esp/idf/tools/idf.py
 -- IDF_COMPONENT_MANAGER=1
 -- IDF_PATH=/opt/esp/idf
 -- IDF_TARGET=esp32
@@ -2655,15 +2655,16 @@ Ld[^
 -- IDF_TARGET_ARCH=xtensa
 -- IDF_TOOLCHAIN=gcc
 -- IDF_TOOLCHAIN=gcc
--- IDF_VER=v5.4-dev-4375-gf420609c33
+-- IDF_VER=v5.3.2-174-g083aad99cf
 -- IDF_VERSION_MAJOR=5
--- IDF_VERSION_MINOR=5
--- IDF_VERSION_PATCH=0
+-- IDF_VERSION_MINOR=3
+-- IDF_VERSION_PATCH=2
 -- INCLUDE_CMAKE_TOOLCHAIN_FILE_IF_REQUIRED=include("/opt/esp/idf/tools/cmake/toolchain-esp32.cmake")
 -- INCLUDE_DIRECTORIES=/project/examples/lcm/build/config
--- INCLUDE_PATH=/project/components/wolfssl
+-- INCLUDE_PATH=/project/examples/lcm/managed_components/wolfssl__wolfssl
 -- INSTALL_MBEDTLS_HEADERS=ON
--- KCONFIGS=/opt/esp/idf/components/console/Kconfig;/opt/esp/idf/components/driver/Kconfig;/opt/esp/idf/components/efuse/Kconfig;/opt/esp/idf/components/esp_coex/Kconfig;/opt/esp/idf/components/esp_common/Kconfig;/opt/esp/idf/components/esp_driver_ana_cmpr/Kconfig;/opt/esp/idf/components/esp_driver_dac/Kconfig;/opt/esp/idf/components/esp_driver_gpio/Kconfig;/opt/esp/idf/components/esp_driver_gptimer/Kconfig;/opt/esp/idf/components/esp_driver_i2c/Kconfig;/opt/esp/idf/components/esp_driver_i2s/Kconfig;/opt/esp/idf/components/esp_driver_ledc/Kconfig;/opt/esp/idf/components/esp_driver_mcpwm/Kconfig;/opt/esp/idf/components/esp_driver_parlio/Kconfig;/opt/esp/idf/components/esp_driver_pcnt/Kconfig;/opt/esp/idf/components/esp_driver_rmt/Kconfig;/opt/esp/idf/components/esp_driver_sdm/Kconfig;/opt/esp/idf/components/esp_driver_spi/Kconfig;/opt/esp/idf/components/esp_driver_tsens/Kconfig;/opt/esp/idf/components/esp_driver_uart/Kconfig;/opt/esp/idf/components/esp_driver_usb_serial_jtag/Kconfig;/opt/esp/idf/components/esp_event/Kconfig;/opt/esp/idf/components/esp_hw_support/Kconfig;/opt/esp/idf/components/esp_mm/Kconfig;/opt/esp/idf/components/esp_netif/Kconfig;/opt/esp/idf/components/esp_partition/Kconfig;/opt/esp/idf/components/esp_phy/Kconfig;/opt/esp/idf/components/esp_pm/Kconfig;/opt/esp/idf/components/esp_ringbuf/Kconfig;/opt/esp/idf/components/esp_security/Kconfig;/opt/esp/idf/components/esp_system/Kconfig;/opt/esp/idf/components/esp_timer/Kconfig;/opt/esp/idf/components/esp_wifi/Kconfig;/opt/esp/idf/components/freertos/Kconfig;/opt/esp/idf/components/hal/Kconfig;/opt/esp/idf/components/heap/Kconfig;/opt/esp/idf/components/log/Kconfig;/opt/esp/idf/components/lwip/Kconfig;/opt/esp/idf/components/mbedtls/Kconfig;/opt/esp/idf/components/newlib/Kconfig;/opt/esp/idf/components/nvs_flash/Kconfig;/opt/esp/idf/components/pthread/Kconfig;/opt/esp/idf/components/soc/Kconfig;/opt/esp/idf/components/spi_flash/Kconfig;/opt/esp/idf/components/vfs/Kconfig;/project/components/homekit/Kconfig;/project/components/wolfssl/Kconfig;/project/examples/lcm/managed_components/espressif__mdns/Kconfig
+-- IS_WOLSSL_ESP_IDF_COMPONENT=0
+-- KCONFIGS=/opt/esp/idf/components/console/Kconfig;/opt/esp/idf/components/driver/Kconfig;/opt/esp/idf/components/efuse/Kconfig;/opt/esp/idf/components/esp-tls/Kconfig;/opt/esp/idf/components/esp_coex/Kconfig;/opt/esp/idf/components/esp_common/Kconfig;/opt/esp/idf/components/esp_driver_ana_cmpr/Kconfig;/opt/esp/idf/components/esp_driver_dac/Kconfig;/opt/esp/idf/components/esp_driver_gpio/Kconfig;/opt/esp/idf/components/esp_driver_gptimer/Kconfig;/opt/esp/idf/components/esp_driver_i2c/Kconfig;/opt/esp/idf/components/esp_driver_i2s/Kconfig;/opt/esp/idf/components/esp_driver_ledc/Kconfig;/opt/esp/idf/components/esp_driver_mcpwm/Kconfig;/opt/esp/idf/components/esp_driver_parlio/Kconfig;/opt/esp/idf/components/esp_driver_pcnt/Kconfig;/opt/esp/idf/components/esp_driver_rmt/Kconfig;/opt/esp/idf/components/esp_driver_sdm/Kconfig;/opt/esp/idf/components/esp_driver_spi/Kconfig;/opt/esp/idf/components/esp_driver_tsens/Kconfig;/opt/esp/idf/components/esp_driver_uart/Kconfig;/opt/esp/idf/components/esp_driver_usb_serial_jtag/Kconfig;/opt/esp/idf/components/esp_event/Kconfig;/opt/esp/idf/components/esp_http_server/Kconfig;/opt/esp/idf/components/esp_hw_support/Kconfig;/opt/esp/idf/components/esp_netif/Kconfig;/opt/esp/idf/components/esp_partition/Kconfig;/opt/esp/idf/components/esp_phy/Kconfig;/opt/esp/idf/components/esp_pm/Kconfig;/opt/esp/idf/components/esp_ringbuf/Kconfig;/opt/esp/idf/components/esp_system/Kconfig;/opt/esp/idf/components/esp_timer/Kconfig;/opt/esp/idf/components/esp_wifi/Kconfig;/opt/esp/idf/components/freertos/Kconfig;/opt/esp/idf/components/hal/Kconfig;/opt/esp/idf/components/heap/Kconfig;/opt/esp/idf/components/log/Kconfig;/opt/esp/idf/components/lwip/Kconfig;/opt/esp/idf/components/mbedtls/Kconfig;/opt/esp/idf/components/newlib/Kconfig;/opt/esp/idf/components/nvs_flash/Kconfig;/opt/esp/idf/components/pthread/Kconfig;/opt/esp/idf/components/soc/Kconfig;/opt/esp/idf/components/spi_flash/Kconfig;/opt/esp/idf/components/vfs/Kconfig;/project/components/homekit/Kconfig;/project/examples/lcm/managed_components/espressif__mdns/Kconfig;/project/examples/lcm/managed_components/wolfssl__wolfssl/Kconfig
 -- KCONFIG_PROJBUILDS=/opt/esp/idf/components/bootloader/Kconfig.projbuild;/opt/esp/idf/components/esp_app_format/Kconfig.projbuild;/opt/esp/idf/components/esp_rom/Kconfig.projbuild;/opt/esp/idf/components/esptool_py/Kconfig.projbuild;/opt/esp/idf/components/partition_table/Kconfig.projbuild;/project/examples/lcm/main/Kconfig.projbuild
 -- LINK_WITH_PTHREAD=OFF
 -- LINK_WITH_TRUSTED_STORAGE=OFF
@@ -2678,7 +2679,6 @@ Ld[^
 -- Mbed TLS_BINARY_DIR=/project/examples/lcm/build/esp-idf/mbedtls/mbedtls
 -- Mbed TLS_IS_TOP_LEVEL=OFF
 -- Mbed TLS_SOURCE_DIR=/opt/esp/idf/components/mbedtls/mbedtls
--- NON_OS_BUILD=
 -- PARTITION_CSV_PATH=/project/examples/lcm/partitions/partitions_esp32.csv
 -- PARTITION_TABLE_CHECK_SIZES_TOOL_PATH=/opt/esp/idf/components/partition_table/check_sizes.py
 -- PARTITION_TABLE_OFFSET=0x8000
@@ -2690,17 +2690,16 @@ Ld[^
 -- PROJECT_IS_TOP_LEVEL=ON
 -- PROJECT_NAME=esp-idf
 -- PROJECT_SOURCE_DIR=/opt/esp/idf
--- PROJECT_VER=f72f5e3-dirty
+-- PROJECT_VER=b49464b-dirty
 -- PROJECT_VERSION=
 -- PROJECT_VERSION_MAJOR=
 -- PROJECT_VERSION_MINOR=
 -- PROJECT_VERSION_PATCH=
 -- PROJECT_VERSION_TWEAK=
--- PROJECT_VER_GIT=f72f5e3-dirty
--- PYTHON=/opt/esp/python_env/idf5.5_py3.12_env/bin/python
--- PYTHON=/opt/esp/python_env/idf5.5_py3.12_env/bin/python
+-- PROJECT_VER_GIT=b49464b-dirty
+-- PYTHON=/opt/esp/python_env/idf5.3_py3.10_env/bin/python
+-- PYTHON=/opt/esp/python_env/idf5.3_py3.10_env/bin/python
 -- PYTHON_DEPS_CHECKED=1
--- RECOVERY_BOOTLOADER_OPTION=
 -- RTOS_IDF_PATH=/opt/esp/idf/components/freertos/FreeRTOS-Kernel/include/freertos
 -- RUN_CONFIGURE=ON
 -- SDKCONFIG=/project/examples/lcm/sdkconfig
@@ -2710,6 +2709,8 @@ Ld[^
 -- SDKCONFIG_JSON=/project/examples/lcm/build/config/sdkconfig.json
 -- SDKCONFIG_JSON_MENUS=/project/examples/lcm/build/config/kconfig_menus.json
 -- STR_WOLFSSL_PROJECT_DIR=//project//examples//lcm//components//wolfssl
+-- THIS_ESP_TLS=esp-tls
+-- THIS_IDF_PATH=/opt/esp/idf
 -- THIS_INCLUDE_DRIVER=driver
 -- THIS_INCLUDE_TIMER=esp_timer
 -- UNIQ_CMAKE_ASM_FLAGS=-mlongcalls 
@@ -2720,10 +2721,10 @@ Ld[^
 -- USE_SHARED_MBEDTLS_LIBRARY=OFF
 -- USE_STATIC_MBEDTLS_LIBRARY=ON
 -- VERBOSE_COMPONENT_MESSAGES=1
--- WOLFSSL_EXTRA_PROJECT_DIR=/project/components/wolfssl/src/
+-- WOLFSSL_EXTRA_PROJECT_DIR=/project/examples/lcm/managed_components/wolfssl__wolfssl/src/
 -- WOLFSSL_FOUND_IDF=0
 -- WOLFSSL_PROJECT_DIR=/project/examples/lcm/components/wolfssl
--- WOLFSSL_ROOT=/project/components/wolfssl
+-- WOLFSSL_ROOT=/project/examples/lcm/managed_components/wolfssl__wolfssl
 -- _ASM_COMPILER_WORKS=1
 -- _CMAKE_ASM_IPO_MAY_BE_SUPPORTED_BY_COMPILER=NO
 -- _CMAKE_ASM_IPO_SUPPORTED_BY_CMAKE=YES
@@ -2734,7 +2735,7 @@ Ld[^
 -- _CMAKE_C_IPO_MAY_BE_SUPPORTED_BY_COMPILER=YES
 -- _CMAKE_C_IPO_SUPPORTED_BY_CMAKE=YES
 -- _CMAKE_C_PIE_MAY_BE_SUPPORTED_BY_LINKER=YES
--- _CMAKE_TOOLCHAIN_LOCATION=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin
+-- _CMAKE_TOOLCHAIN_LOCATION=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin
 -- _CMAKE_TOOLCHAIN_PREFIX=xtensa-esp32-elf-
 -- _CMAKE_USER_ASM_COMPILER_PATH=
 -- _CMAKE_USER_CXX_COMPILER_PATH=
@@ -2746,47 +2747,47 @@ Ld[^
 -- _IN_TC=0
 -- _Python3_Compiler_REASON_FAILURE=
 -- _Python3_Development_REASON_FAILURE=
--- _Python3_EXECUTABLE=/opt/esp/python_env/idf5.5_py3.12_env/bin/python
--- _Python3_INTERPRETER_PROPERTIES=Python;3;12;3;32;64;;;abi3;/usr/lib/python3.12;/opt/esp/python_env/idf5.5_py3.12_env/lib/python3.12;/opt/esp/python_env/idf5.5_py3.12_env/lib/python3.12/site-packages;/opt/esp/python_env/idf5.5_py3.12_env/lib/python3.12/site-packages
--- _Python3_INTERPRETER_SIGNATURE=cb5c10c6b7184ee71bda2dd8f0f28e1e
+-- _Python3_EXECUTABLE=/opt/esp/python_env/idf5.3_py3.10_env/bin/python
+-- _Python3_INTERPRETER_PROPERTIES=Python;3;10;12;32;64;;;abi3;/usr/lib/python3.10;/opt/esp/python_env/idf5.3_py3.10_env/lib/python3.10;/opt/esp/python_env/idf5.3_py3.10_env/lib/python3.10/site-packages;/opt/esp/python_env/idf5.3_py3.10_env/lib/python3.10/site-packages
+-- _Python3_INTERPRETER_SIGNATURE=3f7a4a476d1c8d8e98155887f4d61785
 -- _Python3_NumPy_REASON_FAILURE=
 -- _SET_CMAKE_ASM_COMPILER_ARCHITECTURE_ID=
 -- _SET_CMAKE_ASM_COMPILER_ID_VENDOR_MATCH=
--- _SET_CMAKE_ASM_COMPILER_SYSROOT=set(CMAKE_ASM_COMPILER_SYSROOT "/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/../xtensa-esp-elf/usr")
-set(CMAKE_COMPILER_SYSROOT "/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/../xtensa-esp-elf/usr")
+-- _SET_CMAKE_ASM_COMPILER_SYSROOT=set(CMAKE_ASM_COMPILER_SYSROOT "/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/../xtensa-esp-elf/usr")
+set(CMAKE_COMPILER_SYSROOT "/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/../xtensa-esp-elf/usr")
 -- _SET_CMAKE_CXX_COMPILER_ARCHITECTURE_ID=
--- _SET_CMAKE_CXX_COMPILER_SYSROOT=set(CMAKE_CXX_COMPILER_SYSROOT "/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/../xtensa-esp-elf/usr")
-set(CMAKE_COMPILER_SYSROOT "/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/../xtensa-esp-elf/usr")
+-- _SET_CMAKE_CXX_COMPILER_SYSROOT=set(CMAKE_CXX_COMPILER_SYSROOT "/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/../xtensa-esp-elf/usr")
+set(CMAKE_COMPILER_SYSROOT "/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/../xtensa-esp-elf/usr")
 -- _SET_CMAKE_C_COMPILER_ARCHITECTURE_ID=
--- _SET_CMAKE_C_COMPILER_SYSROOT=set(CMAKE_C_COMPILER_SYSROOT "/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/../xtensa-esp-elf/usr")
-set(CMAKE_COMPILER_SYSROOT "/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/../xtensa-esp-elf/usr")
--- __BUILD_COMPONENTS=__idf_xtensa;__idf_esp_driver_gpio;__idf_esp_timer;__idf_esp_pm;__idf_mbedtls;__idf_bootloader;__idf_esptool_py;__idf_partition_table;__idf_esp_app_format;__idf_esp_bootloader_format;__idf_app_update;__idf_esp_partition;__idf_efuse;__idf_bootloader_support;__idf_esp_mm;__idf_spi_flash;__idf_esp_system;__idf_esp_common;__idf_esp_rom;__idf_hal;__idf_log;__idf_heap;__idf_soc;__idf_esp_security;__idf_esp_hw_support;__idf_newlib;__idf_pthread;__idf_cxx;__idf_freertos;__idf_esp_event;__idf_nvs_flash;__idf_esp_phy;__idf_esp_ringbuf;__idf_esp_driver_uart;__idf_esp_driver_usb_serial_jtag;__idf_esp_vfs_console;__idf_vfs;__idf_lwip;__idf_esp_netif_stack;__idf_esp_netif;__idf_wpa_supplicant;__idf_esp_coex;__idf_esp_wifi;__idf_esp_driver_pcnt;__idf_esp_driver_gptimer;__idf_esp_driver_spi;__idf_esp_driver_mcpwm;__idf_esp_driver_ana_cmpr;__idf_esp_driver_i2s;__idf_sdmmc;__idf_esp_driver_sdmmc;__idf_esp_driver_sdspi;__idf_esp_driver_sdio;__idf_esp_driver_dac;__idf_esp_driver_rmt;__idf_esp_driver_tsens;__idf_esp_driver_sdm;__idf_esp_driver_i2c;__idf_esp_driver_ledc;__idf_esp_driver_parlio;__idf_driver;__idf_wolfssl;__idf_json;__idf_http_parser;__idf_console;__idf_espressif__mdns;__idf_homekit;__idf_main
--- __BUILD_COMPONENT_TARGETS=___idf_xtensa;___idf_esp_driver_gpio;___idf_esp_timer;___idf_esp_pm;___idf_mbedtls;___idf_bootloader;___idf_esptool_py;___idf_partition_table;___idf_esp_app_format;___idf_esp_bootloader_format;___idf_app_update;___idf_esp_partition;___idf_efuse;___idf_bootloader_support;___idf_esp_mm;___idf_spi_flash;___idf_esp_system;___idf_esp_common;___idf_esp_rom;___idf_hal;___idf_log;___idf_heap;___idf_soc;___idf_esp_security;___idf_esp_hw_support;___idf_newlib;___idf_pthread;___idf_cxx;___idf_freertos;___idf_esp_event;___idf_nvs_flash;___idf_esp_phy;___idf_esp_ringbuf;___idf_esp_driver_uart;___idf_esp_driver_usb_serial_jtag;___idf_esp_vfs_console;___idf_vfs;___idf_lwip;___idf_esp_netif_stack;___idf_esp_netif;___idf_wpa_supplicant;___idf_esp_coex;___idf_esp_wifi;___idf_esp_driver_pcnt;___idf_esp_driver_gptimer;___idf_esp_driver_spi;___idf_esp_driver_mcpwm;___idf_esp_driver_ana_cmpr;___idf_esp_driver_i2s;___idf_sdmmc;___idf_esp_driver_sdmmc;___idf_esp_driver_sdspi;___idf_esp_driver_sdio;___idf_esp_driver_dac;___idf_esp_driver_rmt;___idf_esp_driver_tsens;___idf_esp_driver_sdm;___idf_esp_driver_i2c;___idf_esp_driver_ledc;___idf_esp_driver_parlio;___idf_driver;___idf_wolfssl;___idf_json;___idf_http_parser;___idf_console;___idf_espressif__mdns;___idf_homekit;___idf_main
+-- _SET_CMAKE_C_COMPILER_SYSROOT=set(CMAKE_C_COMPILER_SYSROOT "/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/../xtensa-esp-elf/usr")
+set(CMAKE_COMPILER_SYSROOT "/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/../xtensa-esp-elf/usr")
+-- __BUILD_COMPONENTS=__idf_xtensa;__idf_esp_driver_gpio;__idf_esp_timer;__idf_esp_pm;__idf_mbedtls;__idf_bootloader;__idf_esptool_py;__idf_partition_table;__idf_esp_app_format;__idf_esp_bootloader_format;__idf_app_update;__idf_esp_partition;__idf_efuse;__idf_bootloader_support;__idf_esp_mm;__idf_spi_flash;__idf_esp_system;__idf_esp_common;__idf_esp_rom;__idf_hal;__idf_log;__idf_heap;__idf_soc;__idf_esp_hw_support;__idf_newlib;__idf_pthread;__idf_cxx;__idf_freertos;__idf_esp_event;__idf_nvs_flash;__idf_esp_ringbuf;__idf_esp_driver_pcnt;__idf_esp_driver_gptimer;__idf_esp_driver_spi;__idf_esp_driver_mcpwm;__idf_esp_driver_ana_cmpr;__idf_esp_driver_i2s;__idf_sdmmc;__idf_esp_driver_sdmmc;__idf_esp_driver_sdspi;__idf_esp_driver_sdio;__idf_esp_driver_dac;__idf_esp_driver_rmt;__idf_esp_driver_tsens;__idf_esp_driver_sdm;__idf_esp_driver_i2c;__idf_esp_driver_uart;__idf_esp_driver_ledc;__idf_esp_driver_parlio;__idf_esp_driver_usb_serial_jtag;__idf_driver;__idf_esp_phy;__idf_esp_vfs_console;__idf_vfs;__idf_lwip;__idf_esp_netif_stack;__idf_esp_netif;__idf_wpa_supplicant;__idf_esp_coex;__idf_esp_wifi;__idf_http_parser;__idf_esp-tls;__idf_wolfssl__wolfssl;__idf_json;__idf_console;__idf_espressif__mdns;__idf_homekit;__idf_esp_http_server;__idf_main
+-- __BUILD_COMPONENT_TARGETS=___idf_xtensa;___idf_esp_driver_gpio;___idf_esp_timer;___idf_esp_pm;___idf_mbedtls;___idf_bootloader;___idf_esptool_py;___idf_partition_table;___idf_esp_app_format;___idf_esp_bootloader_format;___idf_app_update;___idf_esp_partition;___idf_efuse;___idf_bootloader_support;___idf_esp_mm;___idf_spi_flash;___idf_esp_system;___idf_esp_common;___idf_esp_rom;___idf_hal;___idf_log;___idf_heap;___idf_soc;___idf_esp_hw_support;___idf_newlib;___idf_pthread;___idf_cxx;___idf_freertos;___idf_esp_event;___idf_nvs_flash;___idf_esp_ringbuf;___idf_esp_driver_pcnt;___idf_esp_driver_gptimer;___idf_esp_driver_spi;___idf_esp_driver_mcpwm;___idf_esp_driver_ana_cmpr;___idf_esp_driver_i2s;___idf_sdmmc;___idf_esp_driver_sdmmc;___idf_esp_driver_sdspi;___idf_esp_driver_sdio;___idf_esp_driver_dac;___idf_esp_driver_rmt;___idf_esp_driver_tsens;___idf_esp_driver_sdm;___idf_esp_driver_i2c;___idf_esp_driver_uart;___idf_esp_driver_ledc;___idf_esp_driver_parlio;___idf_esp_driver_usb_serial_jtag;___idf_driver;___idf_esp_phy;___idf_esp_vfs_console;___idf_vfs;___idf_lwip;___idf_esp_netif_stack;___idf_esp_netif;___idf_wpa_supplicant;___idf_esp_coex;___idf_esp_wifi;___idf_http_parser;___idf_esp-tls;___idf_wolfssl__wolfssl;___idf_json;___idf_console;___idf_espressif__mdns;___idf_homekit;___idf_esp_http_server;___idf_main
 -- __BUILD_DIR=/project/examples/lcm/build
--- __BUILD_PROPERTIES=PYTHON;__BUILD_PROPERTIES;IDF_PATH;__PREFIX;__CHECK_PYTHON;IDF_COMPONENT_MANAGER;COMPILE_DEFINITIONS;COMPILE_OPTIONS;C_COMPILE_OPTIONS;CXX_COMPILE_OPTIONS;__COMPONENT_TARGETS;BUILD_COMPONENT_DIRS;BUILD_COMPONENT_TARGETS;__COMPONENT_REQUIRES_COMMON;IDF_VER;__ROOT_KCONFIG;__ROOT_SDKCONFIG_RENAME;__OUTPUT_SDKCONFIG;EXTRA_CMAKE_ARGS;__COMPONENT_MANAGER_INTERFACE_VERSION;BOOTLOADER_BUILD;NON_OS_BUILD;IDF_TOOLCHAIN;IDF_TARGET;IDF_TARGET_ARCH;PROJECT_DIR;PROJECT_NAME;PROJECT_VER;BUILD_DIR;SDKCONFIG;SDKCONFIG_DEFAULTS;__COMPONENT_NAMES_RESOLVED;__COMPONENT_TARGETS_RESOLVED;__BUILD_COMPONENT_TARGETS;__BUILD_COMPONENTS;BUILD_COMPONENT_ALIASES;BUILD_COMPONENTS;___COMPONENT_REQUIRES_COMMON;KCONFIGS;KCONFIG_PROJBUILDS;CONFIG_ENV_PATH;INCLUDE_DIRECTORIES;SDKCONFIG_HEADER;SDKCONFIG_JSON;SDKCONFIG_CMAKE;SDKCONFIG_JSON_MENUS;CONFIG_DIR;__CONFIG_VARIABLES
+-- __BUILD_PROPERTIES=PYTHON;__BUILD_PROPERTIES;IDF_PATH;__PREFIX;__CHECK_PYTHON;IDF_COMPONENT_MANAGER;COMPILE_DEFINITIONS;COMPILE_OPTIONS;C_COMPILE_OPTIONS;CXX_COMPILE_OPTIONS;__COMPONENT_TARGETS;BUILD_COMPONENT_DIRS;BUILD_COMPONENT_TARGETS;__COMPONENT_REQUIRES_COMMON;IDF_VER;__ROOT_KCONFIG;__ROOT_SDKCONFIG_RENAME;__OUTPUT_SDKCONFIG;EXTRA_CMAKE_ARGS;__COMPONENT_MANAGER_INTERFACE_VERSION;BOOTLOADER_BUILD;IDF_TOOLCHAIN;IDF_TARGET;IDF_TARGET_ARCH;PROJECT_DIR;PROJECT_NAME;PROJECT_VER;BUILD_DIR;SDKCONFIG;SDKCONFIG_DEFAULTS;__COMPONENT_NAMES_RESOLVED;__COMPONENT_TARGETS_RESOLVED;__BUILD_COMPONENT_TARGETS;__BUILD_COMPONENTS;BUILD_COMPONENT_ALIASES;BUILD_COMPONENTS;___COMPONENT_REQUIRES_COMMON;KCONFIGS;KCONFIG_PROJBUILDS;CONFIG_ENV_PATH;INCLUDE_DIRECTORIES;SDKCONFIG_HEADER;SDKCONFIG_JSON;SDKCONFIG_CMAKE;SDKCONFIG_JSON_MENUS;CONFIG_DIR;__CONFIG_VARIABLES
 -- __CHECK_PYTHON=0
 -- __COMPILER_CMAKE_COMMON_COMPILER_MACROS=1
 -- __COMPILER_GNU=1
--- __COMPONENTS=main;espressif__mdns
--- __COMPONENT_MANAGER_INTERFACE_VERSION=3
--- __COMPONENT_NAMES_RESOLVED=wolfssl;espressif__mdns;main;freertos;cxx;newlib;esp_hw_support;soc;heap;log;hal;esp_rom;esp_common;esp_system;xtensa;spi_flash;bootloader_support;mbedtls;esp_pm;esp_driver_gpio;esp_timer;efuse;esp_partition;partition_table;esptool_py;bootloader;app_update;esp_app_format;esp_bootloader_format;esp_mm;esp_security;pthread;esp_wifi;esp_event;esp_phy;nvs_flash;esp_netif;esp_netif_stack;lwip;vfs;esp_driver_uart;esp_ringbuf;esp_driver_usb_serial_jtag;esp_vfs_console;wpa_supplicant;esp_coex;driver;esp_driver_pcnt;esp_driver_gptimer;esp_driver_spi;esp_driver_mcpwm;esp_driver_ana_cmpr;esp_driver_i2s;esp_driver_sdmmc;sdmmc;esp_driver_sdspi;esp_driver_sdio;esp_driver_dac;esp_driver_rmt;esp_driver_tsens;esp_driver_sdm;esp_driver_i2c;esp_driver_ledc;esp_driver_parlio;homekit;json;http_parser;console
+-- __COMPONENTS=main;espressif__mdns;wolfssl__wolfssl
+-- __COMPONENT_MANAGER_INTERFACE_VERSION=2
+-- __COMPONENT_NAMES_RESOLVED=espressif__mdns;wolfssl__wolfssl;main;freertos;cxx;newlib;esp_hw_support;soc;heap;log;hal;esp_rom;esp_common;esp_system;xtensa;spi_flash;bootloader_support;mbedtls;esp_pm;esp_driver_gpio;esp_timer;efuse;esp_partition;app_update;partition_table;esptool_py;bootloader;esp_app_format;esp_bootloader_format;esp_mm;pthread;esp_wifi;esp_event;esp_phy;nvs_flash;driver;esp_ringbuf;esp_driver_pcnt;esp_driver_gptimer;esp_driver_spi;esp_driver_mcpwm;esp_driver_ana_cmpr;esp_driver_i2s;esp_driver_sdmmc;sdmmc;esp_driver_sdspi;esp_driver_sdio;esp_driver_dac;esp_driver_rmt;esp_driver_tsens;esp_driver_sdm;esp_driver_i2c;esp_driver_uart;esp_driver_ledc;esp_driver_parlio;esp_driver_usb_serial_jtag;esp_netif;esp_netif_stack;lwip;vfs;esp_vfs_console;wpa_supplicant;esp_coex;homekit;esp-tls;http_parser;json;console;esp_http_server
 -- __COMPONENT_REQUIRES_COMMON=cxx;newlib;freertos;esp_hw_support;heap;log;soc;hal;esp_rom;esp_common;esp_system;xtensa
 -- __COMPONENT_TARGETS = ___idf_app_trace;___idf_app_update;___idf_bootloader;___idf_bootloader ... (truncated)
--- __COMPONENT_TARGETS_RESOLVED=___idf_wolfssl;___idf_espressif__mdns;___idf_main;___idf_freertos;___idf_cxx;___idf_newlib;___idf_esp_hw_support;___idf_soc;___idf_heap;___idf_log;___idf_hal;___idf_esp_rom;___idf_esp_common;___idf_esp_system;___idf_xtensa;___idf_spi_flash;___idf_bootloader_support;___idf_mbedtls;___idf_esp_pm;___idf_esp_driver_gpio;___idf_esp_timer;___idf_efuse;___idf_esp_partition;___idf_partition_table;___idf_esptool_py;___idf_bootloader;___idf_app_update;___idf_esp_app_format;___idf_esp_bootloader_format;___idf_esp_mm;___idf_esp_security;___idf_pthread;___idf_esp_wifi;___idf_esp_event;___idf_esp_phy;___idf_nvs_flash;___idf_esp_netif;___idf_esp_netif_stack;___idf_lwip;___idf_vfs;___idf_esp_driver_uart;___idf_esp_ringbuf;___idf_esp_driver_usb_serial_jtag;___idf_esp_vfs_console;___idf_wpa_supplicant;___idf_esp_coex;___idf_driver;___idf_esp_driver_pcnt;___idf_esp_driver_gptimer;___idf_esp_driver_spi;___idf_esp_driver_mcpwm;___idf_esp_driver_ana_cmpr;___idf_esp_driver_i2s;___idf_esp_driver_sdmmc;___idf_sdmmc;___idf_esp_driver_sdspi;___idf_esp_driver_sdio;___idf_esp_driver_dac;___idf_esp_driver_rmt;___idf_esp_driver_tsens;___idf_esp_driver_sdm;___idf_esp_driver_i2c;___idf_esp_driver_ledc;___idf_esp_driver_parlio;___idf_homekit;___idf_json;___idf_http_parser;___idf_console
+-- __COMPONENT_TARGETS_RESOLVED=___idf_espressif__mdns;___idf_wolfssl__wolfssl;___idf_main;___idf_freertos;___idf_cxx;___idf_newlib;___idf_esp_hw_support;___idf_soc;___idf_heap;___idf_log;___idf_hal;___idf_esp_rom;___idf_esp_common;___idf_esp_system;___idf_xtensa;___idf_spi_flash;___idf_bootloader_support;___idf_mbedtls;___idf_esp_pm;___idf_esp_driver_gpio;___idf_esp_timer;___idf_efuse;___idf_esp_partition;___idf_app_update;___idf_partition_table;___idf_esptool_py;___idf_bootloader;___idf_esp_app_format;___idf_esp_bootloader_format;___idf_esp_mm;___idf_pthread;___idf_esp_wifi;___idf_esp_event;___idf_esp_phy;___idf_nvs_flash;___idf_driver;___idf_esp_ringbuf;___idf_esp_driver_pcnt;___idf_esp_driver_gptimer;___idf_esp_driver_spi;___idf_esp_driver_mcpwm;___idf_esp_driver_ana_cmpr;___idf_esp_driver_i2s;___idf_esp_driver_sdmmc;___idf_sdmmc;___idf_esp_driver_sdspi;___idf_esp_driver_sdio;___idf_esp_driver_dac;___idf_esp_driver_rmt;___idf_esp_driver_tsens;___idf_esp_driver_sdm;___idf_esp_driver_i2c;___idf_esp_driver_uart;___idf_esp_driver_ledc;___idf_esp_driver_parlio;___idf_esp_driver_usb_serial_jtag;___idf_esp_netif;___idf_esp_netif_stack;___idf_lwip;___idf_vfs;___idf_esp_vfs_console;___idf_wpa_supplicant;___idf_esp_coex;___idf_homekit;___idf_esp-tls;___idf_http_parser;___idf_json;___idf_console;___idf_esp_http_server
 -- __CONFIG_VARIABLES = CONFIG_SOC_BROWNOUT_RESET_SUPPORTED;CONFIG_SOC_TWAI_BRP_DIV_SUPPORTED; ... (truncated)
 -- __OUTPUT_SDKCONFIG=1
 -- __PREFIX=idf
 -- __PROJECT_DIR=/project/examples/lcm
 -- __PROJECT_NAME=main
--- __PROJECT_VER=f72f5e3-dirty
+-- __PROJECT_VER=b49464b-dirty
 -- __ROOT_KCONFIG=/opt/esp/idf/Kconfig
 -- __ROOT_SDKCONFIG_RENAME=/opt/esp/idf/sdkconfig.rename
 -- __SDKCONFIG=/project/examples/lcm/sdkconfig
 -- __SDKCONFIG_DEFAULTS=/project/examples/lcm/sdkconfig.defaults
 -- ___COMPONENT_REQUIRES_COMMON=__idf_cxx;__idf_newlib;__idf_freertos;__idf_esp_hw_support;__idf_heap;__idf_log;__idf_soc;__idf_hal;__idf_esp_rom;__idf_esp_common;__idf_esp_system;__idf_xtensa
 -- __build_component_target=
--- __component_dir=/project/components/ws2811
--- __component_name=ws2811
+-- __component_dir=/project/components/homekit
+-- __component_name=homekit
 -- __contents=components:
   - name: "app_trace"
     path: "/opt/esp/idf/components/app_trace"
@@ -2908,8 +2909,6 @@ set(CMAKE_COMPILER_SYSROOT "/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xt
     path: "/opt/esp/idf/components/esp_ringbuf"
   - name: "esp_rom"
     path: "/opt/esp/idf/components/esp_rom"
-  - name: "esp_security"
-    path: "/opt/esp/idf/components/esp_security"
   - name: "esp_system"
     path: "/opt/esp/idf/components/esp_system"
   - name: "esp_timer"
@@ -2968,8 +2967,6 @@ set(CMAKE_COMPILER_SYSROOT "/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xt
     path: "/opt/esp/idf/components/pthread"
   - name: "riscv"
     path: "/opt/esp/idf/components/riscv"
-  - name: "rt"
-    path: "/opt/esp/idf/components/rt"
   - name: "sdmmc"
     path: "/opt/esp/idf/components/sdmmc"
   - name: "soc"
@@ -3004,12 +3001,8 @@ set(CMAKE_COMPILER_SYSROOT "/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xt
     path: "/project/components/esp32-button"
   - name: "homekit"
     path: "/project/components/homekit"
-  - name: "wolfssl"
-    path: "/project/components/wolfssl"
-  - name: "ws2811"
-    path: "/project/components/ws2811"
 
--- __gcc_hints=/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin
+-- __gcc_hints=/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin
 -- __get_git_revision_description=YES
 -- __idf_component_context = 1 ... (truncated)
 -- __lto_flags=-flto=auto;-fno-fat-lto-objects
@@ -3021,16 +3014,15 @@ set(CMAKE_COMPILER_SYSROOT "/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xt
 -- __version_x_y=
 -- _gitdescmoddir=/opt/esp/idf/tools/cmake/third_party
 -- _idf_path=/opt/esp/idf
--- _name=wolfssl
+-- _name=wolfssl__wolfssl
 -- _sdkconfig_defaults=/project/examples/lcm/sdkconfig.defaults
--- alias=idf::wolfssl
+-- alias=idf::wolfssl__wolfssl
 -- arch=xtensa
 -- bootloader_binary_files = /project/examples/lcm/build/bootloader/bootloader.elf;/project/example ... (truncated)
--- bootloader_extra_component_dirs=/opt/esp/idf/components/bootloader
--- build_component_targets=___idf_xtensa;___idf_esp_driver_gpio;___idf_esp_timer;___idf_esp_pm;___idf_mbedtls;___idf_bootloader;___idf_esptool_py;___idf_partition_table;___idf_esp_app_format;___idf_esp_bootloader_format;___idf_app_update;___idf_esp_partition;___idf_efuse;___idf_bootloader_support;___idf_esp_mm;___idf_spi_flash;___idf_esp_system;___idf_esp_common;___idf_esp_rom;___idf_hal;___idf_log;___idf_heap;___idf_soc;___idf_esp_security;___idf_esp_hw_support;___idf_newlib;___idf_pthread;___idf_cxx;___idf_freertos;___idf_esp_event;___idf_nvs_flash;___idf_esp_phy;___idf_esp_ringbuf;___idf_esp_driver_uart;___idf_esp_driver_usb_serial_jtag;___idf_esp_vfs_console;___idf_vfs;___idf_lwip;___idf_esp_netif_stack;___idf_esp_netif;___idf_wpa_supplicant;___idf_esp_coex;___idf_esp_wifi;___idf_esp_driver_pcnt;___idf_esp_driver_gptimer;___idf_esp_driver_spi;___idf_esp_driver_mcpwm;___idf_esp_driver_ana_cmpr;___idf_esp_driver_i2s;___idf_sdmmc;___idf_esp_driver_sdmmc;___idf_esp_driver_sdspi;___idf_esp_driver_sdio;___idf_esp_driver_dac;___idf_esp_driver_rmt;___idf_esp_driver_tsens;___idf_esp_driver_sdm;___idf_esp_driver_i2c;___idf_esp_driver_ledc;___idf_esp_driver_parlio;___idf_driver;___idf_wolfssl;___idf_json;___idf_http_parser;___idf_console;___idf_espressif__mdns;___idf_homekit;___idf_main
+-- build_component_targets=___idf_xtensa;___idf_esp_driver_gpio;___idf_esp_timer;___idf_esp_pm;___idf_mbedtls;___idf_bootloader;___idf_esptool_py;___idf_partition_table;___idf_esp_app_format;___idf_esp_bootloader_format;___idf_app_update;___idf_esp_partition;___idf_efuse;___idf_bootloader_support;___idf_esp_mm;___idf_spi_flash;___idf_esp_system;___idf_esp_common;___idf_esp_rom;___idf_hal;___idf_log;___idf_heap;___idf_soc;___idf_esp_hw_support;___idf_newlib;___idf_pthread;___idf_cxx;___idf_freertos;___idf_esp_event;___idf_nvs_flash;___idf_esp_ringbuf;___idf_esp_driver_pcnt;___idf_esp_driver_gptimer;___idf_esp_driver_spi;___idf_esp_driver_mcpwm;___idf_esp_driver_ana_cmpr;___idf_esp_driver_i2s;___idf_sdmmc;___idf_esp_driver_sdmmc;___idf_esp_driver_sdspi;___idf_esp_driver_sdio;___idf_esp_driver_dac;___idf_esp_driver_rmt;___idf_esp_driver_tsens;___idf_esp_driver_sdm;___idf_esp_driver_i2c;___idf_esp_driver_uart;___idf_esp_driver_ledc;___idf_esp_driver_parlio;___idf_esp_driver_usb_serial_jtag;___idf_driver;___idf_esp_phy;___idf_esp_vfs_console;___idf_vfs;___idf_lwip;___idf_esp_netif_stack;___idf_esp_netif;___idf_wpa_supplicant;___idf_esp_coex;___idf_esp_wifi;___idf_http_parser;___idf_esp-tls;___idf_wolfssl__wolfssl;___idf_json;___idf_console;___idf_espressif__mdns;___idf_homekit;___idf_esp_http_server;___idf_main
 -- build_dir=/project/examples/lcm/build
 -- build_prefix=idf
--- build_properties=PYTHON;__BUILD_PROPERTIES;IDF_PATH;__PREFIX;__CHECK_PYTHON;IDF_COMPONENT_MANAGER;COMPILE_DEFINITIONS;COMPILE_OPTIONS;C_COMPILE_OPTIONS;CXX_COMPILE_OPTIONS;__COMPONENT_TARGETS;BUILD_COMPONENT_DIRS;BUILD_COMPONENT_TARGETS;__COMPONENT_REQUIRES_COMMON;IDF_VER;__ROOT_KCONFIG;__ROOT_SDKCONFIG_RENAME;__OUTPUT_SDKCONFIG;EXTRA_CMAKE_ARGS;__COMPONENT_MANAGER_INTERFACE_VERSION;BOOTLOADER_BUILD;NON_OS_BUILD;IDF_TOOLCHAIN;IDF_TARGET;IDF_TARGET_ARCH;PROJECT_DIR;PROJECT_NAME;PROJECT_VER;BUILD_DIR;SDKCONFIG;SDKCONFIG_DEFAULTS;__COMPONENT_NAMES_RESOLVED;__COMPONENT_TARGETS_RESOLVED;__BUILD_COMPONENT_TARGETS;__BUILD_COMPONENTS;BUILD_COMPONENT_ALIASES;BUILD_COMPONENTS;___COMPONENT_REQUIRES_COMMON;KCONFIGS;KCONFIG_PROJBUILDS;CONFIG_ENV_PATH;INCLUDE_DIRECTORIES;SDKCONFIG_HEADER;SDKCONFIG_JSON;SDKCONFIG_CMAKE;SDKCONFIG_JSON_MENUS;CONFIG_DIR;__CONFIG_VARIABLES
+-- build_properties=PYTHON;__BUILD_PROPERTIES;IDF_PATH;__PREFIX;__CHECK_PYTHON;IDF_COMPONENT_MANAGER;COMPILE_DEFINITIONS;COMPILE_OPTIONS;C_COMPILE_OPTIONS;CXX_COMPILE_OPTIONS;__COMPONENT_TARGETS;BUILD_COMPONENT_DIRS;BUILD_COMPONENT_TARGETS;__COMPONENT_REQUIRES_COMMON;IDF_VER;__ROOT_KCONFIG;__ROOT_SDKCONFIG_RENAME;__OUTPUT_SDKCONFIG;EXTRA_CMAKE_ARGS;__COMPONENT_MANAGER_INTERFACE_VERSION;BOOTLOADER_BUILD;IDF_TOOLCHAIN;IDF_TARGET;IDF_TARGET_ARCH;PROJECT_DIR;PROJECT_NAME;PROJECT_VER;BUILD_DIR;SDKCONFIG;SDKCONFIG_DEFAULTS;__COMPONENT_NAMES_RESOLVED;__COMPONENT_TARGETS_RESOLVED;__BUILD_COMPONENT_TARGETS;__BUILD_COMPONENTS;BUILD_COMPONENT_ALIASES;BUILD_COMPONENTS;___COMPONENT_REQUIRES_COMMON;KCONFIGS;KCONFIG_PROJBUILDS;CONFIG_ENV_PATH;INCLUDE_DIRECTORIES;SDKCONFIG_HEADER;SDKCONFIG_JSON;SDKCONFIG_CMAKE;SDKCONFIG_JSON_MENUS;CONFIG_DIR;__CONFIG_VARIABLES
 -- build_property=
 -- c_compile_options=-Wno-old-style-declaration
 -- chip_model=esp32
@@ -3038,12 +3030,12 @@ set(CMAKE_COMPILER_SYSROOT "/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xt
 -- common_reqs=cxx;newlib;freertos;esp_hw_support;heap;log;soc;hal;esp_rom;esp_common;esp_system;xtensa
 -- compile_options=-Os;-freorder-blocks;-fmacro-prefix-map=/project/examples/lcm=.;-fmacro-prefix-map=/opt/esp/idf=/IDF;-fstrict-volatile-bitfields;-fno-jump-tables;-fno-tree-switch-conversion
 -- component=
--- component_manager_interface_version=3
--- component_target=___idf_wolfssl
--- component_targets = ___idf_main;___idf_espressif__mdns ... (truncated)
+-- component_manager_interface_version=2
+-- component_target=___idf_wolfssl__wolfssl
+-- component_targets = ___idf_main;___idf_espressif__mdns;___idf_wolfssl__wolfssl ... (truncated)
 -- components=main
--- cxx_compile_options=-fno-exceptions;-fno-rtti;-fuse-cxa-atexit
--- dir=/project/components/wolfssl
+-- cxx_compile_options=-fno-exceptions;-fno-rtti
+-- dir=/project/examples/lcm/managed_components/wolfssl__wolfssl
 -- dump_machine=xtensa-esp-elf
 -- elf=$<TARGET_PROPERTY:__idf_build_target,EXECUTABLE>
 -- elf_name=$<TARGET_PROPERTY:__idf_build_target,EXECUTABLE_NAME>
@@ -3080,25 +3072,24 @@ set(CMAKE_COMPILER_SYSROOT "/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xt
 -- main_HOMEPAGE_URL=
 -- main_IS_TOP_LEVEL=ON
 -- main_SOURCE_DIR=/project/examples/lcm
--- managed_components=espressif__mdns
+-- managed_components=espressif__mdns;wolfssl__wolfssl
 -- managed_components_list_file=/project/examples/lcm/build/managed_components_list.temp.cmake
--- mbedcrypto_LIB_DEPENDS=general;__idf_cxx;general;__idf_newlib;general;__idf_freertos;general;__idf_esp_hw_support;general;__idf_heap;general;__idf_log;general;__idf_soc;general;__idf_hal;general;__idf_esp_rom;general;__idf_esp_common;general;__idf_esp_system;general;__idf_xtensa;general;everest;general;p256m;general;idf::esp_security;
+-- mbedcrypto_LIB_DEPENDS=general;__idf_cxx;general;__idf_newlib;general;__idf_freertos;general;__idf_esp_hw_support;general;__idf_heap;general;__idf_log;general;__idf_soc;general;__idf_hal;general;__idf_esp_rom;general;__idf_esp_common;general;__idf_esp_system;general;__idf_xtensa;general;everest;general;p256m;
 -- mbedtls_LIB_DEPENDS=general;__idf_cxx;general;__idf_newlib;general;__idf_freertos;general;__idf_esp_hw_support;general;__idf_heap;general;__idf_log;general;__idf_soc;general;__idf_hal;general;__idf_esp_rom;general;__idf_esp_common;general;__idf_esp_system;general;__idf_xtensa;general;mbedx509;
 -- mbedx509_LIB_DEPENDS=general;__idf_cxx;general;__idf_newlib;general;__idf_freertos;general;__idf_esp_hw_support;general;__idf_heap;general;__idf_log;general;__idf_soc;general;__idf_hal;general;__idf_esp_rom;general;__idf_esp_common;general;__idf_esp_system;general;__idf_xtensa;general;mbedcrypto;
 -- min_rev=0
 -- multi_value=COMPONENTS;SDKCONFIG_DEFAULTS
 -- p256m_LIB_DEPENDS=general;__idf_cxx;general;__idf_newlib;general;__idf_freertos;general;__idf_esp_hw_support;general;__idf_heap;general;__idf_log;general;__idf_soc;general;__idf_hal;general;__idf_esp_rom;general;__idf_esp_common;general;__idf_esp_system;general;__idf_xtensa;
 -- prefix=idf
--- prefix_map_compile_options=-fmacro-prefix-map=/project/examples/lcm=.;-fmacro-prefix-map=/opt/esp/idf=/IDF
 -- project_dir=/project/examples/lcm
--- project_ver=f72f5e3-dirty
--- python=/opt/esp/python_env/idf5.5_py3.12_env/bin/python
+-- project_ver=b49464b-dirty
+-- python=/opt/esp/python_env/idf5.3_py3.10_env/bin/python
 -- result=0
 -- sdkconfig=/project/examples/lcm/sdkconfig
 -- sdkconfig_cmake=/project/examples/lcm/build/config/sdkconfig.cmake
 -- sdkconfig_default=
 -- sdkconfig_defaults=/project/examples/lcm/sdkconfig.defaults
--- sdkconfig_target=NOTFOUND
+-- sdkconfig_target=esp32
 -- single_value=PROJECT_DIR;PROJECT_VER;PROJECT_NAME;BUILD_DIR;SDKCONFIG
 -- target=esp32
 -- test_components=
@@ -3108,22 +3099,21 @@ set(CMAKE_COMPILER_SYSROOT "/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xt
 -- unsigned_project_binary=$<TARGET_PROPERTY:__idf_build_target,EXECUTABLE_NAME>.bin
 -- val = CONFIG_SOC_BROWNOUT_RESET_SUPPORTED;CONFIG_SOC_TWAI_BRP_DIV_SUPPORTED; ... (truncated)
 -- version_keyword_present=FALSE
--- where=NOTFOUND
+-- where=/project/examples/lcm/sdkconfig
 -- 
 -- ALL VARIABLES END
 -- 
--- Adding macro definitions:
--- Found LIBWOLFSSL_VERSION_GIT_ORIGIN=https://Achim%20Pieters@github.com/AchimPieters/esp32-homekit-demo.git
--- Found LIBWOLFSSL_VERSION_GIT_BRANCH=main
--- Found LIBWOLFSSL_VERSION_GIT_HASH=f72f5e34e5fe67a3b49b74aae68dcd056b45d5eb
--- Found LIBWOLFSSL_VERSION_GIT_SHORT_HASH=f72f5e3
--- Found LIBWOLFSSL_VERSION_GIT_HASH_DATE='Sat Oct 19 10:14:52 2024 +0200'
--- Found LIBWOLFSSL_VERSION_WOLFSSL_ROOT=/project/components/wolfssl
+-- DETECTED_PROJECT_NAME=main
+-- COMPONENT_TARGET=__idf_wolfssl__wolfssl
+-- Using wolfSSL in /project/examples/lcm/managed_components/wolfssl__wolfssl
+-- PIO_WOLFSSL_ROOT =  /project/examples/lcm/managed_components/wolfssl__wolfssl
+-- PLATFORMIO_BUILD_DIR = 
+-- WARNING: wolfSSL NOT selected for ESP-TLS. Features and performance will be limited.
 -- ************************************************************************************************
--- wolfssl component config complete!
+-- wolfSSL component config complete!
 -- ************************************************************************************************
--- Components: app_update bootloader bootloader_support console cxx driver efuse esp_app_format esp_bootloader_format esp_coex esp_common esp_driver_ana_cmpr esp_driver_dac esp_driver_gpio esp_driver_gptimer esp_driver_i2c esp_driver_i2s esp_driver_ledc esp_driver_mcpwm esp_driver_parlio esp_driver_pcnt esp_driver_rmt esp_driver_sdio esp_driver_sdm esp_driver_sdmmc esp_driver_sdspi esp_driver_spi esp_driver_tsens esp_driver_uart esp_driver_usb_serial_jtag esp_event esp_hw_support esp_mm esp_netif esp_netif_stack esp_partition esp_phy esp_pm esp_ringbuf esp_rom esp_security esp_system esp_timer esp_vfs_console esp_wifi espressif__mdns esptool_py freertos hal heap homekit http_parser json log lwip main mbedtls newlib nvs_flash partition_table pthread sdmmc soc spi_flash vfs wolfssl wpa_supplicant xtensa
--- Component paths: /opt/esp/idf/components/app_update /opt/esp/idf/components/bootloader /opt/esp/idf/components/bootloader_support /opt/esp/idf/components/console /opt/esp/idf/components/cxx /opt/esp/idf/components/driver /opt/esp/idf/components/efuse /opt/esp/idf/components/esp_app_format /opt/esp/idf/components/esp_bootloader_format /opt/esp/idf/components/esp_coex /opt/esp/idf/components/esp_common /opt/esp/idf/components/esp_driver_ana_cmpr /opt/esp/idf/components/esp_driver_dac /opt/esp/idf/components/esp_driver_gpio /opt/esp/idf/components/esp_driver_gptimer /opt/esp/idf/components/esp_driver_i2c /opt/esp/idf/components/esp_driver_i2s /opt/esp/idf/components/esp_driver_ledc /opt/esp/idf/components/esp_driver_mcpwm /opt/esp/idf/components/esp_driver_parlio /opt/esp/idf/components/esp_driver_pcnt /opt/esp/idf/components/esp_driver_rmt /opt/esp/idf/components/esp_driver_sdio /opt/esp/idf/components/esp_driver_sdm /opt/esp/idf/components/esp_driver_sdmmc /opt/esp/idf/components/esp_driver_sdspi /opt/esp/idf/components/esp_driver_spi /opt/esp/idf/components/esp_driver_tsens /opt/esp/idf/components/esp_driver_uart /opt/esp/idf/components/esp_driver_usb_serial_jtag /opt/esp/idf/components/esp_event /opt/esp/idf/components/esp_hw_support /opt/esp/idf/components/esp_mm /opt/esp/idf/components/esp_netif /opt/esp/idf/components/esp_netif_stack /opt/esp/idf/components/esp_partition /opt/esp/idf/components/esp_phy /opt/esp/idf/components/esp_pm /opt/esp/idf/components/esp_ringbuf /opt/esp/idf/components/esp_rom /opt/esp/idf/components/esp_security /opt/esp/idf/components/esp_system /opt/esp/idf/components/esp_timer /opt/esp/idf/components/esp_vfs_console /opt/esp/idf/components/esp_wifi /project/examples/lcm/managed_components/espressif__mdns /opt/esp/idf/components/esptool_py /opt/esp/idf/components/freertos /opt/esp/idf/components/hal /opt/esp/idf/components/heap /project/components/homekit /opt/esp/idf/components/http_parser /opt/esp/idf/components/json /opt/esp/idf/components/log /opt/esp/idf/components/lwip /project/examples/lcm/main /opt/esp/idf/components/mbedtls /opt/esp/idf/components/newlib /opt/esp/idf/components/nvs_flash /opt/esp/idf/components/partition_table /opt/esp/idf/components/pthread /opt/esp/idf/components/sdmmc /opt/esp/idf/components/soc /opt/esp/idf/components/spi_flash /opt/esp/idf/components/vfs /project/components/wolfssl /opt/esp/idf/components/wpa_supplicant /opt/esp/idf/components/xtensa
--- Configuring done (2.3s)
--- Generating done (0.4s)
+-- Components: app_update bootloader bootloader_support console cxx driver efuse esp-tls esp_app_format esp_bootloader_format esp_coex esp_common esp_driver_ana_cmpr esp_driver_dac esp_driver_gpio esp_driver_gptimer esp_driver_i2c esp_driver_i2s esp_driver_ledc esp_driver_mcpwm esp_driver_parlio esp_driver_pcnt esp_driver_rmt esp_driver_sdio esp_driver_sdm esp_driver_sdmmc esp_driver_sdspi esp_driver_spi esp_driver_tsens esp_driver_uart esp_driver_usb_serial_jtag esp_event esp_http_server esp_hw_support esp_mm esp_netif esp_netif_stack esp_partition esp_phy esp_pm esp_ringbuf esp_rom esp_system esp_timer esp_vfs_console esp_wifi espressif__mdns esptool_py freertos hal heap homekit http_parser json log lwip main mbedtls newlib nvs_flash partition_table pthread sdmmc soc spi_flash vfs wolfssl__wolfssl wpa_supplicant xtensa
+-- Component paths: /opt/esp/idf/components/app_update /opt/esp/idf/components/bootloader /opt/esp/idf/components/bootloader_support /opt/esp/idf/components/console /opt/esp/idf/components/cxx /opt/esp/idf/components/driver /opt/esp/idf/components/efuse /opt/esp/idf/components/esp-tls /opt/esp/idf/components/esp_app_format /opt/esp/idf/components/esp_bootloader_format /opt/esp/idf/components/esp_coex /opt/esp/idf/components/esp_common /opt/esp/idf/components/esp_driver_ana_cmpr /opt/esp/idf/components/esp_driver_dac /opt/esp/idf/components/esp_driver_gpio /opt/esp/idf/components/esp_driver_gptimer /opt/esp/idf/components/esp_driver_i2c /opt/esp/idf/components/esp_driver_i2s /opt/esp/idf/components/esp_driver_ledc /opt/esp/idf/components/esp_driver_mcpwm /opt/esp/idf/components/esp_driver_parlio /opt/esp/idf/components/esp_driver_pcnt /opt/esp/idf/components/esp_driver_rmt /opt/esp/idf/components/esp_driver_sdio /opt/esp/idf/components/esp_driver_sdm /opt/esp/idf/components/esp_driver_sdmmc /opt/esp/idf/components/esp_driver_sdspi /opt/esp/idf/components/esp_driver_spi /opt/esp/idf/components/esp_driver_tsens /opt/esp/idf/components/esp_driver_uart /opt/esp/idf/components/esp_driver_usb_serial_jtag /opt/esp/idf/components/esp_event /opt/esp/idf/components/esp_http_server /opt/esp/idf/components/esp_hw_support /opt/esp/idf/components/esp_mm /opt/esp/idf/components/esp_netif /opt/esp/idf/components/esp_netif_stack /opt/esp/idf/components/esp_partition /opt/esp/idf/components/esp_phy /opt/esp/idf/components/esp_pm /opt/esp/idf/components/esp_ringbuf /opt/esp/idf/components/esp_rom /opt/esp/idf/components/esp_system /opt/esp/idf/components/esp_timer /opt/esp/idf/components/esp_vfs_console /opt/esp/idf/components/esp_wifi /project/examples/lcm/managed_components/espressif__mdns /opt/esp/idf/components/esptool_py /opt/esp/idf/components/freertos /opt/esp/idf/components/hal /opt/esp/idf/components/heap /project/components/homekit /opt/esp/idf/components/http_parser /opt/esp/idf/components/json /opt/esp/idf/components/log /opt/esp/idf/components/lwip /project/examples/lcm/main /opt/esp/idf/components/mbedtls /opt/esp/idf/components/newlib /opt/esp/idf/components/nvs_flash /opt/esp/idf/components/partition_table /opt/esp/idf/components/pthread /opt/esp/idf/components/sdmmc /opt/esp/idf/components/soc /opt/esp/idf/components/spi_flash /opt/esp/idf/components/vfs /project/examples/lcm/managed_components/wolfssl__wolfssl /opt/esp/idf/components/wpa_supplicant /opt/esp/idf/components/xtensa
+-- Configuring done (2.6s)
+-- Generating done (0.5s)
 -- Build files have been written to: /project/examples/lcm/build

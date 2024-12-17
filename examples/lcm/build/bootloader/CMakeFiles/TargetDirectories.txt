@@ -52,8 +52,6 @@
 /project/examples/lcm/build/bootloader/esp-idf/efuse/CMakeFiles/efuse_test_table.dir
 /project/examples/lcm/build/bootloader/esp-idf/efuse/CMakeFiles/edit_cache.dir
 /project/examples/lcm/build/bootloader/esp-idf/efuse/CMakeFiles/rebuild_cache.dir
-/project/examples/lcm/build/bootloader/esp-idf/esp_security/CMakeFiles/edit_cache.dir
-/project/examples/lcm/build/bootloader/esp-idf/esp_security/CMakeFiles/rebuild_cache.dir
 /project/examples/lcm/build/bootloader/esp-idf/esp_system/CMakeFiles/__idf_esp_system.dir
 /project/examples/lcm/build/bootloader/esp-idf/esp_system/CMakeFiles/edit_cache.dir
 /project/examples/lcm/build/bootloader/esp-idf/esp_system/CMakeFiles/rebuild_cache.dir

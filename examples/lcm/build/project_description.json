@@ -1,7 +1,7 @@
 {
-    "version":            "1.1",
+    "version":            "1.2",
     "project_name":       "main",
-    "project_version":    "f72f5e3-dirty",
+    "project_version":    "b49464b-dirty",
     "project_path":       "/project/examples/lcm",
     "idf_path":           "/opt/esp/idf",
     "build_dir":          "/project/examples/lcm/build",
@@ -11,7 +11,7 @@
     "app_elf":            "main.elf",
     "app_bin":            "main.bin",
     "build_type":         "flash_app",
-    "git_revision":       "v5.4-dev-4375-gf420609c33",
+    "git_revision":       "v5.3.2-174-g083aad99cf",
     "target":             "esp32",
     "rev":                "0",
     "min_rev":            "0",
@@ -19,14 +19,14 @@
     "phy_data_partition": "",
     "monitor_baud" :      "115200",
     "monitor_toolprefix": "xtensa-esp32-elf-",
-    "c_compiler":         "/opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc",
+    "c_compiler":         "/opt/esp/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc",
     "config_environment" : {
-        "COMPONENT_KCONFIGS" : "/opt/esp/idf/components/console/Kconfig;/opt/esp/idf/components/driver/Kconfig;/opt/esp/idf/components/efuse/Kconfig;/opt/esp/idf/components/esp_coex/Kconfig;/opt/esp/idf/components/esp_common/Kconfig;/opt/esp/idf/components/esp_driver_ana_cmpr/Kconfig;/opt/esp/idf/components/esp_driver_dac/Kconfig;/opt/esp/idf/components/esp_driver_gpio/Kconfig;/opt/esp/idf/components/esp_driver_gptimer/Kconfig;/opt/esp/idf/components/esp_driver_i2c/Kconfig;/opt/esp/idf/components/esp_driver_i2s/Kconfig;/opt/esp/idf/components/esp_driver_ledc/Kconfig;/opt/esp/idf/components/esp_driver_mcpwm/Kconfig;/opt/esp/idf/components/esp_driver_parlio/Kconfig;/opt/esp/idf/components/esp_driver_pcnt/Kconfig;/opt/esp/idf/components/esp_driver_rmt/Kconfig;/opt/esp/idf/components/esp_driver_sdm/Kconfig;/opt/esp/idf/components/esp_driver_spi/Kconfig;/opt/esp/idf/components/esp_driver_tsens/Kconfig;/opt/esp/idf/components/esp_driver_uart/Kconfig;/opt/esp/idf/components/esp_driver_usb_serial_jtag/Kconfig;/opt/esp/idf/components/esp_event/Kconfig;/opt/esp/idf/components/esp_hw_support/Kconfig;/opt/esp/idf/components/esp_mm/Kconfig;/opt/esp/idf/components/esp_netif/Kconfig;/opt/esp/idf/components/esp_partition/Kconfig;/opt/esp/idf/components/esp_phy/Kconfig;/opt/esp/idf/components/esp_pm/Kconfig;/opt/esp/idf/components/esp_ringbuf/Kconfig;/opt/esp/idf/components/esp_security/Kconfig;/opt/esp/idf/components/esp_system/Kconfig;/opt/esp/idf/components/esp_timer/Kconfig;/opt/esp/idf/components/esp_wifi/Kconfig;/opt/esp/idf/components/freertos/Kconfig;/opt/esp/idf/components/hal/Kconfig;/opt/esp/idf/components/heap/Kconfig;/opt/esp/idf/components/log/Kconfig;/opt/esp/idf/components/lwip/Kconfig;/opt/esp/idf/components/mbedtls/Kconfig;/opt/esp/idf/components/newlib/Kconfig;/opt/esp/idf/components/nvs_flash/Kconfig;/opt/esp/idf/components/pthread/Kconfig;/opt/esp/idf/components/soc/Kconfig;/opt/esp/idf/components/spi_flash/Kconfig;/opt/esp/idf/components/vfs/Kconfig;/project/components/homekit/Kconfig;/project/components/wolfssl/Kconfig;/project/examples/lcm/managed_components/espressif__mdns/Kconfig",
+        "COMPONENT_KCONFIGS" : "/opt/esp/idf/components/console/Kconfig;/opt/esp/idf/components/driver/Kconfig;/opt/esp/idf/components/efuse/Kconfig;/opt/esp/idf/components/esp-tls/Kconfig;/opt/esp/idf/components/esp_coex/Kconfig;/opt/esp/idf/components/esp_common/Kconfig;/opt/esp/idf/components/esp_driver_ana_cmpr/Kconfig;/opt/esp/idf/components/esp_driver_dac/Kconfig;/opt/esp/idf/components/esp_driver_gpio/Kconfig;/opt/esp/idf/components/esp_driver_gptimer/Kconfig;/opt/esp/idf/components/esp_driver_i2c/Kconfig;/opt/esp/idf/components/esp_driver_i2s/Kconfig;/opt/esp/idf/components/esp_driver_ledc/Kconfig;/opt/esp/idf/components/esp_driver_mcpwm/Kconfig;/opt/esp/idf/components/esp_driver_parlio/Kconfig;/opt/esp/idf/components/esp_driver_pcnt/Kconfig;/opt/esp/idf/components/esp_driver_rmt/Kconfig;/opt/esp/idf/components/esp_driver_sdm/Kconfig;/opt/esp/idf/components/esp_driver_spi/Kconfig;/opt/esp/idf/components/esp_driver_tsens/Kconfig;/opt/esp/idf/components/esp_driver_uart/Kconfig;/opt/esp/idf/components/esp_driver_usb_serial_jtag/Kconfig;/opt/esp/idf/components/esp_event/Kconfig;/opt/esp/idf/components/esp_http_server/Kconfig;/opt/esp/idf/components/esp_hw_support/Kconfig;/opt/esp/idf/components/esp_netif/Kconfig;/opt/esp/idf/components/esp_partition/Kconfig;/opt/esp/idf/components/esp_phy/Kconfig;/opt/esp/idf/components/esp_pm/Kconfig;/opt/esp/idf/components/esp_ringbuf/Kconfig;/opt/esp/idf/components/esp_system/Kconfig;/opt/esp/idf/components/esp_timer/Kconfig;/opt/esp/idf/components/esp_wifi/Kconfig;/opt/esp/idf/components/freertos/Kconfig;/opt/esp/idf/components/hal/Kconfig;/opt/esp/idf/components/heap/Kconfig;/opt/esp/idf/components/log/Kconfig;/opt/esp/idf/components/lwip/Kconfig;/opt/esp/idf/components/mbedtls/Kconfig;/opt/esp/idf/components/newlib/Kconfig;/opt/esp/idf/components/nvs_flash/Kconfig;/opt/esp/idf/components/pthread/Kconfig;/opt/esp/idf/components/soc/Kconfig;/opt/esp/idf/components/spi_flash/Kconfig;/opt/esp/idf/components/vfs/Kconfig;/project/components/homekit/Kconfig;/project/examples/lcm/managed_components/espressif__mdns/Kconfig;/project/examples/lcm/managed_components/wolfssl__wolfssl/Kconfig",
         "COMPONENT_KCONFIGS_PROJBUILD" : "/opt/esp/idf/components/bootloader/Kconfig.projbuild;/opt/esp/idf/components/esp_app_format/Kconfig.projbuild;/opt/esp/idf/components/esp_rom/Kconfig.projbuild;/opt/esp/idf/components/esptool_py/Kconfig.projbuild;/opt/esp/idf/components/partition_table/Kconfig.projbuild;/project/examples/lcm/main/Kconfig.projbuild"
     },
     "common_component_reqs": [ "cxx", "newlib", "freertos", "esp_hw_support", "heap", "log", "soc", "hal", "esp_rom", "esp_common", "esp_system", "xtensa" ],
-    "build_components" : [ "app_update", "bootloader", "bootloader_support", "console", "cxx", "driver", "efuse", "esp_app_format", "esp_bootloader_format", "esp_coex", "esp_common", "esp_driver_ana_cmpr", "esp_driver_dac", "esp_driver_gpio", "esp_driver_gptimer", "esp_driver_i2c", "esp_driver_i2s", "esp_driver_ledc", "esp_driver_mcpwm", "esp_driver_parlio", "esp_driver_pcnt", "esp_driver_rmt", "esp_driver_sdio", "esp_driver_sdm", "esp_driver_sdmmc", "esp_driver_sdspi", "esp_driver_spi", "esp_driver_tsens", "esp_driver_uart", "esp_driver_usb_serial_jtag", "esp_event", "esp_hw_support", "esp_mm", "esp_netif", "esp_netif_stack", "esp_partition", "esp_phy", "esp_pm", "esp_ringbuf", "esp_rom", "esp_security", "esp_system", "esp_timer", "esp_vfs_console", "esp_wifi", "espressif__mdns", "esptool_py", "freertos", "hal", "heap", "homekit", "http_parser", "json", "log", "lwip", "main", "mbedtls", "newlib", "nvs_flash", "partition_table", "pthread", "sdmmc", "soc", "spi_flash", "vfs", "wolfssl", "wpa_supplicant", "xtensa", "" ],
-    "build_component_paths" : [ "/opt/esp/idf/components/app_update", "/opt/esp/idf/components/bootloader", "/opt/esp/idf/components/bootloader_support", "/opt/esp/idf/components/console", "/opt/esp/idf/components/cxx", "/opt/esp/idf/components/driver", "/opt/esp/idf/components/efuse", "/opt/esp/idf/components/esp_app_format", "/opt/esp/idf/components/esp_bootloader_format", "/opt/esp/idf/components/esp_coex", "/opt/esp/idf/components/esp_common", "/opt/esp/idf/components/esp_driver_ana_cmpr", "/opt/esp/idf/components/esp_driver_dac", "/opt/esp/idf/components/esp_driver_gpio", "/opt/esp/idf/components/esp_driver_gptimer", "/opt/esp/idf/components/esp_driver_i2c", "/opt/esp/idf/components/esp_driver_i2s", "/opt/esp/idf/components/esp_driver_ledc", "/opt/esp/idf/components/esp_driver_mcpwm", "/opt/esp/idf/components/esp_driver_parlio", "/opt/esp/idf/components/esp_driver_pcnt", "/opt/esp/idf/components/esp_driver_rmt", "/opt/esp/idf/components/esp_driver_sdio", "/opt/esp/idf/components/esp_driver_sdm", "/opt/esp/idf/components/esp_driver_sdmmc", "/opt/esp/idf/components/esp_driver_sdspi", "/opt/esp/idf/components/esp_driver_spi", "/opt/esp/idf/components/esp_driver_tsens", "/opt/esp/idf/components/esp_driver_uart", "/opt/esp/idf/components/esp_driver_usb_serial_jtag", "/opt/esp/idf/components/esp_event", "/opt/esp/idf/components/esp_hw_support", "/opt/esp/idf/components/esp_mm", "/opt/esp/idf/components/esp_netif", "/opt/esp/idf/components/esp_netif_stack", "/opt/esp/idf/components/esp_partition", "/opt/esp/idf/components/esp_phy", "/opt/esp/idf/components/esp_pm", "/opt/esp/idf/components/esp_ringbuf", "/opt/esp/idf/components/esp_rom", "/opt/esp/idf/components/esp_security", "/opt/esp/idf/components/esp_system", "/opt/esp/idf/components/esp_timer", "/opt/esp/idf/components/esp_vfs_console", "/opt/esp/idf/components/esp_wifi", "/project/examples/lcm/managed_components/espressif__mdns", "/opt/esp/idf/components/esptool_py", "/opt/esp/idf/components/freertos", "/opt/esp/idf/components/hal", "/opt/esp/idf/components/heap", "/project/components/homekit", "/opt/esp/idf/components/http_parser", "/opt/esp/idf/components/json", "/opt/esp/idf/components/log", "/opt/esp/idf/components/lwip", "/project/examples/lcm/main", "/opt/esp/idf/components/mbedtls", "/opt/esp/idf/components/newlib", "/opt/esp/idf/components/nvs_flash", "/opt/esp/idf/components/partition_table", "/opt/esp/idf/components/pthread", "/opt/esp/idf/components/sdmmc", "/opt/esp/idf/components/soc", "/opt/esp/idf/components/spi_flash", "/opt/esp/idf/components/vfs", "/project/components/wolfssl", "/opt/esp/idf/components/wpa_supplicant", "/opt/esp/idf/components/xtensa", "" ],
+    "build_components" : [ "app_update", "bootloader", "bootloader_support", "console", "cxx", "driver", "efuse", "esp-tls", "esp_app_format", "esp_bootloader_format", "esp_coex", "esp_common", "esp_driver_ana_cmpr", "esp_driver_dac", "esp_driver_gpio", "esp_driver_gptimer", "esp_driver_i2c", "esp_driver_i2s", "esp_driver_ledc", "esp_driver_mcpwm", "esp_driver_parlio", "esp_driver_pcnt", "esp_driver_rmt", "esp_driver_sdio", "esp_driver_sdm", "esp_driver_sdmmc", "esp_driver_sdspi", "esp_driver_spi", "esp_driver_tsens", "esp_driver_uart", "esp_driver_usb_serial_jtag", "esp_event", "esp_http_server", "esp_hw_support", "esp_mm", "esp_netif", "esp_netif_stack", "esp_partition", "esp_phy", "esp_pm", "esp_ringbuf", "esp_rom", "esp_system", "esp_timer", "esp_vfs_console", "esp_wifi", "espressif__mdns", "esptool_py", "freertos", "hal", "heap", "homekit", "http_parser", "json", "log", "lwip", "main", "mbedtls", "newlib", "nvs_flash", "partition_table", "pthread", "sdmmc", "soc", "spi_flash", "vfs", "wolfssl__wolfssl", "wpa_supplicant", "xtensa", "" ],
+    "build_component_paths" : [ "/opt/esp/idf/components/app_update", "/opt/esp/idf/components/bootloader", "/opt/esp/idf/components/bootloader_support", "/opt/esp/idf/components/console", "/opt/esp/idf/components/cxx", "/opt/esp/idf/components/driver", "/opt/esp/idf/components/efuse", "/opt/esp/idf/components/esp-tls", "/opt/esp/idf/components/esp_app_format", "/opt/esp/idf/components/esp_bootloader_format", "/opt/esp/idf/components/esp_coex", "/opt/esp/idf/components/esp_common", "/opt/esp/idf/components/esp_driver_ana_cmpr", "/opt/esp/idf/components/esp_driver_dac", "/opt/esp/idf/components/esp_driver_gpio", "/opt/esp/idf/components/esp_driver_gptimer", "/opt/esp/idf/components/esp_driver_i2c", "/opt/esp/idf/components/esp_driver_i2s", "/opt/esp/idf/components/esp_driver_ledc", "/opt/esp/idf/components/esp_driver_mcpwm", "/opt/esp/idf/components/esp_driver_parlio", "/opt/esp/idf/components/esp_driver_pcnt", "/opt/esp/idf/components/esp_driver_rmt", "/opt/esp/idf/components/esp_driver_sdio", "/opt/esp/idf/components/esp_driver_sdm", "/opt/esp/idf/components/esp_driver_sdmmc", "/opt/esp/idf/components/esp_driver_sdspi", "/opt/esp/idf/components/esp_driver_spi", "/opt/esp/idf/components/esp_driver_tsens", "/opt/esp/idf/components/esp_driver_uart", "/opt/esp/idf/components/esp_driver_usb_serial_jtag", "/opt/esp/idf/components/esp_event", "/opt/esp/idf/components/esp_http_server", "/opt/esp/idf/components/esp_hw_support", "/opt/esp/idf/components/esp_mm", "/opt/esp/idf/components/esp_netif", "/opt/esp/idf/components/esp_netif_stack", "/opt/esp/idf/components/esp_partition", "/opt/esp/idf/components/esp_phy", "/opt/esp/idf/components/esp_pm", "/opt/esp/idf/components/esp_ringbuf", "/opt/esp/idf/components/esp_rom", "/opt/esp/idf/components/esp_system", "/opt/esp/idf/components/esp_timer", "/opt/esp/idf/components/esp_vfs_console", "/opt/esp/idf/components/esp_wifi", "/project/examples/lcm/managed_components/espressif__mdns", "/opt/esp/idf/components/esptool_py", "/opt/esp/idf/components/freertos", "/opt/esp/idf/components/hal", "/opt/esp/idf/components/heap", "/project/components/homekit", "/opt/esp/idf/components/http_parser", "/opt/esp/idf/components/json", "/opt/esp/idf/components/log", "/opt/esp/idf/components/lwip", "/project/examples/lcm/main", "/opt/esp/idf/components/mbedtls", "/opt/esp/idf/components/newlib", "/opt/esp/idf/components/nvs_flash", "/opt/esp/idf/components/partition_table", "/opt/esp/idf/components/pthread", "/opt/esp/idf/components/sdmmc", "/opt/esp/idf/components/soc", "/opt/esp/idf/components/spi_flash", "/opt/esp/idf/components/vfs", "/project/examples/lcm/managed_components/wolfssl__wolfssl", "/opt/esp/idf/components/wpa_supplicant", "/opt/esp/idf/components/xtensa", "" ],
     "build_component_info" : {
         "app_update": {
             "alias": "idf::app_update",
@@ -133,6 +133,21 @@
             "sources": [ "/opt/esp/idf/components/efuse/esp32/esp_efuse_table.c", "/opt/esp/idf/components/efuse/esp32/esp_efuse_fields.c", "/opt/esp/idf/components/efuse/esp32/esp_efuse_utility.c", "/opt/esp/idf/components/efuse/src/esp_efuse_api.c", "/opt/esp/idf/components/efuse/src/esp_efuse_fields.c", "/opt/esp/idf/components/efuse/src/esp_efuse_utility.c", "/opt/esp/idf/components/efuse/src/efuse_controller/keys/without_key_purposes/three_key_blocks/esp_efuse_api_key.c", "/opt/esp/idf/components/efuse/src/esp_efuse_startup.c" ],
             "include_dirs": [ "include", "esp32/include" ]
         },
+        "esp-tls": {
+            "alias": "idf::esp-tls",
+            "target": "___idf_esp-tls",
+            "prefix": "idf",
+            "dir": "/opt/esp/idf/components/esp-tls",
+            "type": "LIBRARY",
+            "lib": "__idf_esp-tls",
+            "reqs": [ "mbedtls" ],
+            "priv_reqs": [ "http_parser", "esp_timer", "lwip" ],
+            "managed_reqs": [],
+            "managed_priv_reqs": [],
+            "file": "/project/examples/lcm/build/esp-idf/esp-tls/libesp-tls.a",
+            "sources": [ "/opt/esp/idf/components/esp-tls/esp_tls.c", "/opt/esp/idf/components/esp-tls/esp-tls-crypto/esp_tls_crypto.c", "/opt/esp/idf/components/esp-tls/esp_tls_error_capture.c", "/opt/esp/idf/components/esp-tls/esp_tls_platform_port.c", "/opt/esp/idf/components/esp-tls/esp_tls_mbedtls.c" ],
+            "include_dirs": [ "/opt/esp/idf/components/esp-tls", "esp-tls-crypto" ]
+        },
         "esp_app_format": {
             "alias": "idf::esp_app_format",
             "target": "___idf_esp_app_format",
@@ -171,7 +186,7 @@
             "type": "LIBRARY",
             "lib": "__idf_esp_coex",
             "reqs": [],
-            "priv_reqs": [ "esp_timer", "esp_driver_gpio" ],
+            "priv_reqs": [ "esp_timer", "driver", "esp_event" ],
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "file": "/project/examples/lcm/build/esp-idf/esp_coex/libesp_coex.a",
@@ -280,7 +295,7 @@
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "file": "/project/examples/lcm/build/esp-idf/esp_driver_i2s/libesp_driver_i2s.a",
-            "sources": [ "/opt/esp/idf/components/esp_driver_i2s/i2s_common.c", "/opt/esp/idf/components/esp_driver_i2s/i2s_std.c", "/opt/esp/idf/components/esp_driver_i2s/i2s_pdm.c", "/opt/esp/idf/components/esp_driver_i2s/i2s_platform.c" ],
+            "sources": [ "/opt/esp/idf/components/esp_driver_i2s/i2s_common.c", "/opt/esp/idf/components/esp_driver_i2s/i2s_platform.c", "/opt/esp/idf/components/esp_driver_i2s/i2s_std.c", "/opt/esp/idf/components/esp_driver_i2s/i2s_pdm.c" ],
             "include_dirs": [ "include" ]
         },
         "esp_driver_ledc": {
@@ -493,6 +508,21 @@
             "sources": [ "/opt/esp/idf/components/esp_event/default_event_loop.c", "/opt/esp/idf/components/esp_event/esp_event.c", "/opt/esp/idf/components/esp_event/esp_event_private.c" ],
             "include_dirs": [ "include" ]
         },
+        "esp_http_server": {
+            "alias": "idf::esp_http_server",
+            "target": "___idf_esp_http_server",
+            "prefix": "idf",
+            "dir": "/opt/esp/idf/components/esp_http_server",
+            "type": "LIBRARY",
+            "lib": "__idf_esp_http_server",
+            "reqs": [ "http_parser", "esp_event" ],
+            "priv_reqs": [ "mbedtls", "lwip", "esp_timer" ],
+            "managed_reqs": [],
+            "managed_priv_reqs": [],
+            "file": "/project/examples/lcm/build/esp-idf/esp_http_server/libesp_http_server.a",
+            "sources": [ "/opt/esp/idf/components/esp_http_server/src/httpd_main.c", "/opt/esp/idf/components/esp_http_server/src/httpd_parse.c", "/opt/esp/idf/components/esp_http_server/src/httpd_sess.c", "/opt/esp/idf/components/esp_http_server/src/httpd_txrx.c", "/opt/esp/idf/components/esp_http_server/src/httpd_uri.c", "/opt/esp/idf/components/esp_http_server/src/httpd_ws.c", "/opt/esp/idf/components/esp_http_server/src/util/ctrl_sock.c" ],
+            "include_dirs": [ "include" ]
+        },
         "esp_hw_support": {
             "alias": "idf::esp_hw_support",
             "target": "___idf_esp_hw_support",
@@ -501,12 +531,12 @@
             "type": "LIBRARY",
             "lib": "__idf_esp_hw_support",
             "reqs": [ "soc" ],
-            "priv_reqs": [ "efuse", "spi_flash", "bootloader_support", "esp_security", "esp_driver_gpio", "esp_timer", "esp_pm", "esp_mm" ],
+            "priv_reqs": [ "efuse", "spi_flash", "bootloader_support", "esp_driver_gpio", "esp_timer", "esp_pm", "esp_mm" ],
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "file": "/project/examples/lcm/build/esp-idf/esp_hw_support/libesp_hw_support.a",
-            "sources": [ "/opt/esp/idf/components/esp_hw_support/cpu.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/esp_cpu_intr.c", "/opt/esp/idf/components/esp_hw_support/esp_memory_utils.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/cpu_region_protect.c", "/opt/esp/idf/components/esp_hw_support/esp_clk.c", "/opt/esp/idf/components/esp_hw_support/clk_ctrl_os.c", "/opt/esp/idf/components/esp_hw_support/hw_random.c", "/opt/esp/idf/components/esp_hw_support/intr_alloc.c", "/opt/esp/idf/components/esp_hw_support/mac_addr.c", "/opt/esp/idf/components/esp_hw_support/periph_ctrl.c", "/opt/esp/idf/components/esp_hw_support/revision.c", "/opt/esp/idf/components/esp_hw_support/rtc_module.c", "/opt/esp/idf/components/esp_hw_support/sleep_modem.c", "/opt/esp/idf/components/esp_hw_support/sleep_modes.c", "/opt/esp/idf/components/esp_hw_support/sleep_console.c", "/opt/esp/idf/components/esp_hw_support/sleep_gpio.c", "/opt/esp/idf/components/esp_hw_support/sleep_event.c", "/opt/esp/idf/components/esp_hw_support/regi2c_ctrl.c", "/opt/esp/idf/components/esp_hw_support/esp_gpio_reserve.c", "/opt/esp/idf/components/esp_hw_support/sar_periph_ctrl_common.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/io_mux.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/esp_clk_tree.c", "/opt/esp/idf/components/esp_hw_support/port/esp_clk_tree_common.c", "/opt/esp/idf/components/esp_hw_support/dma/esp_dma_utils.c", "/opt/esp/idf/components/esp_hw_support/dma/gdma_link.c", "/opt/esp/idf/components/esp_hw_support/spi_share_hw_ctrl.c", "/opt/esp/idf/components/esp_hw_support/spi_bus_lock.c", "/opt/esp/idf/components/esp_hw_support/adc_share_hw_ctrl.c", "/opt/esp/idf/components/esp_hw_support/rtc_wdt.c", "/opt/esp/idf/components/esp_hw_support/mspi_timing_tuning.c", "/opt/esp/idf/components/esp_hw_support/sleep_wake_stub.c", "/opt/esp/idf/components/esp_hw_support/esp_clock_output.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/rtc_clk.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/rtc_clk_init.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/rtc_init.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/rtc_sleep.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/rtc_time.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/chip_info.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/cache_sram_mmu.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/sar_periph_ctrl.c", "/opt/esp/idf/components/esp_hw_support/lowpower" ],
-            "include_dirs": [ "include", "include/soc", "include/soc/esp32", "dma/include", "ldo/include", "debug_probe/include" ]
+            "sources": [ "/opt/esp/idf/components/esp_hw_support/cpu.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/esp_cpu_intr.c", "/opt/esp/idf/components/esp_hw_support/esp_memory_utils.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/cpu_region_protect.c", "/opt/esp/idf/components/esp_hw_support/esp_clk.c", "/opt/esp/idf/components/esp_hw_support/clk_ctrl_os.c", "/opt/esp/idf/components/esp_hw_support/hw_random.c", "/opt/esp/idf/components/esp_hw_support/intr_alloc.c", "/opt/esp/idf/components/esp_hw_support/mac_addr.c", "/opt/esp/idf/components/esp_hw_support/periph_ctrl.c", "/opt/esp/idf/components/esp_hw_support/revision.c", "/opt/esp/idf/components/esp_hw_support/rtc_module.c", "/opt/esp/idf/components/esp_hw_support/sleep_modem.c", "/opt/esp/idf/components/esp_hw_support/sleep_modes.c", "/opt/esp/idf/components/esp_hw_support/sleep_console.c", "/opt/esp/idf/components/esp_hw_support/sleep_gpio.c", "/opt/esp/idf/components/esp_hw_support/sleep_event.c", "/opt/esp/idf/components/esp_hw_support/regi2c_ctrl.c", "/opt/esp/idf/components/esp_hw_support/esp_gpio_reserve.c", "/opt/esp/idf/components/esp_hw_support/sar_periph_ctrl_common.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/io_mux.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/esp_clk_tree.c", "/opt/esp/idf/components/esp_hw_support/port/esp_clk_tree_common.c", "/opt/esp/idf/components/esp_hw_support/dma/esp_dma_utils.c", "/opt/esp/idf/components/esp_hw_support/dma/gdma_link.c", "/opt/esp/idf/components/esp_hw_support/spi_share_hw_ctrl.c", "/opt/esp/idf/components/esp_hw_support/spi_bus_lock.c", "/opt/esp/idf/components/esp_hw_support/adc_share_hw_ctrl.c", "/opt/esp/idf/components/esp_hw_support/rtc_wdt.c", "/opt/esp/idf/components/esp_hw_support/mspi_timing_tuning.c", "/opt/esp/idf/components/esp_hw_support/sleep_wake_stub.c", "/opt/esp/idf/components/esp_hw_support/esp_clock_output.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/rtc_clk.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/rtc_clk_init.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/rtc_init.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/rtc_sleep.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/rtc_time.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/chip_info.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/cache_sram_mmu.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/esp_crypto_lock.c", "/opt/esp/idf/components/esp_hw_support/port/esp32/sar_periph_ctrl.c", "/opt/esp/idf/components/esp_hw_support/lowpower" ],
+            "include_dirs": [ "include", "include/soc", "include/soc/esp32", "dma/include", "ldo/include" ]
         },
         "esp_mm": {
             "alias": "idf::esp_mm",
@@ -561,7 +591,7 @@
             "type": "LIBRARY",
             "lib": "__idf_esp_partition",
             "reqs": [],
-            "priv_reqs": [ "esp_system", "spi_flash", "partition_table", "bootloader_support", "app_update" ],
+            "priv_reqs": [ "esp_system", "bootloader_support", "spi_flash", "app_update", "partition_table" ],
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "file": "/project/examples/lcm/build/esp-idf/esp_partition/libesp_partition.a",
@@ -576,7 +606,7 @@
             "type": "LIBRARY",
             "lib": "__idf_esp_phy",
             "reqs": [],
-            "priv_reqs": [ "nvs_flash", "esp_driver_gpio", "efuse", "esp_timer", "esp_wifi" ],
+            "priv_reqs": [ "nvs_flash", "driver", "efuse", "esp_timer", "esp_wifi" ],
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "file": "/project/examples/lcm/build/esp-idf/esp_phy/libesp_phy.a",
@@ -625,23 +655,8 @@
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "file": "/project/examples/lcm/build/esp-idf/esp_rom/libesp_rom.a",
-            "sources": [ "/opt/esp/idf/components/esp_rom/patches/esp_rom_sys.c", "/opt/esp/idf/components/esp_rom/patches/esp_rom_print.c", "/opt/esp/idf/components/esp_rom/patches/esp_rom_crc.c", "/opt/esp/idf/components/esp_rom/patches/esp_rom_uart.c", "/opt/esp/idf/components/esp_rom/patches/esp_rom_spiflash.c", "/opt/esp/idf/components/esp_rom/patches/esp_rom_efuse.c", "/opt/esp/idf/components/esp_rom/patches/esp_rom_gpio.c", "/opt/esp/idf/components/esp_rom/patches/esp_rom_longjmp.S" ],
-            "include_dirs": [ "include", "esp32/include", "esp32/include/esp32", "esp32" ]
-        },
-        "esp_security": {
-            "alias": "idf::esp_security",
-            "target": "___idf_esp_security",
-            "prefix": "idf",
-            "dir": "/opt/esp/idf/components/esp_security",
-            "type": "LIBRARY",
-            "lib": "__idf_esp_security",
-            "reqs": [],
-            "priv_reqs": [ "efuse", "esp_hw_support", "esp_system", "esp_timer" ],
-            "managed_reqs": [],
-            "managed_priv_reqs": [],
-            "file": "/project/examples/lcm/build/esp-idf/esp_security/libesp_security.a",
-            "sources": [ "/opt/esp/idf/components/esp_security/src/init.c", "/opt/esp/idf/components/esp_security/src/esp_crypto_lock.c" ],
-            "include_dirs": [ "include" ]
+            "sources": [ "/opt/esp/idf/components/esp_rom/patches/esp_rom_crc.c", "/opt/esp/idf/components/esp_rom/patches/esp_rom_sys.c", "/opt/esp/idf/components/esp_rom/patches/esp_rom_uart.c", "/opt/esp/idf/components/esp_rom/patches/esp_rom_spiflash.c", "/opt/esp/idf/components/esp_rom/patches/esp_rom_efuse.c", "/opt/esp/idf/components/esp_rom/patches/esp_rom_longjmp.S" ],
+            "include_dirs": [ "include", "include/esp32", "esp32" ]
         },
         "esp_system": {
             "alias": "idf::esp_system",
@@ -696,7 +711,7 @@
             "type": "LIBRARY",
             "lib": "__idf_esp_wifi",
             "reqs": [ "esp_event", "esp_phy", "esp_netif" ],
-            "priv_reqs": [ "esptool_py", "esp_pm", "esp_timer", "nvs_flash", "wpa_supplicant", "hal", "lwip", "esp_coex" ],
+            "priv_reqs": [ "driver", "esptool_py", "esp_pm", "esp_timer", "nvs_flash", "wpa_supplicant", "hal", "lwip", "esp_coex" ],
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "file": "/project/examples/lcm/build/esp-idf/esp_wifi/libesp_wifi.a",
@@ -745,7 +760,7 @@
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "file": "/project/examples/lcm/build/esp-idf/freertos/libfreertos.a",
-            "sources": [ "/opt/esp/idf/components/freertos/heap_idf.c", "/opt/esp/idf/components/freertos/app_startup.c", "/opt/esp/idf/components/freertos/port_common.c", "/opt/esp/idf/components/freertos/port_systick.c", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/list.c", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/queue.c", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/tasks.c", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/timers.c", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/event_groups.c", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/stream_buffer.c", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/portable/xtensa/port.c", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/portable/xtensa/portasm.S", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/portable/xtensa/xtensa_init.c", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/portable/xtensa/xtensa_overlay_os_hook.c", "/opt/esp/idf/components/freertos/esp_additions/freertos_compatibility.c", "/opt/esp/idf/components/freertos/esp_additions/idf_additions_event_groups.c", "/opt/esp/idf/components/freertos/esp_additions/idf_additions.c" ],
+            "sources": [ "/opt/esp/idf/components/freertos/heap_idf.c", "/opt/esp/idf/components/freertos/app_startup.c", "/opt/esp/idf/components/freertos/port_common.c", "/opt/esp/idf/components/freertos/port_systick.c", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/list.c", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/queue.c", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/tasks.c", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/timers.c", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/event_groups.c", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/stream_buffer.c", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/portable/xtensa/port.c", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/portable/xtensa/portasm.S", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/portable/xtensa/xtensa_init.c", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/portable/xtensa/xtensa_overlay_os_hook.c", "/opt/esp/idf/components/freertos/esp_additions/freertos_compatibility.c", "/opt/esp/idf/components/freertos/esp_additions/idf_additions.c" ],
             "include_dirs": [ "config/include", "config/include/freertos", "config/xtensa/include", "FreeRTOS-Kernel/include", "FreeRTOS-Kernel/portable/xtensa/include", "FreeRTOS-Kernel/portable/xtensa/include/freertos", "esp_additions/include" ]
         },
         "hal": {
@@ -776,7 +791,7 @@
             "managed_priv_reqs": [],
             "file": "/project/examples/lcm/build/esp-idf/heap/libheap.a",
             "sources": [ "/opt/esp/idf/components/heap/heap_caps_base.c", "/opt/esp/idf/components/heap/heap_caps.c", "/opt/esp/idf/components/heap/heap_caps_init.c", "/opt/esp/idf/components/heap/multi_heap.c", "/opt/esp/idf/components/heap/tlsf/tlsf.c", "/opt/esp/idf/components/heap/port/memory_layout_utils.c", "/opt/esp/idf/components/heap/port/esp32/memory_layout.c" ],
-            "include_dirs": [ "include", "tlsf" ]
+            "include_dirs": [ "include" ]
         },
         "homekit": {
             "alias": "idf::homekit",
@@ -785,10 +800,10 @@
             "dir": "/project/components/homekit",
             "type": "LIBRARY",
             "lib": "__idf_homekit",
-            "reqs": [ "wolfssl", "esp_partition", "json", "http_parser", "spi_flash", "nvs_flash" ],
-            "priv_reqs": [ "espressif__mdns" ],
+            "reqs": [ "wolfssl__wolfssl", "esp_partition", "json", "http_parser", "spi_flash", "nvs_flash" ],
+            "priv_reqs": [ "espressif__mdns", "wolfssl__wolfssl" ],
             "managed_reqs": [],
-            "managed_priv_reqs": [ "espressif__mdns" ],
+            "managed_priv_reqs": [ "espressif__mdns", "wolfssl__wolfssl" ],
             "file": "/project/examples/lcm/build/esp-idf/homekit/libhomekit.a",
             "sources": [ "/project/components/homekit/src/accessories.c", "/project/components/homekit/src/base64.c", "/project/components/homekit/src/bitset.c", "/project/components/homekit/src/crypto.c", "/project/components/homekit/src/debug.c", "/project/components/homekit/src/json.c", "/project/components/homekit/src/port.c", "/project/components/homekit/src/query_params.c", "/project/components/homekit/src/server.c", "/project/components/homekit/src/storage.c", "/project/components/homekit/src/tlv.c" ],
             "include_dirs": [ "include" ]
@@ -835,7 +850,7 @@
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "file": "/project/examples/lcm/build/esp-idf/log/liblog.a",
-            "sources": [ "/opt/esp/idf/components/log/src/os/log_timestamp.c", "/opt/esp/idf/components/log/src/log_timestamp_common.c", "/opt/esp/idf/components/log/src/os/log_lock.c", "/opt/esp/idf/components/log/src/os/log_write.c", "/opt/esp/idf/components/log/src/buffer/log_buffers.c", "/opt/esp/idf/components/log/src/util.c", "/opt/esp/idf/components/log/src/log_level/log_level.c", "/opt/esp/idf/components/log/src/log_level/tag_log_level/tag_log_level.c", "/opt/esp/idf/components/log/src/log_level/tag_log_level/linked_list/log_linked_list.c", "/opt/esp/idf/components/log/src/log_level/tag_log_level/cache/log_binary_heap.c" ],
+            "sources": [ "/opt/esp/idf/components/log/log.c", "/opt/esp/idf/components/log/log_buffers.c", "/opt/esp/idf/components/log/log_freertos.c" ],
             "include_dirs": [ "include" ]
         },
         "lwip": {
@@ -850,7 +865,7 @@
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "file": "/project/examples/lcm/build/esp-idf/lwip/liblwip.a",
-            "sources": [ "/opt/esp/idf/components/lwip/apps/sntp/sntp.c", "/opt/esp/idf/components/lwip/lwip/src/api/api_lib.c", "/opt/esp/idf/components/lwip/lwip/src/api/api_msg.c", "/opt/esp/idf/components/lwip/lwip/src/api/err.c", "/opt/esp/idf/components/lwip/lwip/src/api/if_api.c", "/opt/esp/idf/components/lwip/lwip/src/api/netbuf.c", "/opt/esp/idf/components/lwip/lwip/src/api/netdb.c", "/opt/esp/idf/components/lwip/lwip/src/api/netifapi.c", "/opt/esp/idf/components/lwip/lwip/src/api/sockets.c", "/opt/esp/idf/components/lwip/lwip/src/api/tcpip.c", "/opt/esp/idf/components/lwip/lwip/src/apps/sntp/sntp.c", "/opt/esp/idf/components/lwip/lwip/src/apps/netbiosns/netbiosns.c", "/opt/esp/idf/components/lwip/lwip/src/core/def.c", "/opt/esp/idf/components/lwip/lwip/src/core/dns.c", "/opt/esp/idf/components/lwip/lwip/src/core/inet_chksum.c", "/opt/esp/idf/components/lwip/lwip/src/core/init.c", "/opt/esp/idf/components/lwip/lwip/src/core/ip.c", "/opt/esp/idf/components/lwip/lwip/src/core/mem.c", "/opt/esp/idf/components/lwip/lwip/src/core/memp.c", "/opt/esp/idf/components/lwip/lwip/src/core/netif.c", "/opt/esp/idf/components/lwip/lwip/src/core/pbuf.c", "/opt/esp/idf/components/lwip/lwip/src/core/raw.c", "/opt/esp/idf/components/lwip/lwip/src/core/stats.c", "/opt/esp/idf/components/lwip/lwip/src/core/sys.c", "/opt/esp/idf/components/lwip/lwip/src/core/tcp.c", "/opt/esp/idf/components/lwip/lwip/src/core/tcp_in.c", "/opt/esp/idf/components/lwip/lwip/src/core/tcp_out.c", "/opt/esp/idf/components/lwip/lwip/src/core/timeouts.c", "/opt/esp/idf/components/lwip/lwip/src/core/udp.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv4/autoip.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv4/dhcp.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv4/etharp.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv4/icmp.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv4/igmp.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv4/ip4.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv4/ip4_napt.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv4/ip4_addr.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv4/ip4_frag.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv6/dhcp6.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv6/ethip6.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv6/icmp6.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv6/inet6.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv6/ip6.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv6/ip6_addr.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv6/ip6_frag.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv6/mld6.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv6/nd6.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ethernet.c", "/opt/esp/idf/components/lwip/lwip/src/netif/bridgeif.c", "/opt/esp/idf/components/lwip/lwip/src/netif/bridgeif_fdb.c", "/opt/esp/idf/components/lwip/lwip/src/netif/slipif.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/auth.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/ccp.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/chap-md5.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/chap-new.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/chap_ms.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/demand.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/eap.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/ecp.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/eui64.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/fsm.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/ipcp.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/ipv6cp.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/lcp.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/magic.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/mppe.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/multilink.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/ppp.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/pppapi.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/pppcrypt.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/pppoe.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/pppol2tp.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/pppos.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/upap.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/utils.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/vj.c", "/opt/esp/idf/components/lwip/port/hooks/tcp_isn_default.c", "/opt/esp/idf/components/lwip/port/hooks/lwip_default_hooks.c", "/opt/esp/idf/components/lwip/port/debug/lwip_debug.c", "/opt/esp/idf/components/lwip/port/sockets_ext.c", "/opt/esp/idf/components/lwip/port/freertos/sys_arch.c", "/opt/esp/idf/components/lwip/port/acd_dhcp_check.c", "/opt/esp/idf/components/lwip/port/esp32xx/vfs_lwip.c", "/opt/esp/idf/components/lwip/apps/ping/esp_ping.c", "/opt/esp/idf/components/lwip/apps/ping/ping.c", "/opt/esp/idf/components/lwip/apps/ping/ping_sock.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/polarssl/arc4.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/polarssl/des.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/polarssl/md4.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/polarssl/md5.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/polarssl/sha1.c", "/opt/esp/idf/components/lwip/apps/dhcpserver/dhcpserver.c" ],
+            "sources": [ "/opt/esp/idf/components/lwip/apps/sntp/sntp.c", "/opt/esp/idf/components/lwip/lwip/src/api/api_lib.c", "/opt/esp/idf/components/lwip/lwip/src/api/api_msg.c", "/opt/esp/idf/components/lwip/lwip/src/api/err.c", "/opt/esp/idf/components/lwip/lwip/src/api/if_api.c", "/opt/esp/idf/components/lwip/lwip/src/api/netbuf.c", "/opt/esp/idf/components/lwip/lwip/src/api/netdb.c", "/opt/esp/idf/components/lwip/lwip/src/api/netifapi.c", "/opt/esp/idf/components/lwip/lwip/src/api/sockets.c", "/opt/esp/idf/components/lwip/lwip/src/api/tcpip.c", "/opt/esp/idf/components/lwip/lwip/src/apps/sntp/sntp.c", "/opt/esp/idf/components/lwip/lwip/src/apps/netbiosns/netbiosns.c", "/opt/esp/idf/components/lwip/lwip/src/core/def.c", "/opt/esp/idf/components/lwip/lwip/src/core/dns.c", "/opt/esp/idf/components/lwip/lwip/src/core/inet_chksum.c", "/opt/esp/idf/components/lwip/lwip/src/core/init.c", "/opt/esp/idf/components/lwip/lwip/src/core/ip.c", "/opt/esp/idf/components/lwip/lwip/src/core/mem.c", "/opt/esp/idf/components/lwip/lwip/src/core/memp.c", "/opt/esp/idf/components/lwip/lwip/src/core/netif.c", "/opt/esp/idf/components/lwip/lwip/src/core/pbuf.c", "/opt/esp/idf/components/lwip/lwip/src/core/raw.c", "/opt/esp/idf/components/lwip/lwip/src/core/stats.c", "/opt/esp/idf/components/lwip/lwip/src/core/sys.c", "/opt/esp/idf/components/lwip/lwip/src/core/tcp.c", "/opt/esp/idf/components/lwip/lwip/src/core/tcp_in.c", "/opt/esp/idf/components/lwip/lwip/src/core/tcp_out.c", "/opt/esp/idf/components/lwip/lwip/src/core/timeouts.c", "/opt/esp/idf/components/lwip/lwip/src/core/udp.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv4/autoip.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv4/dhcp.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv4/etharp.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv4/icmp.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv4/igmp.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv4/ip4.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv4/ip4_napt.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv4/ip4_addr.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv4/ip4_frag.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv6/dhcp6.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv6/ethip6.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv6/icmp6.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv6/inet6.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv6/ip6.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv6/ip6_addr.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv6/ip6_frag.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv6/mld6.c", "/opt/esp/idf/components/lwip/lwip/src/core/ipv6/nd6.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ethernet.c", "/opt/esp/idf/components/lwip/lwip/src/netif/bridgeif.c", "/opt/esp/idf/components/lwip/lwip/src/netif/bridgeif_fdb.c", "/opt/esp/idf/components/lwip/lwip/src/netif/slipif.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/auth.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/ccp.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/chap-md5.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/chap-new.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/chap_ms.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/demand.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/eap.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/ecp.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/eui64.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/fsm.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/ipcp.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/ipv6cp.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/lcp.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/magic.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/mppe.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/multilink.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/ppp.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/pppapi.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/pppcrypt.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/pppoe.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/pppol2tp.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/pppos.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/upap.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/utils.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/vj.c", "/opt/esp/idf/components/lwip/port/hooks/tcp_isn_default.c", "/opt/esp/idf/components/lwip/port/hooks/lwip_default_hooks.c", "/opt/esp/idf/components/lwip/port/debug/lwip_debug.c", "/opt/esp/idf/components/lwip/port/sockets_ext.c", "/opt/esp/idf/components/lwip/port/freertos/sys_arch.c", "/opt/esp/idf/components/lwip/port/esp32xx/vfs_lwip.c", "/opt/esp/idf/components/lwip/apps/ping/esp_ping.c", "/opt/esp/idf/components/lwip/apps/ping/ping.c", "/opt/esp/idf/components/lwip/apps/ping/ping_sock.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/polarssl/arc4.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/polarssl/des.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/polarssl/md4.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/polarssl/md5.c", "/opt/esp/idf/components/lwip/lwip/src/netif/ppp/polarssl/sha1.c", "/opt/esp/idf/components/lwip/apps/dhcpserver/dhcpserver.c" ],
             "include_dirs": [ "include", "include/apps", "include/apps/sntp", "lwip/src/include", "port/include", "port/freertos/include/", "port/esp32xx/include", "port/esp32xx/include/arch", "port/esp32xx/include/sys" ]
         },
         "main": {
@@ -860,12 +875,12 @@
             "dir": "/project/examples/lcm/main",
             "type": "LIBRARY",
             "lib": "__idf_main",
-            "reqs": [ "freertos", "esp_wifi", "nvs_flash", "driver", "homekit" ],
+            "reqs": [ "freertos", "esp_wifi", "nvs_flash", "driver", "homekit", "esp_http_server" ],
             "priv_reqs": [],
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "file": "/project/examples/lcm/build/esp-idf/main/libmain.a",
-            "sources": [ "/project/examples/lcm/main/main.c" ],
+            "sources": [ "/project/examples/lcm/main/main.c", "/project/examples/lcm/main/lcm.c" ],
             "include_dirs": []
         },
         "mbedtls": {
@@ -895,7 +910,7 @@
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "file": "/project/examples/lcm/build/esp-idf/newlib/libnewlib.a",
-            "sources": [ "/opt/esp/idf/components/newlib/abort.c", "/opt/esp/idf/components/newlib/assert.c", "/opt/esp/idf/components/newlib/heap.c", "/opt/esp/idf/components/newlib/flockfile.c", "/opt/esp/idf/components/newlib/locks.c", "/opt/esp/idf/components/newlib/poll.c", "/opt/esp/idf/components/newlib/pthread.c", "/opt/esp/idf/components/newlib/random.c", "/opt/esp/idf/components/newlib/getentropy.c", "/opt/esp/idf/components/newlib/reent_init.c", "/opt/esp/idf/components/newlib/newlib_init.c", "/opt/esp/idf/components/newlib/syscalls.c", "/opt/esp/idf/components/newlib/termios.c", "/opt/esp/idf/components/newlib/stdatomic.c", "/opt/esp/idf/components/newlib/time.c", "/opt/esp/idf/components/newlib/sysconf.c", "/opt/esp/idf/components/newlib/realpath.c", "/opt/esp/idf/components/newlib/scandir.c", "/opt/esp/idf/components/newlib/port/esp_time_impl.c" ],
+            "sources": [ "/opt/esp/idf/components/newlib/abort.c", "/opt/esp/idf/components/newlib/assert.c", "/opt/esp/idf/components/newlib/heap.c", "/opt/esp/idf/components/newlib/locks.c", "/opt/esp/idf/components/newlib/poll.c", "/opt/esp/idf/components/newlib/pthread.c", "/opt/esp/idf/components/newlib/random.c", "/opt/esp/idf/components/newlib/getentropy.c", "/opt/esp/idf/components/newlib/reent_init.c", "/opt/esp/idf/components/newlib/newlib_init.c", "/opt/esp/idf/components/newlib/syscalls.c", "/opt/esp/idf/components/newlib/termios.c", "/opt/esp/idf/components/newlib/stdatomic.c", "/opt/esp/idf/components/newlib/time.c", "/opt/esp/idf/components/newlib/sysconf.c", "/opt/esp/idf/components/newlib/realpath.c", "/opt/esp/idf/components/newlib/scandir.c", "/opt/esp/idf/components/newlib/port/esp_time_impl.c" ],
             "include_dirs": [ "platform_include" ]
         },
         "nvs_flash": {
@@ -910,8 +925,8 @@
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "file": "/project/examples/lcm/build/esp-idf/nvs_flash/libnvs_flash.a",
-            "sources": [ "/opt/esp/idf/components/nvs_flash/src/nvs_api.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_cxx_api.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_item_hash_list.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_page.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_pagemanager.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_storage.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_handle_simple.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_handle_locked.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_partition.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_partition_lookup.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_partition_manager.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_types.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_platform.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_bootloader.c", "/opt/esp/idf/components/nvs_flash/src/nvs_encrypted_partition.cpp" ],
-            "include_dirs": [ "include" ]
+            "sources": [ "/opt/esp/idf/components/nvs_flash/src/nvs_api.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_cxx_api.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_item_hash_list.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_page.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_pagemanager.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_storage.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_handle_simple.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_handle_locked.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_partition.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_partition_lookup.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_partition_manager.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_types.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_platform.cpp", "/opt/esp/idf/components/nvs_flash/src/nvs_encrypted_partition.cpp" ],
+            "include_dirs": [ "include", "../spi_flash/include" ]
         },
         "partition_table": {
             "alias": "idf::partition_table",
@@ -971,7 +986,7 @@
             "managed_priv_reqs": [],
             "file": "/project/examples/lcm/build/esp-idf/soc/libsoc.a",
             "sources": [ "/opt/esp/idf/components/soc/lldesc.c", "/opt/esp/idf/components/soc/dport_access_common.c", "/opt/esp/idf/components/soc/esp32/interrupts.c", "/opt/esp/idf/components/soc/esp32/gpio_periph.c", "/opt/esp/idf/components/soc/esp32/uart_periph.c", "/opt/esp/idf/components/soc/esp32/dport_access.c", "/opt/esp/idf/components/soc/esp32/adc_periph.c", "/opt/esp/idf/components/soc/esp32/emac_periph.c", "/opt/esp/idf/components/soc/esp32/spi_periph.c", "/opt/esp/idf/components/soc/esp32/ledc_periph.c", "/opt/esp/idf/components/soc/esp32/pcnt_periph.c", "/opt/esp/idf/components/soc/esp32/rmt_periph.c", "/opt/esp/idf/components/soc/esp32/sdm_periph.c", "/opt/esp/idf/components/soc/esp32/i2s_periph.c", "/opt/esp/idf/components/soc/esp32/i2c_periph.c", "/opt/esp/idf/components/soc/esp32/timer_periph.c", "/opt/esp/idf/components/soc/esp32/lcd_periph.c", "/opt/esp/idf/components/soc/esp32/mcpwm_periph.c", "/opt/esp/idf/components/soc/esp32/mpi_periph.c", "/opt/esp/idf/components/soc/esp32/sdmmc_periph.c", "/opt/esp/idf/components/soc/esp32/touch_sensor_periph.c", "/opt/esp/idf/components/soc/esp32/twai_periph.c", "/opt/esp/idf/components/soc/esp32/wdt_periph.c", "/opt/esp/idf/components/soc/esp32/dac_periph.c", "/opt/esp/idf/components/soc/esp32/rtc_io_periph.c", "/opt/esp/idf/components/soc/esp32/sdio_slave_periph.c" ],
-            "include_dirs": [ "include", "esp32", "esp32/include", "esp32/register" ]
+            "include_dirs": [ "include", "esp32", "esp32/include" ]
         },
         "spi_flash": {
             "alias": "idf::spi_flash",
@@ -1000,23 +1015,23 @@
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "file": "/project/examples/lcm/build/esp-idf/vfs/libvfs.a",
-            "sources": [ "/opt/esp/idf/components/vfs/vfs.c", "/opt/esp/idf/components/vfs/vfs_eventfd.c", "/opt/esp/idf/components/vfs/vfs_semihost.c", "/opt/esp/idf/components/vfs/nullfs.c" ],
+            "sources": [ "/opt/esp/idf/components/vfs/vfs.c", "/opt/esp/idf/components/vfs/vfs_eventfd.c", "/opt/esp/idf/components/vfs/vfs_semihost.c" ],
             "include_dirs": [ "include" ]
         },
-        "wolfssl": {
-            "alias": "idf::wolfssl",
-            "target": "___idf_wolfssl",
+        "wolfssl__wolfssl": {
+            "alias": "idf::wolfssl__wolfssl",
+            "target": "___idf_wolfssl__wolfssl",
             "prefix": "idf",
-            "dir": "/project/components/wolfssl",
+            "dir": "/project/examples/lcm/managed_components/wolfssl__wolfssl",
             "type": "LIBRARY",
-            "lib": "__idf_wolfssl",
+            "lib": "__idf_wolfssl__wolfssl",
             "reqs": [ "lwip" ],
-            "priv_reqs": [],
+            "priv_reqs": [ "esp-tls", "esp_timer", "driver" ],
             "managed_reqs": [],
             "managed_priv_reqs": [],
-            "file": "/project/examples/lcm/build/esp-idf/wolfssl/libwolfssl.a",
-            "sources": [ "/project/components/wolfssl/src/crl.c", "/project/components/wolfssl/src/dtls.c", "/project/components/wolfssl/src/dtls13.c", "/project/components/wolfssl/src/internal.c", "/project/components/wolfssl/src/keys.c", "/project/components/wolfssl/src/ocsp.c", "/project/components/wolfssl/src/quic.c", "/project/components/wolfssl/src/sniffer.c", "/project/components/wolfssl/src/ssl.c", "/project/components/wolfssl/src/ssl_load.c", "/project/components/wolfssl/src/ssl_p7p12.c", "/project/components/wolfssl/src/ssl_sess.c", "/project/components/wolfssl/src/tls.c", "/project/components/wolfssl/src/tls13.c", "/project/components/wolfssl/src/wolfio.c", "/project/components/wolfssl/wolfcrypt/src/aes.c", "/project/components/wolfssl/wolfcrypt/src/arc4.c", "/project/components/wolfssl/wolfcrypt/src/asm.c", "/project/components/wolfssl/wolfcrypt/src/asn.c", "/project/components/wolfssl/wolfcrypt/src/async.c", "/project/components/wolfssl/wolfcrypt/src/blake2b.c", "/project/components/wolfssl/wolfcrypt/src/blake2s.c", "/project/components/wolfssl/wolfcrypt/src/camellia.c", "/project/components/wolfssl/wolfcrypt/src/chacha.c", "/project/components/wolfssl/wolfcrypt/src/chacha20_poly1305.c", "/project/components/wolfssl/wolfcrypt/src/cmac.c", "/project/components/wolfssl/wolfcrypt/src/coding.c", "/project/components/wolfssl/wolfcrypt/src/compress.c", "/project/components/wolfssl/wolfcrypt/src/cpuid.c", "/project/components/wolfssl/wolfcrypt/src/cryptocb.c", "/project/components/wolfssl/wolfcrypt/src/curve25519.c", "/project/components/wolfssl/wolfcrypt/src/curve448.c", "/project/components/wolfssl/wolfcrypt/src/des3.c", "/project/components/wolfssl/wolfcrypt/src/dh.c", "/project/components/wolfssl/wolfcrypt/src/dilithium.c", "/project/components/wolfssl/wolfcrypt/src/dsa.c", "/project/components/wolfssl/wolfcrypt/src/ecc.c", "/project/components/wolfssl/wolfcrypt/src/ecc_fp.c", "/project/components/wolfssl/wolfcrypt/src/eccsi.c", "/project/components/wolfssl/wolfcrypt/src/ed25519.c", "/project/components/wolfssl/wolfcrypt/src/ed448.c", "/project/components/wolfssl/wolfcrypt/src/error.c", "/project/components/wolfssl/wolfcrypt/src/ext_kyber.c", "/project/components/wolfssl/wolfcrypt/src/ext_lms.c", "/project/components/wolfssl/wolfcrypt/src/ext_xmss.c", "/project/components/wolfssl/wolfcrypt/src/falcon.c", "/project/components/wolfssl/wolfcrypt/src/fe_448.c", "/project/components/wolfssl/wolfcrypt/src/fe_low_mem.c", "/project/components/wolfssl/wolfcrypt/src/fe_operations.c", "/project/components/wolfssl/wolfcrypt/src/fips.c", "/project/components/wolfssl/wolfcrypt/src/fips_test.c", "/project/components/wolfssl/wolfcrypt/src/ge_448.c", "/project/components/wolfssl/wolfcrypt/src/ge_low_mem.c", "/project/components/wolfssl/wolfcrypt/src/ge_operations.c", "/project/components/wolfssl/wolfcrypt/src/hash.c", "/project/components/wolfssl/wolfcrypt/src/hmac.c", "/project/components/wolfssl/wolfcrypt/src/hpke.c", "/project/components/wolfssl/wolfcrypt/src/integer.c", "/project/components/wolfssl/wolfcrypt/src/kdf.c", "/project/components/wolfssl/wolfcrypt/src/logging.c", "/project/components/wolfssl/wolfcrypt/src/md2.c", "/project/components/wolfssl/wolfcrypt/src/md4.c", "/project/components/wolfssl/wolfcrypt/src/md5.c", "/project/components/wolfssl/wolfcrypt/src/memory.c", "/project/components/wolfssl/wolfcrypt/src/pkcs12.c", "/project/components/wolfssl/wolfcrypt/src/pkcs7.c", "/project/components/wolfssl/wolfcrypt/src/poly1305.c", "/project/components/wolfssl/wolfcrypt/src/pwdbased.c", "/project/components/wolfssl/wolfcrypt/src/random.c", "/project/components/wolfssl/wolfcrypt/src/rc2.c", "/project/components/wolfssl/wolfcrypt/src/ripemd.c", "/project/components/wolfssl/wolfcrypt/src/rsa.c", "/project/components/wolfssl/wolfcrypt/src/sakke.c", "/project/components/wolfssl/wolfcrypt/src/selftest.c", "/project/components/wolfssl/wolfcrypt/src/sha.c", "/project/components/wolfssl/wolfcrypt/src/sha256.c", "/project/components/wolfssl/wolfcrypt/src/sha3.c", "/project/components/wolfssl/wolfcrypt/src/sha512.c", "/project/components/wolfssl/wolfcrypt/src/signature.c", "/project/components/wolfssl/wolfcrypt/src/siphash.c", "/project/components/wolfssl/wolfcrypt/src/sm2.c", "/project/components/wolfssl/wolfcrypt/src/sm3.c", "/project/components/wolfssl/wolfcrypt/src/sm4.c", "/project/components/wolfssl/wolfcrypt/src/sp_arm32.c", "/project/components/wolfssl/wolfcrypt/src/sp_arm64.c", "/project/components/wolfssl/wolfcrypt/src/sp_armthumb.c", "/project/components/wolfssl/wolfcrypt/src/sp_c32.c", "/project/components/wolfssl/wolfcrypt/src/sp_c64.c", "/project/components/wolfssl/wolfcrypt/src/sp_cortexm.c", "/project/components/wolfssl/wolfcrypt/src/sp_dsp32.c", "/project/components/wolfssl/wolfcrypt/src/sp_int.c", "/project/components/wolfssl/wolfcrypt/src/sp_x86_64.c", "/project/components/wolfssl/wolfcrypt/src/sphincs.c", "/project/components/wolfssl/wolfcrypt/src/srp.c", "/project/components/wolfssl/wolfcrypt/src/tfm.c", "/project/components/wolfssl/wolfcrypt/src/wc_dsp.c", "/project/components/wolfssl/wolfcrypt/src/wc_encrypt.c", "/project/components/wolfssl/wolfcrypt/src/wc_kyber.c", "/project/components/wolfssl/wolfcrypt/src/wc_kyber_poly.c", "/project/components/wolfssl/wolfcrypt/src/wc_lms.c", "/project/components/wolfssl/wolfcrypt/src/wc_lms_impl.c", "/project/components/wolfssl/wolfcrypt/src/wc_pkcs11.c", "/project/components/wolfssl/wolfcrypt/src/wc_port.c", "/project/components/wolfssl/wolfcrypt/src/wc_xmss.c", "/project/components/wolfssl/wolfcrypt/src/wc_xmss_impl.c", "/project/components/wolfssl/wolfcrypt/src/wolfcrypt_first.c", "/project/components/wolfssl/wolfcrypt/src/wolfcrypt_last.c", "/project/components/wolfssl/wolfcrypt/src/wolfevent.c", "/project/components/wolfssl/wolfcrypt/src/wolfmath.c", "/project/components/wolfssl/wolfcrypt/src/port/Espressif/esp32_aes.c", "/project/components/wolfssl/wolfcrypt/src/port/Espressif/esp32_mp.c", "/project/components/wolfssl/wolfcrypt/src/port/Espressif/esp32_sha.c", "/project/components/wolfssl/wolfcrypt/src/port/Espressif/esp32_util.c", "/project/components/wolfssl/wolfcrypt/src/port/Espressif/esp_sdk_mem_lib.c", "/project/components/wolfssl/wolfcrypt/src/port/Espressif/esp_sdk_time_lib.c", "/project/components/wolfssl/wolfcrypt/src/port/Espressif/esp_sdk_wifi_lib.c", "/project/components/wolfssl/wolfcrypt/src/port/atmel/atmel.c" ],
-            "include_dirs": [ "./include", "/project/components/wolfssl/", "/project/components/wolfssl/wolfssl/", "/project/components/wolfssl/wolfssl/wolfcrypt/", "/project/components/wolfssl/wolfssl/wolfcrypt/port/Espressif", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/include/freertos/", "/project/components/wolfssl/wolfssl/", "/project/components/wolfssl/wolfssl/wolfcrypt/" ]
+            "file": "/project/examples/lcm/build/esp-idf/wolfssl__wolfssl/libwolfssl__wolfssl.a",
+            "sources": [ "/project/examples/lcm/managed_components/wolfssl__wolfssl/src/crl.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/src/dtls.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/src/dtls13.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/src/internal.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/src/keys.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/src/ocsp.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/src/quic.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/src/sniffer.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/src/ssl.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/src/tls.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/src/tls13.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/src/wolfio.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/aes.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/arc4.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/asm.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/asn.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/async.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/blake2b.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/blake2s.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/camellia.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/chacha.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/chacha20_poly1305.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/cmac.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/coding.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/compress.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/cpuid.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/cryptocb.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/curve25519.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/curve448.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/des3.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/dh.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/dilithium.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/dsa.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/ecc.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/ecc_fp.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/eccsi.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/ed25519.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/ed448.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/error.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/ext_lms.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/ext_xmss.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/falcon.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/fe_448.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/fe_low_mem.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/fe_operations.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/fips.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/fips_test.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/ge_448.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/ge_low_mem.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/ge_operations.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/hash.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/hmac.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/hpke.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/integer.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/kdf.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/logging.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/md2.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/md4.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/md5.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/memory.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/pkcs12.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/pkcs7.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/poly1305.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/pwdbased.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/random.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/rc2.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/ripemd.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/rsa.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sakke.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/selftest.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sha.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sha256.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sha3.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sha512.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/signature.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/siphash.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sm2.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sm3.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sm4.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_arm32.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_arm64.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_armthumb.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_c32.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_c64.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_cortexm.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_dsp32.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_int.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sp_x86_64.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/sphincs.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/srp.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/tfm.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/wc_dsp.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/wc_encrypt.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/wc_kyber.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/wc_kyber_poly.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/wc_lms.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/wc_lms_impl.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/wc_pkcs11.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/wc_port.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/wc_xmss.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/wc_xmss_impl.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/wolfcrypt_first.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/wolfcrypt_last.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/wolfevent.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/wolfmath.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/port/Espressif/esp32_aes.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/port/Espressif/esp32_mp.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/port/Espressif/esp32_sha.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/port/Espressif/esp32_util.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/port/Espressif/esp_sdk_mem_lib.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/port/Espressif/esp_sdk_time_lib.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/port/Espressif/esp_sdk_wifi_lib.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/port/Espressif/esp_crt_bundle/esp_crt_bundle.c", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfcrypt/src/port/atmel/atmel.c" ],
+            "include_dirs": [ "./include", "/project/examples/lcm/managed_components/wolfssl__wolfssl/", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfssl/", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfssl/wolfcrypt/", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfssl/wolfcrypt/port/Espressif", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/include/freertos/", "/opt/esp/idf/components/esp_event/include", "/opt/esp/idf/components/esp_netif/include", "/opt/esp/idf/components/esp_wifi/include", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfssl/", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfssl/wolfcrypt/" ]
         },
         "wpa_supplicant": {
             "alias": "idf::wpa_supplicant",
@@ -1180,7 +1195,7 @@
             "priv_reqs": [ "http_parser", "esp_timer", "lwip" ],
             "managed_reqs": [],
             "managed_priv_reqs": [],
-            "include_dirs": [ "/project/examples/lcm/build", "esp-tls-crypto" ]
+            "include_dirs": [ "/opt/esp/idf/components/esp-tls", "esp-tls-crypto" ]
         },
         "esp_adc": {
             "alias": "idf::esp_adc",
@@ -1189,7 +1204,7 @@
             "dir": "/opt/esp/idf/components/esp_adc",
             "lib": "__idf_esp_adc",
             "reqs": [],
-            "priv_reqs": [ "esp_driver_gpio", "efuse", "esp_pm", "esp_ringbuf", "esp_mm", "esp_driver_i2s", "driver" ],
+            "priv_reqs": [ "driver", "esp_driver_gpio", "efuse", "esp_pm", "esp_ringbuf", "esp_mm" ],
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "include_dirs": [ "include", "interface", "esp32/include", "deprecated/include" ]
@@ -1225,7 +1240,7 @@
             "dir": "/opt/esp/idf/components/esp_coex",
             "lib": "__idf_esp_coex",
             "reqs": [],
-            "priv_reqs": [ "esp_timer", "esp_driver_gpio" ],
+            "priv_reqs": [ "esp_timer", "driver", "esp_event" ],
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "include_dirs": [ "include" ]
@@ -1633,10 +1648,10 @@
             "dir": "/opt/esp/idf/components/esp_hw_support",
             "lib": "__idf_esp_hw_support",
             "reqs": [ "soc" ],
-            "priv_reqs": [ "efuse", "spi_flash", "bootloader_support", "esp_security", "esp_driver_gpio", "esp_timer", "esp_pm", "esp_mm" ],
+            "priv_reqs": [ "efuse", "spi_flash", "bootloader_support", "esp_driver_gpio", "esp_timer", "esp_pm", "esp_mm" ],
             "managed_reqs": [],
             "managed_priv_reqs": [],
-            "include_dirs": [ "include", "include/soc", "include/soc/esp32", "dma/include", "ldo/include", "debug_probe/include" ]
+            "include_dirs": [ "include", "include/soc", "include/soc/esp32", "dma/include", "ldo/include" ]
         },
         "esp_lcd": {
             "alias": "idf::esp_lcd",
@@ -1705,7 +1720,7 @@
             "dir": "/opt/esp/idf/components/esp_partition",
             "lib": "__idf_esp_partition",
             "reqs": [],
-            "priv_reqs": [ "esp_system", "spi_flash", "partition_table", "bootloader_support", "app_update" ],
+            "priv_reqs": [ "esp_system", "bootloader_support", "spi_flash", "app_update", "partition_table" ],
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "include_dirs": [ "include" ]
@@ -1717,7 +1732,7 @@
             "dir": "/opt/esp/idf/components/esp_phy",
             "lib": "__idf_esp_phy",
             "reqs": [],
-            "priv_reqs": [ "nvs_flash", "esp_driver_gpio", "efuse", "esp_timer", "esp_wifi" ],
+            "priv_reqs": [ "nvs_flash", "driver", "efuse", "esp_timer", "esp_wifi" ],
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "include_dirs": [ "include", "esp32/include" ]
@@ -1741,7 +1756,7 @@
             "dir": "/opt/esp/idf/components/esp_psram",
             "lib": "__idf_esp_psram",
             "reqs": [],
-            "priv_reqs": [ "heap", "spi_flash", "esp_mm", "bootloader_support", "esp_driver_spi", "esp_driver_gpio" ],
+            "priv_reqs": [ "heap", "spi_flash", "esp_mm", "bootloader_support", "driver" ],
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "include_dirs": [ "include" ]
@@ -1768,19 +1783,7 @@
             "priv_reqs": [ "soc", "hal" ],
             "managed_reqs": [],
             "managed_priv_reqs": [],
-            "include_dirs": [ "include", "esp32/include", "esp32/include/esp32", "esp32" ]
-        },
-        "esp_security": {
-            "alias": "idf::esp_security",
-            "target": "___idf_esp_security",
-            "prefix": "idf",
-            "dir": "/opt/esp/idf/components/esp_security",
-            "lib": "__idf_esp_security",
-            "reqs": [],
-            "priv_reqs": [ "efuse", "esp_hw_support", "esp_system", "esp_timer" ],
-            "managed_reqs": [],
-            "managed_priv_reqs": [],
-            "include_dirs": [ "include" ]
+            "include_dirs": [ "include", "include/esp32", "esp32" ]
         },
         "esp_system": {
             "alias": "idf::esp_system",
@@ -1825,7 +1828,7 @@
             "dir": "/opt/esp/idf/components/esp_wifi",
             "lib": "__idf_esp_wifi",
             "reqs": [ "esp_event", "esp_phy", "esp_netif" ],
-            "priv_reqs": [ "esptool_py", "esp_pm", "esp_timer", "nvs_flash", "wpa_supplicant", "hal", "lwip", "esp_coex" ],
+            "priv_reqs": [ "driver", "esptool_py", "esp_pm", "esp_timer", "nvs_flash", "wpa_supplicant", "hal", "lwip", "esp_coex" ],
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "include_dirs": [ "include", "wifi_apps/include", "wifi_apps/nan_app/include", "include/local" ]
@@ -1837,7 +1840,7 @@
             "dir": "/opt/esp/idf/components/espcoredump",
             "lib": "__idf_espcoredump",
             "reqs": [],
-            "priv_reqs": [ "esp_partition", "spi_flash", "bootloader_support", "mbedtls", "esp_rom", "soc", "esp_system", "esp_driver_gpio" ],
+            "priv_reqs": [ "esp_partition", "spi_flash", "bootloader_support", "mbedtls", "esp_rom", "soc", "esp_system", "esp_driver_gpio", "driver" ],
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "include_dirs": [ "include" ]
@@ -1900,7 +1903,7 @@
             "priv_reqs": [ "soc" ],
             "managed_reqs": [],
             "managed_priv_reqs": [],
-            "include_dirs": [ "include", "tlsf" ]
+            "include_dirs": [ "include" ]
         },
         "http_parser": {
             "alias": "idf::http_parser",
@@ -1933,7 +1936,7 @@
             "dir": "/opt/esp/idf/components/ieee802154",
             "lib": "__idf_ieee802154",
             "reqs": [],
-            "priv_reqs": [ "esp_phy", "esp_timer", "esp_coex", "soc", "hal", "esp_pm" ],
+            "priv_reqs": [ "esp_phy", "driver", "esp_timer", "esp_coex", "soc", "hal" ],
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "include_dirs": [ "include" ]
@@ -2032,7 +2035,7 @@
             "priv_reqs": [ "spi_flash", "newlib" ],
             "managed_reqs": [],
             "managed_priv_reqs": [],
-            "include_dirs": [ "include" ]
+            "include_dirs": [ "include", "../spi_flash/include" ]
         },
         "nvs_sec_provider": {
             "alias": "idf::nvs_sec_provider",
@@ -2101,7 +2104,7 @@
             "dir": "/opt/esp/idf/components/protocomm",
             "lib": "__idf_protocomm",
             "reqs": [ "bt" ],
-            "priv_reqs": [ "protobuf-c", "mbedtls", "console", "esp_http_server", "esp_driver_uart" ],
+            "priv_reqs": [ "protobuf-c", "mbedtls", "console", "esp_http_server", "driver" ],
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "include_dirs": [ "include/common", "include/security", "include/transports", "include/crypto/srp6a", "proto-c" ]
@@ -2130,18 +2133,6 @@
             "managed_priv_reqs": [],
             "include_dirs": [ "include" ]
         },
-        "rt": {
-            "alias": "idf::rt",
-            "target": "___idf_rt",
-            "prefix": "idf",
-            "dir": "/opt/esp/idf/components/rt",
-            "lib": "__idf_rt",
-            "reqs": [],
-            "priv_reqs": [],
-            "managed_reqs": [],
-            "managed_priv_reqs": [],
-            "include_dirs": [ "include" ]
-        },
         "sdmmc": {
             "alias": "idf::sdmmc",
             "target": "___idf_sdmmc",
@@ -2164,7 +2155,7 @@
             "priv_reqs": [],
             "managed_reqs": [],
             "managed_priv_reqs": [],
-            "include_dirs": [ "include", "esp32", "esp32/include", "esp32/register" ]
+            "include_dirs": [ "include", "esp32", "esp32/include" ]
         },
         "spi_flash": {
             "alias": "idf::spi_flash",
@@ -2185,7 +2176,7 @@
             "dir": "/opt/esp/idf/components/spiffs",
             "lib": "__idf_spiffs",
             "reqs": [ "esp_partition" ],
-            "priv_reqs": [ "bootloader_support", "esptool_py", "vfs" ],
+            "priv_reqs": [ "bootloader_support", "esptool_py", "vfs", "spi_flash" ],
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "include_dirs": [ "include" ]
@@ -2316,7 +2307,7 @@
             "prefix": "idf",
             "dir": "/project/examples/lcm/main",
             "lib": "__idf_main",
-            "reqs": [ "freertos", "esp_wifi", "nvs_flash", "driver", "homekit" ],
+            "reqs": [ "freertos", "esp_wifi", "nvs_flash", "driver", "homekit", "esp_http_server" ],
             "priv_reqs": [],
             "managed_reqs": [],
             "managed_priv_reqs": [],
@@ -2340,35 +2331,11 @@
             "prefix": "idf",
             "dir": "/project/components/homekit",
             "lib": "__idf_homekit",
-            "reqs": [ "wolfssl", "esp_partition", "json", "http_parser", "spi_flash", "nvs_flash" ],
-            "priv_reqs": [ "espressif__mdns" ],
+            "reqs": [ "wolfssl__wolfssl", "esp_partition", "json", "http_parser", "spi_flash", "nvs_flash" ],
+            "priv_reqs": [ "espressif__mdns", "wolfssl__wolfssl" ],
             "managed_reqs": [],
-            "managed_priv_reqs": [ "espressif__mdns" ],
+            "managed_priv_reqs": [ "espressif__mdns", "wolfssl__wolfssl" ],
             "include_dirs": [ "include" ]
-        },
-        "wolfssl": {
-            "alias": "idf::wolfssl",
-            "target": "___idf_wolfssl",
-            "prefix": "idf",
-            "dir": "/project/components/wolfssl",
-            "lib": "__idf_wolfssl",
-            "reqs": [ "lwip" ],
-            "priv_reqs": [],
-            "managed_reqs": [],
-            "managed_priv_reqs": [],
-            "include_dirs": [ "./include", "/project/components/wolfssl/", "/project/components/wolfssl/wolfssl/", "/project/components/wolfssl/wolfssl/wolfcrypt/", "/project/components/wolfssl/wolfssl/wolfcrypt/port/Espressif", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/include/freertos/", "/project/components/wolfssl/wolfssl/", "/project/components/wolfssl/wolfssl/wolfcrypt/" ]
-        },
-        "ws2811": {
-            "alias": "idf::ws2811",
-            "target": "___idf_ws2811",
-            "prefix": "idf",
-            "dir": "/project/components/ws2811",
-            "lib": "__idf_ws2811",
-            "reqs": [ "driver" ],
-            "priv_reqs": [],
-            "managed_reqs": [],
-            "managed_priv_reqs": [],
-            "include_dirs": [ "." ]
         },
         "espressif__mdns": {
             "alias": "idf::espressif__mdns",
@@ -2381,7 +2348,26 @@
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "include_dirs": [ "include" ]
+        },
+        "wolfssl__wolfssl": {
+            "alias": "idf::wolfssl__wolfssl",
+            "target": "___idf_wolfssl__wolfssl",
+            "prefix": "idf",
+            "dir": "/project/examples/lcm/managed_components/wolfssl__wolfssl",
+            "lib": "__idf_wolfssl__wolfssl",
+            "reqs": [ "lwip" ],
+            "priv_reqs": [ "esp-tls", "esp_timer", "driver" ],
+            "managed_reqs": [],
+            "managed_priv_reqs": [],
+            "include_dirs": [ "./include", "/project/examples/lcm/managed_components/wolfssl__wolfssl/", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfssl/", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfssl/wolfcrypt/", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfssl/wolfcrypt/port/Espressif", "/opt/esp/idf/components/freertos/FreeRTOS-Kernel/include/freertos/", "/opt/esp/idf/components/esp_event/include", "/opt/esp/idf/components/esp_netif/include", "/opt/esp/idf/components/esp_wifi/include", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfssl/", "/project/examples/lcm/managed_components/wolfssl__wolfssl/wolfssl/wolfcrypt/" ]
         }
     },
-    "debug_prefix_map_gdbinit": ""
+    "debug_prefix_map_gdbinit": "",
+    "gdbinit_files": {
+        "01_symbols": "/project/examples/lcm/build/gdbinit/symbols",
+        "02_prefix_map": "/project/examples/lcm/build/gdbinit/prefix_map",
+        "03_py_extensions": "/project/examples/lcm/build/gdbinit/py_extensions",
+        "04_connect": "/project/examples/lcm/build/gdbinit/connect"
+    },
+    "debug_arguments_openocd": "-f board/esp32-wrover-kit-3.3v.cfg"
 }
