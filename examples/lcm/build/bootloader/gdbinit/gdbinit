@@ -1,2 +1,0 @@
-source /project/examples/lcm/build/bootloader/gdbinit/symbols
-source /project/examples/lcm/build/bootloader/gdbinit/connect
