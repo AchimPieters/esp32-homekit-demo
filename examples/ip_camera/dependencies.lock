@@ -1,0 +1,48 @@
+dependencies:
+  espressif/esp32-camera:
+    component_hash: c3eb05fbeeae884a23bed9b17d48d5f0da8872beadae0c0e747d2fbea6094f06
+    dependencies: []
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 2.0.15
+  espressif/esp_h264:
+    component_hash: fa5daaebc8a304f0b79bc57e51aab43e0a03eabc2ba3865bff4063c56b5d4564
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=4.4'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.0.4
+  espressif/mdns:
+    component_hash: af6306fe65d637a3683d1cf671508fcedd6b05f9ca029a8815abeab64001fb8d
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.4.0
+  idf:
+    source:
+      type: idf
+    version: 5.3.2
+  wolfssl/wolfssl:
+    component_hash: a6cd6a27ab3cc6874c3cff580c286e6a4f54c09216ca7f7d253c5cc7897baf8c
+    dependencies: []
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 5.7.4-preview1e
+direct_dependencies:
+- espressif/esp32-camera
+- espressif/esp_h264
+- espressif/mdns
+- idf
+- wolfssl/wolfssl
+manifest_hash: 2f7be8a47427970fea29e4bbd39884a5c1a7f43a781ceb5ef922d05e481ad3e3
+target: esp32
+version: 2.0.0
