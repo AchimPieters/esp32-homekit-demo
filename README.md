@@ -80,7 +80,7 @@ screen /dev/tty.usbserial-01FD1166 74880
 ```
 ---
 
-Made with by [StudioPieters®](https://www.studiopieters.nl)
+Made by [StudioPieters®](https://www.studiopieters.nl)
 
 ---
 
