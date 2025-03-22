@@ -1,12 +1,17 @@
-# Example for `LIGHT RGB STRIP`
+# Example for `Light RGB strip`
 
 ## What it does
 
-It's a Non-Addressable RGB LED Strip example for the HomeKit Demo. It is a code to turn ON and OFF or Set any color an RGB LED Strip connected to an ESP32 Module.
+This code is for an ESP32-based HomeKit-compatible RGB LED strip. It connects the ESP32 to WiFi and allows users to control the power (on/off), brightness, hue, and saturation of an RGB LED strip via Apple HomeKit.
+
+## Key Functions:
+- WiFi Management: Handles connection, reconnection, and IP assignment.
+- RGB LED Control: Uses PWM (Pulse Width Modulation) to adjust LED colors smoothly.
+- HSI to RGB Conversion: Converts Hue, Saturation, and Intensity (HSI) values to RGB.
+- HomeKit Integration: Enables control over power, brightness, hue, and saturation.
+- Accessory Identification: Implements a blinking pattern to help identify the device.
 
 ## Wiring
-
-Connect `RED LED'S`, `GREEN LED'S` and `BLUE LED'S` pin to the following pin:
 
 | Name | Description | Defaults |
 |------|-------------|----------|
@@ -16,10 +21,17 @@ Connect `RED LED'S`, `GREEN LED'S` and `BLUE LED'S` pin to the following pin:
 
 ## Scheme
 
-![alt text](./scheme.png)
+![HomeKit LED](https://raw.githubusercontent.com/AchimPieters/esp32-homekit-demo/refs/heads/main/examples/light_RGB_strip/scheme.png)
+
+## Requirements
+
+- **idf version:** `>=5.0`
+- **espressif/mdns version:** `1.8.0`
+- **wolfssl/wolfssl version:** `5.7.6`
+- **achimpieters/esp32-homekit version:** `1.0.0`
 
 ## Notes
 
-- Choose your GPIO's numbers under `StudioPieters` in `menuconfig`. The default is `25` for the RED LED'S,`26` for the GREEN LED'S adn `27` for the RED LED'S (On an ESP32 WROOM 32D).
+- Choose your GPIO number under `StudioPieters` in `menuconfig`. The default is `2` (On an ESP32 WROOM 32D).
 - Set your `WiFi SSID` and `WiFi Password` under `StudioPieters` in `menuconfig`.
-- Optional: You can change `HomeKit Setup Code` and `HomeKit Setup ID` under `StudioPieters` in `menuconfig`. (Note:  you need to make a new QR-CODE To make it work)
+- **Optional:** You can change `HomeKit Setup Code` and `HomeKit Setup ID` under `StudioPieters` in `menuconfig`. _(Note: you need to make a new QR-CODE to make it work.)_

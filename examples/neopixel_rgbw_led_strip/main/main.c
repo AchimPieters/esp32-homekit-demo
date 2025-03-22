@@ -1,5 +1,5 @@
 /**
-   Copyright 2024 Achim Pieters | StudioPieters®
+   Copyright 2025 Achim Pieters | StudioPieters®
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
@@ -32,10 +32,8 @@
 #include <homekit/homekit.h>
 #include <homekit/characteristics.h>
 #include <led_strip.h>
-#include <led_strip_rmt.h>
 #include <math.h>
 
-// Macros and Definitions
 #define CHECK_ERROR(x) do { \
                 esp_err_t __err_rc = (x); \
                 if (__err_rc != ESP_OK) { \
@@ -48,14 +46,12 @@
 #define LED_STRIP_LENGTH CONFIG_ESP_STRIP_LENGTH
 #define DEG_TO_RAD(X) (M_PI*(X)/180)
 
-// Static Declarations
 static led_strip_handle_t led_strip;
 static bool led_on = false;
 static float led_brightness = 50;
-static float led_hue = 180; // 0 to 360
-static float led_saturation = 50; // 0 to 100
+static float led_hue = 180;
+static float led_saturation = 50;
 
-// Error Handling
 static void handle_error(esp_err_t err) {
         if (err == ESP_ERR_WIFI_NOT_STARTED || err == ESP_ERR_WIFI_CONN) {
                 ESP_LOGI("INFORMATION", "Restarting WiFi...");
@@ -67,7 +63,8 @@ static void handle_error(esp_err_t err) {
         }
 }
 
-// Event Handler
+static void on_wifi_ready(void);
+
 static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
         if (event_base == WIFI_EVENT) {
                 if (event_id == WIFI_EVENT_STA_START || event_id == WIFI_EVENT_STA_DISCONNECTED) {
@@ -80,7 +77,6 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
         }
 }
 
-// WiFi Initialization
 static void wifi_init() {
         CHECK_ERROR(esp_netif_init());
         CHECK_ERROR(esp_event_loop_create_default());
@@ -106,14 +102,13 @@ static void wifi_init() {
         CHECK_ERROR(esp_wifi_start());
 }
 
-// LED Control
 static void hsi2rgbw(float H, float S, float I, int* rgbw) {
         int r = 0, g = 0, b = 0, w = 0;
         float cos_h, cos_1047_h;
 
-        H = fmod(H, 360); // Cycle H around to 0-360 degrees
-        H = DEG_TO_RAD(H); // Convert to radians.
-        S = fminf(fmaxf(S, 0), 1); // Clamp S and I to interval [0,1]
+        H = fmod(H, 360);
+        H = DEG_TO_RAD(H);
+        S = fminf(fmaxf(S, 0), 1);
         I = fminf(fmaxf(I, 0), 1);
 
         if (H < 2.09439) {
@@ -161,21 +156,22 @@ static void led_strip_init() {
         led_strip_config_t strip_config = {
                 .strip_gpio_num = LED_STRIP_GPIO,
                 .max_leds = LED_STRIP_LENGTH,
-                .led_pixel_format = LED_PIXEL_FORMAT_GRBW,
-                .led_model = LED_MODEL_SK6812,
-                .flags.invert_out = false,
+                .flags = {
+                        .invert_out = false,
+                },
         };
 
         led_strip_rmt_config_t rmt_config = {
                 .clk_src = RMT_CLK_SRC_DEFAULT,
                 .resolution_hz = 10 * 1000 * 1000,
-                .flags.with_dma = false,
+                .flags = {
+                        .with_dma = false,
+                },
         };
 
         CHECK_ERROR(led_strip_new_rmt_device(&strip_config, &rmt_config, &led_strip));
 }
 
-// Accessory Identification
 static void accessory_identify_task(void *args) {
         for (int i = 0; i < 3; i++) {
                 led_write(true);
@@ -193,11 +189,7 @@ static void accessory_identify(homekit_value_t _value) {
         xTaskCreate(accessory_identify_task, "Accessory identify", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
 }
 
-// HomeKit Characteristics
-static homekit_value_t led_on_get() {
-        return HOMEKIT_BOOL(led_on);
-}
-
+static homekit_value_t led_on_get() { return HOMEKIT_BOOL(led_on); }
 static void led_on_set(homekit_value_t value) {
         if (value.format == homekit_format_bool) {
                 led_on = value.bool_value;
@@ -205,10 +197,7 @@ static void led_on_set(homekit_value_t value) {
         }
 }
 
-static homekit_value_t led_brightness_get() {
-        return HOMEKIT_INT(led_brightness);
-}
-
+static homekit_value_t led_brightness_get() { return HOMEKIT_INT(led_brightness); }
 static void led_brightness_set(homekit_value_t value) {
         if (value.format == homekit_format_int) {
                 led_brightness = value.int_value;
@@ -216,10 +205,7 @@ static void led_brightness_set(homekit_value_t value) {
         }
 }
 
-static homekit_value_t led_hue_get() {
-        return HOMEKIT_FLOAT(led_hue);
-}
-
+static homekit_value_t led_hue_get() { return HOMEKIT_FLOAT(led_hue); }
 static void led_hue_set(homekit_value_t value) {
         if (value.format == homekit_format_float) {
                 led_hue = value.float_value;
@@ -227,10 +213,7 @@ static void led_hue_set(homekit_value_t value) {
         }
 }
 
-static homekit_value_t led_saturation_get() {
-        return HOMEKIT_FLOAT(led_saturation);
-}
-
+static homekit_value_t led_saturation_get() { return HOMEKIT_FLOAT(led_saturation); }
 static void led_saturation_set(homekit_value_t value) {
         if (value.format == homekit_format_float) {
                 led_saturation = value.float_value;
@@ -238,7 +221,6 @@ static void led_saturation_set(homekit_value_t value) {
         }
 }
 
-// HomeKit Accessory Configuration
 #define DEVICE_NAME "HomeKit RGBW Light"
 #define DEVICE_MANUFACTURER "StudioPieters®"
 #define DEVICE_SERIAL "NLDA4SQN1466"
@@ -251,6 +233,8 @@ static homekit_characteristic_t serial = HOMEKIT_CHARACTERISTIC_(SERIAL_NUMBER, 
 static homekit_characteristic_t model = HOMEKIT_CHARACTERISTIC_(MODEL, DEVICE_MODEL);
 static homekit_characteristic_t revision = HOMEKIT_CHARACTERISTIC_(FIRMWARE_REVISION, FW_VERSION);
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverride-init"
 static homekit_accessory_t *accessories[] = {
         HOMEKIT_ACCESSORY(.id = 1, .category = homekit_accessory_category_lighting, .services = (homekit_service_t*[]) {
                 HOMEKIT_SERVICE(ACCESSORY_INFORMATION, .characteristics = (homekit_characteristic_t*[]) {
@@ -264,32 +248,17 @@ static homekit_accessory_t *accessories[] = {
                 }),
                 HOMEKIT_SERVICE(LIGHTBULB, .primary = true, .characteristics = (homekit_characteristic_t*[]) {
                         HOMEKIT_CHARACTERISTIC(NAME, "HomeKit RGBW Light"),
-                        HOMEKIT_CHARACTERISTIC(
-                                ON, true,
-                                .getter = led_on_get,
-                                .setter = led_on_set
-                                ),
-                        HOMEKIT_CHARACTERISTIC(
-                                BRIGHTNESS, 100,
-                                .getter = led_brightness_get,
-                                .setter = led_brightness_set
-                                ),
-                        HOMEKIT_CHARACTERISTIC(
-                                HUE, 0,
-                                .getter = led_hue_get,
-                                .setter = led_hue_set
-                                ),
-                        HOMEKIT_CHARACTERISTIC(
-                                SATURATION, 0,
-                                .getter = led_saturation_get,
-                                .setter = led_saturation_set
-                                ),
+                        HOMEKIT_CHARACTERISTIC(ON, true, .getter = led_on_get, .setter = led_on_set),
+                        HOMEKIT_CHARACTERISTIC(BRIGHTNESS, 100, .getter = led_brightness_get, .setter = led_brightness_set),
+                        HOMEKIT_CHARACTERISTIC(HUE, 0, .getter = led_hue_get, .setter = led_hue_set),
+                        HOMEKIT_CHARACTERISTIC(SATURATION, 0, .getter = led_saturation_get, .setter = led_saturation_set),
                         NULL
                 }),
                 NULL
         }),
         NULL
 };
+#pragma GCC diagnostic pop
 
 static homekit_server_config_t config = {
         .accessories = accessories,
@@ -297,13 +266,11 @@ static homekit_server_config_t config = {
         .setupId = CONFIG_ESP_SETUP_ID,
 };
 
-// WiFi Ready Handler
 static void on_wifi_ready() {
         ESP_LOGI("INFORMATION", "Starting HomeKit server...");
         homekit_server_init(&config);
 }
 
-// Main Application
 void app_main(void) {
         esp_err_t ret = nvs_flash_init();
         if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {

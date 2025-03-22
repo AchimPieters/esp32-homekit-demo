@@ -1,45 +1,37 @@
-# WORK IN PROGRESS
-
-# Example for `LSC Smart Power Plug`
+# Example for `HomeKit Smart Plug`
 
 ## What it does
 
-It's a "Hello World" example for the HomeKit Demo. It is a code to turn ON and OFF an LED connected to an ESP Module.
+This code is for an ESP32-based HomeKit-compatible smart plug. It connects the ESP32 to WiFi and allows users to control the power state (on/off) via Apple HomeKit. The plug can also be controlled with a physical button.
 
-Brand: LSC (Smart Connect)
-Product: Smart Power Plug
-VERSION: 970762 | 970764 | 970766
-ART. No 2578685
+## Key Functions:
+- **WiFi Management:** Handles connection, reconnection, and IP assignment.
+- **Relay Control:** Manages turning the smart plug on and off.
+- **HomeKit Integration:** Enables control over power state and provides status updates.
+- **Button Support:** Supports single press, double press, and long press for different actions.
+- **Accessory Identification:** Implements a blinking pattern to help identify the device.
 
 ## Wiring
 
-Connect `LED` pin to the following pin:
-
 | Name | Description | Defaults |
 |------|-------------|----------|
-| `CONFIG_ESP_RELAY_GPIO` | GPIO number for `RELAY` pin | "18" Default |
-| `CONFIG_ESP_BUTTON_GPIO` | GPIO number for `BUTTON` pin | "10" Default |
-| `CONFIG_ESP_RED_LED_GPIO` | GPIO number for `RED_LED` pin | "7" Default |
-| `CONFIG_ESP_BLUE_LED_GPIO` | GPIO number for `BLUE_LED` pin | "4" Default |
+| `CONFIG_ESP_BUTTON_GPIO` | GPIO number for the `Button` | "0" Default |
+| `CONFIG_ESP_BLUE_LED_GPIO` | GPIO number for the `Status LED` | "2" Default |
+| `CONFIG_ESP_RELAY_GPIO` | GPIO number for the `Relay` | "5" Default |
 
 ## Scheme
 
-![alt text](./scheme.png)
+![HomeKit LED](https://raw.githubusercontent.com/AchimPieters/esp32-homekit-demo/refs/heads/main/examples/lsc_smart_plug/scheme.png)
 
 ## Requirements
 
-Currently, a preview release is available, and can be installed like this:
-
-```
-idf.py add-dependency "wolfssl/wolfssl^5.7.1-preview2e"
-```
-
-To enable support for Apple HomeKit, be sure to check the respective box in `idf.py menuconfig`.
-
-The local `sdkconfig.defaults` has been edited to enable the wolfSSL support for Apple HomeKit by default.
+- **idf version:** `>=5.0`
+- **espressif/mdns version:** `1.8.0`
+- **wolfssl/wolfssl version:** `5.7.6`
+- **achimpieters/esp32-homekit version:** `1.0.0`
 
 ## Notes
 
 - Choose your GPIO number under `StudioPieters` in `menuconfig`. The default is `2` (On an ESP32 WROOM 32D).
 - Set your `WiFi SSID` and `WiFi Password` under `StudioPieters` in `menuconfig`.
-- Optional: You can change `HomeKit Setup Code` and `HomeKit Setup ID` under `StudioPieters` in `menuconfig`. (Note:  you need to make a new QR-CODE To make it work)
+- **Optional:** You can change `HomeKit Setup Code` and `HomeKit Setup ID` under `StudioPieters` in `menuconfig`. _(Note: you need to make a new QR-CODE to make it work.)_

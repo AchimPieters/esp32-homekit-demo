@@ -1,13 +1,17 @@
-# Example for `LIGHT SENSOR`
+# Example for `Light sensor`
 
 ## What it does
 
-It shows illuminance in lux in a loop.
+This code is for an ESP32-based HomeKit-compatible light sensor. It connects the ESP32 to WiFi and integrates a BH1750 ambient light sensor, allowing users to monitor lux levels (light intensity) via Apple HomeKit.
+
+## Key Functions:
+
+- WiFi Management: Ensures a stable network connection.
+- Light Sensing: Uses an I2C-based BH1750 sensor to measure ambient light levels.
+- HomeKit Integration: Exposes real-time light intensity (lux) as a HomeKit characteristic.
+- Accessory Identification: Implements an LED blinking pattern for device recognition.
 
 ## Wiring
-
-Connect `SCL` and `SDA` pins to the following pins with appropriate pull-up
-resistors.
 
 | Name | Description | Defaults |
 |------|-------------|----------|
@@ -16,10 +20,17 @@ resistors.
 
 ## Scheme
 
-![alt text](./scheme.png)
+![HomeKit LED](https://raw.githubusercontent.com/AchimPieters/esp32-homekit-demo/refs/heads/main/examples/light_sensor/scheme.png)
+
+## Requirements
+
+- **idf version:** `>=5.0`
+- **espressif/mdns version:** `1.8.0`
+- **wolfssl/wolfssl version:** `5.7.6`
+- **achimpieters/esp32-homekit version:** `1.0.0`
 
 ## Notes
 
 - Choose your GPIO number under `StudioPieters` in `menuconfig`. The default is `2` (On an ESP32 WROOM 32D).
 - Set your `WiFi SSID` and `WiFi Password` under `StudioPieters` in `menuconfig`.
-- Optional: You can change `HomeKit Setup Code` and `HomeKit Setup ID` under `StudioPieters` in `menuconfig`. (Note:  you need to make a new QR-CODE To make it work)
+- **Optional:** You can change `HomeKit Setup Code` and `HomeKit Setup ID` under `StudioPieters` in `menuconfig`. _(Note: you need to make a new QR-CODE to make it work.)_

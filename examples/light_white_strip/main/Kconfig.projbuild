@@ -12,23 +12,17 @@ menu "StudioPieters"
               help
                   WiFi password (WPA or WPA2) for the example to use.
 
-      config ESP_RED_LED_GPIO
-              int "Set the GPIO for the Red LED's"
+      config ESP_WW_LED_GPIO
+              int "Set the GPIO for the Warm White LED's"
               default 25
               help
-                  The GPIO number the Red LED's are connected to.
+                  The GPIO number the Warm White LED's are connected to.
 
-      config ESP_GREEN_LED_GPIO
-              int "Set the GPIO for the Green LED's"
+      config ESP_CW_LED_GPIO
+              int "Set the GPIO for the Cool White LED's"
               default 26
               help
-                  The GPIO number the Green LED's are connected to.
-
-      config ESP_BLUE_LED_GPIO
-              int "Set the GPIO for the Blue LED's"
-              default 27
-              help
-                  The GPIO number the Blue LED's are connected to.
+                  The GPIO number the Cool White LED's are connected to.
 
       config ESP_SETUP_CODE
               string "HomeKit Setup Code"

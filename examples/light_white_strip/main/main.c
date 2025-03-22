@@ -1,5 +1,5 @@
 /**
-   Copyright 2024 Achim Pieters | StudioPieters®
+   Copyright 2025 Achim Pieters | StudioPieters®
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
@@ -240,6 +240,18 @@ static void led_brightness_cw_set(homekit_value_t value) {
         }
         led_brightness_cw = value.int_value;
 }
+// HomeKit characteristics
+#define DEVICE_NAME "HomeKit White Strip"
+#define DEVICE_MANUFACTURER "StudioPieters®"
+#define DEVICE_SERIAL "NLDA4SQN1466"
+#define DEVICE_MODEL "SD466NL/A"
+#define FW_VERSION "0.0.1"
+
+homekit_characteristic_t name = HOMEKIT_CHARACTERISTIC_(NAME, DEVICE_NAME);
+homekit_characteristic_t manufacturer = HOMEKIT_CHARACTERISTIC_(MANUFACTURER,  DEVICE_MANUFACTURER);
+homekit_characteristic_t serial = HOMEKIT_CHARACTERISTIC_(SERIAL_NUMBER, DEVICE_SERIAL);
+homekit_characteristic_t model = HOMEKIT_CHARACTERISTIC_(MODEL, DEVICE_MODEL);
+homekit_characteristic_t revision = HOMEKIT_CHARACTERISTIC_(FIRMWARE_REVISION, FW_VERSION);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverride-init"
@@ -300,6 +312,5 @@ void app_main(void) {
         CHECK_ERROR(ret);
 
         wifi_init();
-        gpio_init();
-        ledc();
+        xTaskCreate(ledc_task, "ledc_task", 2048, NULL, 5, NULL);
 }

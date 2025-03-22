@@ -1,5 +1,5 @@
 /**
-   Copyright 2024 Achim Pieters | StudioPieters®
+   Copyright 2025 Achim Pieters | StudioPieters®
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal

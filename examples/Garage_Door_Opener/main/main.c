@@ -94,6 +94,24 @@ static void wifi_init() {
         CHECK_ERROR(esp_wifi_start());
 }
 
+#define LED_GPIO            CONFIG_ESP_LED_GPIO
+#define RELAY_OPEN_GPIO     CONFIG_ESP_RELAY_OPEN_GPIO
+#define RELAY_CLOSE_GPIO    CONFIG_ESP_RELAY_CLOSE_GPIO
+#define REED_OPEN_GPIO      CONFIG_ESP_REED_OPEN_GPIO
+#define REED_CLOSE_GPIO     CONFIG_ESP_REED_CLOSE_GPIO
+
+bool led_on = false; // Define the LED state variable
+bool relay_open = false;
+bool relay_closed = false;
+
+#define HOMEKIT_CHARACTERISTIC_CURRENT_DOOR_STATE_CLOSED 0
+#define HOMEKIT_CHARACTERISTIC_CURRENT_DOOR_STATE_OPEN 1
+#define HOMEKIT_CHARACTERISTIC_TARGET_DOOR_STATE_CLOSED 0
+#define HOMEKIT_CHARACTERISTIC_TARGET_DOOR_STATE_OPEN 1
+
+uint32_t door_operation_start_time = 0;
+#define MAX_DOOR_OPERATION_TIME CONFIG_ESP_DELAY
+
 static void led_write(bool on) {
         gpio_set_level(LED_GPIO, on ? 1 : 0);
 }

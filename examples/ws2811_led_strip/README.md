@@ -1,26 +1,58 @@
-# WORK IN PROGRESS
-
-# Example for `RGBW LED STRIP`
+# Example for `HomeKit RGBW Light`
 
 ## What it does
 
-Based on a NEO-Pixel SK6812, RGBW LED strip. ON/OFF, Brightness, HUE, Color temperature and Saturation.
+This example implements a full-featured RGBW smart light accessory for Apple HomeKit using an ESP32. It supports RGB color control, brightness adjustment, and white temperature tuning (from warm to cool white) using both an addressable LED strip and two separate white LEDs controlled by PWM.
 
-## Wiring
+## Features
 
-Connect `RGBW LED STRIP` pin to the following pin:
+- RGB color control (Hue, Saturation)
+- Brightness adjustment
+- Color temperature control (Warm White ↔ Cold White)
+- WiFi auto-connect and error handling
+- HomeKit accessory identification (blinking LED effect)
+- Compatible with Apple Home
 
-| Name | Description | Defaults |
-|------|-------------|----------|
-| `CONFIG_ESP_LED_GPIO` | GPIO number for `LED` pin | "2" Default |
+## Hardware Setup
+
+| Name                     | Description                        | Default |
+|--------------------------|------------------------------------|---------|
+| `CONFIG_ESP_LED_GPIO`    | GPIO connected to RGBW LED strip   | `18`    |
+| `CONFIG_ESP_STRIP_LENGTH`| Number of LEDs in the strip        | `8`     |
+| `GPIO_WARM_WHITE`        | GPIO for warm white LED (PWM)      | `18`    |
+| `GPIO_COLD_WHITE`        | GPIO for cold white LED (PWM)      | `19`    |
+
+This setup uses both a digital RGBW LED strip (like **SK6812**) and **two PWM-controlled white LEDs** (warm & cold white) to simulate tunable white lighting via color temperature.
+
+## Color Temperature Control
+
+HomeKit controls color temperature using **Mirek** units (1,000,000 / Kelvin). This example converts between Kelvin ↔ Mirek automatically.
+
+Supported range:
+
+- Warm White: ~2700K
+- Neutral: ~4000K
+- Cool White: ~6500K
 
 ## Scheme
 
-![alt text](./scheme.png)
+![HomeKit RGBW Light](https://www.studiopieters.nl/wp-content/uploads/2025/03/homekit_rgbw_light_temp.png)
 
-## Notes
+## Requirements
 
-- Choose your GPIO number under `StudioPieters` in `menuconfig`. The default is `2` (On an ESP32 WROOM 32D).
-- Choose your strip length under `StudioPieters` in `menuconfig`. The default is `3`.
-- Set your `WiFi SSID` and `WiFi Password` under `StudioPieters` in `menuconfig`.
-- Optional: You can change `HomeKit Setup Code` and `HomeKit Setup ID` under `StudioPieters` in `menuconfig`. (Note:  you need to make a new QR-CODE To make it work)
+- **idf version:** `>=5.0`
+- **espressif/mdns version:** `1.8.0`
+- **wolfssl/wolfssl version:** `5.7.6`
+- **achimpieters/esp32-homekit version:** `1.0.0`
+
+## Configuration
+
+- Set your Wi-Fi credentials under `menuconfig → StudioPieters`
+- Set LED GPIO pins and strip length
+- Set HomeKit Setup Code and Setup ID (optional, if you want a custom pairing code)
+
+---
+
+This example is ideal for creating a **HomeKit Tunable RGBW Light**, **color-adjustable LED ceiling fixture**, or **DIY smart lighting** setup.
+
+Control everything from your iPhone, iPad, or via Siri.

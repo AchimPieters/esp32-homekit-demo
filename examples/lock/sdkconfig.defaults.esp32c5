@@ -1,5 +1,0 @@
-
-
-CONFIG_PARTITION_TABLE_CUSTOM=y
-CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions/partitions_esp32c5.csv"
-CONFIG_PARTITION_TABLE_FILENAME="partitions/partitions_esp32c5.csv"

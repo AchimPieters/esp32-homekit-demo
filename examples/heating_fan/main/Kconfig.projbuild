@@ -25,7 +25,6 @@ menu "StudioPieters"
               help
                   This the default GPIO of the Program button of an ESP board.
 
-
       config SHT3X_I2C_ADDRESS
               hex "I2C address of the SHT3X sensor"
               default 0x44

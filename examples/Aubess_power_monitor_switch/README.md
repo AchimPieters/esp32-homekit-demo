@@ -1,10 +1,17 @@
-# WORK IN PROGRESS
-
-# Example for `Aubess Power Monitor Switch`
+# Example for `Aubess power monitor switch`
 
 ## What it does
 
-It's a example for the Aubess Power Monitor Switch module. It is a code to turn ON and OFF Power through HomeKit and a wall switch, Its also capable of monitoring its power consumption.
+This code is for an ESP32-based HomeKit-compatible power monitoring switch. It integrates a relay switch, an LED indicator, and a BL0942 energy meter to measure current (A), voltage (V), and power (W), all accessible through Apple HomeKit.
+
+# Code state: Alfa; This code is still being worked on!
+
+## Key Functions:
+- WiFi Management: Ensures network connectivity.
+- Power Monitoring: Reads current, voltage, and power consumption from the BL0942 energy meter via UART.
+- Relay Control: Turns an electrical device on or off.
+- HomeKit Integration: Exposes switch control and real-time power data (A/V/W).
+- LED Indicator & Identification: Provides status feedback and device identification.
 
 ## Wiring
 
@@ -21,22 +28,17 @@ Connect `Aubess Power Monitor Switch` pin to the following pin:
 
 ## Scheme
 
-![alt text](./scheme.png)
+![HomeKit LED](https://raw.githubusercontent.com/AchimPieters/esp32-homekit-demo/refs/heads/main/examples/Aubess_power_monitor_switch/scheme.png)
 
 ## Requirements
 
-Currently, a preview release is available, and can be installed like this:
-
-```
-idf.py add-dependency "wolfssl/wolfssl^5.7.1-preview2e"
-```
-
-To enable support for Apple HomeKit, be sure to check the respective box in `idf.py menuconfig`.
-
-The local `sdkconfig.defaults` has been edited to enable the wolfSSL support for Apple HomeKit by default.
+- **idf version:** `>=5.0`
+- **espressif/mdns version:** `1.8.0`
+- **wolfssl/wolfssl version:** `5.7.6`
+- **achimpieters/esp32-homekit version:** `1.0.0`
 
 ## Notes
 
 - Choose your GPIO number under `StudioPieters` in `menuconfig`. The default is `2` (On an ESP32 WROOM 32D).
 - Set your `WiFi SSID` and `WiFi Password` under `StudioPieters` in `menuconfig`.
-- Optional: You can change `HomeKit Setup Code` and `HomeKit Setup ID` under `StudioPieters` in `menuconfig`. (Note:  you need to make a new QR-CODE To make it work)
+- **Optional:** You can change `HomeKit Setup Code` and `HomeKit Setup ID` under `StudioPieters` in `menuconfig`. _(Note: you need to make a new QR-CODE to make it work.)_

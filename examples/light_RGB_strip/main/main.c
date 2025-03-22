@@ -1,5 +1,5 @@
 /**
-   Copyright 2024 Achim Pieters | StudioPieters®
+   Copyright 2025 Achim Pieters | StudioPieters®
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
@@ -190,7 +190,7 @@ static void ledc_task(void *pvParameters) {
                 if (led_on) {
                         hsi2rgb(led_hue, led_saturation, led_brightness, &target_color);
                 } else {
-                        target_color = (rgb_color_t){0, 0, 0};
+                        target_color = (rgb_color_t){{0, 0, 0, 0}};
                 }
 
                 // Apply low-pass filter to smoothly transition to target color
