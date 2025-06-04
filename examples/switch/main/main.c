@@ -35,7 +35,6 @@
 #include <homekit/homekit.h>
 #include <homekit/characteristics.h>
 
-// Removed: #include <button.h>
 
 // Logging tag
 static const char *TAG = "HOMEKIT_SWITCH";
@@ -186,7 +185,7 @@ static void switch_on_callback(homekit_characteristic_t *_ch,
 // Single/Double/Long Press Logic
 // =============================
 
-// Define the event type that used to come from <button.h>
+// Define button event types
 typedef enum {
     button_event_single_press,
     button_event_double_press,
@@ -221,7 +220,7 @@ static void button_callback(button_event_t event, void *context) {
 }
 
 // =============================
-// Replacement for <button.h>
+// Button event handling
 // =============================
 static QueueHandle_t button_evt_queue = NULL;
 
@@ -405,7 +404,7 @@ void app_main(void) {
     // Setup Wi-Fi, I/O, and Button
     wifi_init();
     gpio_init();
-    button_init(); // Replaces the old code that used button_create(...)
+    button_init(); // Initialize button handling
 
     // Done. The rest is event-driven via ISR + tasks.
 }
