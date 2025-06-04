@@ -39,7 +39,7 @@ extern homekit_characteristic_t custom_watt;
 
 #define HOMEKIT_CHARACTERISTIC_CUSTOM_AMMONIUM_LEVEL HOMEKIT_CUSTOM_UUID_DBB("F0000005")
 #define HOMEKIT_DECLARE_CHARACTERISTIC_CUSTOM_AMMONIUM_LEVEL(_value, ...) .type = HOMEKIT_CHARACTERISTIC_CUSTOM_AMMONIUM_LEVEL, \
-        .description = "Amonium Level", \
+        .description = "Ammonium Level", \
         .format = homekit_format_float, \
         .permissions = homekit_permissions_paired_read \
                        | homekit_permissions_notify, \
