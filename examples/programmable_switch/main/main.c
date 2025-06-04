@@ -35,7 +35,6 @@
 #include <homekit/homekit.h>
 #include <homekit/characteristics.h>
 
-// Removed: #include <button.h>
 
 // =======================
 // Error handling macros
@@ -161,8 +160,7 @@ void button_identify(homekit_value_t _value) {
 homekit_characteristic_t button_event =
     HOMEKIT_CHARACTERISTIC_(PROGRAMMABLE_SWITCH_EVENT, 0);
 
-// Original callback function that used to come from <button.h> logic
-// We'll define an enum for these events
+// Custom button event types
 typedef enum {
     button_event_single_press,
     button_event_double_press,
@@ -191,7 +189,7 @@ void button_callback(custom_button_event_t event, void *context) {
 }
 
 // ===============================================
-// Replace <button.h> with native ESP-IDF logic
+// Button implementation using ESP-IDF APIs
 // ===============================================
 
 // We'll track press times for single/double/long press
@@ -377,7 +375,5 @@ void app_main(void) {
     // Wi-Fi, GPIO, Button
     wifi_init();
     gpio_init();
-    custom_button_init();  // Replaces button_create(...)
-
-    // No more references to the old <button.h> library
+    custom_button_init();  // Initialize button handling
 }
