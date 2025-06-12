@@ -13,23 +13,23 @@ void hsi2rgbw(float H, float S, float I, int *rgbw) {
     if (H < 2.09439f) {
         cos_h = cosf(H);
         cos_1047_h = cosf(1.047196667f - H);
-        r = S * 255 * I / 3 * (1 + cos_h / cos_1047_h);
-        g = S * 255 * I / 3 * (1 + (1 - cos_h / cos_1047_h));
-        w = 255 * (1 - S) * I;
+        r = (int)roundf(S * 255 * I / 3 * (1 + cos_h / cos_1047_h));
+        g = (int)roundf(S * 255 * I / 3 * (1 + (1 - cos_h / cos_1047_h)));
+        w = (int)roundf(255 * (1 - S) * I);
     } else if (H < 4.188787f) {
         H -= 2.09439f;
         cos_h = cosf(H);
         cos_1047_h = cosf(1.047196667f - H);
-        g = S * 255 * I / 3 * (1 + cos_h / cos_1047_h);
-        b = S * 255 * I / 3 * (1 + (1 - cos_h / cos_1047_h));
-        w = 255 * (1 - S) * I;
+        g = (int)roundf(S * 255 * I / 3 * (1 + cos_h / cos_1047_h));
+        b = (int)roundf(S * 255 * I / 3 * (1 + (1 - cos_h / cos_1047_h)));
+        w = (int)roundf(255 * (1 - S) * I);
     } else {
         H -= 4.188787f;
         cos_h = cosf(H);
         cos_1047_h = cosf(1.047196667f - H);
-        b = S * 255 * I / 3 * (1 + cos_h / cos_1047_h);
-        r = S * 255 * I / 3 * (1 + (1 - cos_h / cos_1047_h));
-        w = 255 * (1 - S) * I;
+        b = (int)roundf(S * 255 * I / 3 * (1 + cos_h / cos_1047_h));
+        r = (int)roundf(S * 255 * I / 3 * (1 + (1 - cos_h / cos_1047_h)));
+        w = (int)roundf(255 * (1 - S) * I);
     }
 
     rgbw[0] = r;
