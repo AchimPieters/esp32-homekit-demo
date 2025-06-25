@@ -1,8 +1,8 @@
-# Example for `HomeKit RGBW Light`
+# Example for `HomeKit RGB Light`
 
 ## What it does
 
-This example implements a full-featured RGBW smart light accessory for Apple HomeKit using an ESP32. It supports RGB color control, brightness adjustment, and white temperature tuning (from warm to cool white) using both an addressable LED strip and two separate white LEDs controlled by PWM.
+This example implements a full-featured RGB WS2812/WS2812B/SK6812 (NeoPixel) smart light accessory for Apple HomeKit using an ESP32. It supports RGB color control, brightness adjustment, and white temperature tuning (from warm to cool white) using both an addressable LED strip and two separate white LEDs controlled by PWM.
 
 ## Features
 
@@ -44,6 +44,7 @@ Supported range:
 - **espressif/mdns version:** `1.8.0`
 - **wolfssl/wolfssl version:** `5.7.6`
 - **achimpieters/esp32-homekit version:** `1.0.0`
+- **achimpieters/esp32-color-converter** `1.0.1`
 
 ## Configuration
 
@@ -53,6 +54,6 @@ Supported range:
 
 ---
 
-This example is ideal for creating a **HomeKit Tunable RGBW Light**, **color-adjustable LED ceiling fixture**, or **DIY smart lighting** setup.
+This example is ideal for creating a **HomeKit Tunable RGB Light**, **color-adjustable LED ceiling fixture**, or **DIY smart lighting** setup.
 
 Control everything from your iPhone, iPad, or via Siri.
