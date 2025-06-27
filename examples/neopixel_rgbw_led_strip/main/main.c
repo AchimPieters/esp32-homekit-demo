@@ -33,7 +33,6 @@
 #include <homekit/characteristics.h>
 #include <led_strip.h>
 #include <math.h>
-#include "hsi2rgbw.h"
 
 #define CHECK_ERROR(x) do { \
                 esp_err_t __err_rc = (x); \
@@ -103,6 +102,42 @@ static void wifi_init() {
         CHECK_ERROR(esp_wifi_start());
 }
 
+static void hsi2rgbw(float H, float S, float I, int* rgbw) {
+        int r = 0, g = 0, b = 0, w = 0;
+        float cos_h, cos_1047_h;
+
+        H = fmod(H, 360);
+        H = DEG_TO_RAD(H);
+        S = fminf(fmaxf(S, 0), 1);
+        I = fminf(fmaxf(I, 0), 1);
+
+        if (H < 2.09439) {
+                cos_h = cos(H);
+                cos_1047_h = cos(1.047196667 - H);
+                r = S * 255 * I / 3 * (1 + cos_h / cos_1047_h);
+                g = S * 255 * I / 3 * (1 + (1 - cos_h / cos_1047_h));
+                w = 255 * (1 - S) * I;
+        } else if (H < 4.188787) {
+                H -= 2.09439;
+                cos_h = cos(H);
+                cos_1047_h = cos(1.047196667 - H);
+                g = S * 255 * I / 3 * (1 + cos_h / cos_1047_h);
+                b = S * 255 * I / 3 * (1 + (1 - cos_h / cos_1047_h));
+                w = 255 * (1 - S) * I;
+        } else {
+                H -= 4.188787;
+                cos_h = cos(H);
+                cos_1047_h = cos(1.047196667 - H);
+                b = S * 255 * I / 3 * (1 + cos_h / cos_1047_h);
+                r = S * 255 * I / 3 * (1 + (1 - cos_h / cos_1047_h));
+                w = 255 * (1 - S) * I;
+        }
+
+        rgbw[0] = r;
+        rgbw[1] = g;
+        rgbw[2] = b;
+        rgbw[3] = w;
+}
 
 static void led_write(bool on) {
         if (led_strip) {
