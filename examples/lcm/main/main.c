@@ -27,7 +27,7 @@
 #include <freertos/task.h>
 #include <nvs_flash.h>
 #include <esp_log.h>
-#include "captive_portal.h" // Jouw eigen captive portal component!
+#include <captive_portal.h> // Jouw eigen captive portal component!
 #include <homekit/homekit.h>
 #include <homekit/characteristics.h>
 
@@ -134,19 +134,13 @@ void wifi_event_cb(wifi_config_event_t event) {
 
 // ---- De enige main() die je nog nodig hebt ----
 void app_main(void) {
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        ESP_LOGW("WARNING", "NVS flash initialization failed, erasing...");
-        nvs_flash_erase();
-        ret = nvs_flash_init();
-    }
-    if (ret != ESP_OK) {
-        ESP_LOGE("ERROR", "NVS init failed: %s", esp_err_to_name(ret));
-        esp_restart();
-    }
+    esp_log_level_set("*", ESP_LOG_VERBOSE);
+    ESP_LOGI("BOOT", "running app_main...");
 
-    gpio_init(); // Alleen nog je LED/init
+    gpio_init(); // LED init
 
-    // ---- Hier start je captive portal WiFi-config ----
+    ESP_LOGI("DEBUG", "app_main started");
+
     wifi_config_init("ESP32-HomeKit", NULL, wifi_event_cb);
+    ESP_LOGI("DEBUG", "wifi_config_init() returned");
 }
