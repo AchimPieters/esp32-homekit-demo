@@ -3,5 +3,5 @@ dependencies:
     version: ">=5.0"
   achimpieters/esp32-homekit:
     version: ">=1.2.5"
-  achimpieters/esp32-captive_portal:
-    version: "^2.0.1"
+  achimpieters/esp32-wifi-bootstrap:
+    version: "^1.0.0"

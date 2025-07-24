@@ -24,8 +24,6 @@
 #include <stdio.h>
 #include <esp_log.h>
 #include <nvs_flash.h>
-#include <esp_wifi.h>
-
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <driver/gpio.h>
@@ -33,54 +31,79 @@
 #include <homekit/characteristics.h>
 #include <wifi_config.h>
 
-// Custom error handling macro
-#define CHECK_ERROR(x) do { \
-                esp_err_t __err_rc = (x); \
-                if (__err_rc != ESP_OK) { \
-                        ESP_LOGE("INFORMATION", "Error: %s", esp_err_to_name(__err_rc)); \
-                        handle_error(__err_rc); \
-                } \
-} while(0)
-
-void handle_error(esp_err_t err) {
-        // Custom error handling logic
-        if (err == ESP_ERR_WIFI_NOT_STARTED || err == ESP_ERR_WIFI_CONN) {
-                ESP_LOGI("INFORMATION", "Restarting WiFi...");
-                esp_wifi_stop();
-                esp_wifi_start();
-        } else {
-                ESP_LOGE("ERROR", "Critical error, restarting device...");
-                esp_restart();
-        }
-}
-
-void on_wifi_ready();
-
-static void on_wifi_event(wifi_config_event_t event) {
-        if (event == WIFI_CONFIG_CONNECTED) {
-                ESP_LOGI("INFORMATION", "WiFi connected, IP obtained");
-                on_wifi_ready();
-        } else if (event == WIFI_CONFIG_DISCONNECTED) {
-                ESP_LOGI("INFORMATION", "WiFi disconnected");
-        }
-}
-
-// LED control
+// GPIO-definities
 #define LED_GPIO CONFIG_ESP_LED_GPIO
+#define BUTTON_GPIO CONFIG_ESP_BUTTON_GPIO
+#define DEBOUNCE_TIME_MS 50
+
+static const char *TAG = "main";
+
 bool led_on = false;
 
 void led_write(bool on) {
         gpio_set_level(LED_GPIO, on ? 1 : 0);
 }
 
-// All GPIO Settings
 void gpio_init() {
-        gpio_reset_pin(LED_GPIO); // Reset GPIO pin to avoid conflicts
+        // LED setup
+        gpio_reset_pin(LED_GPIO);
         gpio_set_direction(LED_GPIO, GPIO_MODE_OUTPUT);
         led_write(led_on);
+
+        // Knop setup
+        gpio_config_t io_conf = {
+                .pin_bit_mask = 1ULL << BUTTON_GPIO,
+                        .mode = GPIO_MODE_INPUT,
+                        .pull_up_en = GPIO_PULLUP_ENABLE,
+                        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+                        .intr_type = GPIO_INTR_DISABLE
+        };
+        gpio_config(&io_conf);
 }
 
-// Accessory identification
+// Task factory_reset
+void factory_reset_task(void *pvParameter) {
+        ESP_LOGI("RESET", "Resetting WiFi Config");
+        wifi_config_reset();
+
+        vTaskDelay(pdMS_TO_TICKS(1000));
+
+        ESP_LOGI("RESET", "Resetting HomeKit Config");
+        homekit_server_reset();
+
+        vTaskDelay(pdMS_TO_TICKS(1000));
+
+        ESP_LOGI("RESTART", "Restarting system");
+        esp_restart();
+
+        vTaskDelete(NULL);
+}
+
+void factory_reset() {
+        ESP_LOGI("RESET", "Resetting device configuration");
+        xTaskCreate(factory_reset_task, "factory_reset", 4096, NULL, 2, NULL);
+}
+
+// Task button
+void button_task(void *pvParameter) {
+        ESP_LOGI(TAG, "Button task started");
+        bool last_state = true;
+
+        while (1) {
+                bool current_state = gpio_get_level(BUTTON_GPIO);
+
+                // Detecteer overgang van HIGH naar LOW (knop ingedrukt)
+                if (last_state && !current_state) {
+                        ESP_LOGW(TAG, "BUTTON PRESSED → RESETTING CONFIGURATION");
+                        factory_reset();
+                }
+
+                last_state = current_state;
+                vTaskDelay(pdMS_TO_TICKS(DEBOUNCE_TIME_MS));
+        }
+}
+
+// Accessory identify
 void accessory_identify_task(void *args) {
         for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 2; j++) {
@@ -96,24 +119,25 @@ void accessory_identify_task(void *args) {
 }
 
 void accessory_identify(homekit_value_t _value) {
-        ESP_LOGI("INFORMATION", "Accessory identify");
-        xTaskCreate(accessory_identify_task, "Accessory identify", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
+        ESP_LOGI(TAG, "Accessory identify");
+        xTaskCreate(accessory_identify_task, "identify", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
 }
 
+// HomeKit callbacks
 homekit_value_t led_on_get() {
         return HOMEKIT_BOOL(led_on);
 }
 
 void led_on_set(homekit_value_t value) {
         if (value.format != homekit_format_bool) {
-                ESP_LOGE("ERROR", "Invalid value format: %d", value.format);
+                ESP_LOGE(TAG, "Invalid value format: %d", value.format);
                 return;
         }
         led_on = value.bool_value;
         led_write(led_on);
 }
 
-// HomeKit characteristics
+// HomeKit metadata
 #define DEVICE_NAME "LED"
 #define DEVICE_MANUFACTURER "StudioPieters®"
 #define DEVICE_SERIAL "NLDA4SQN1466"
@@ -121,7 +145,7 @@ void led_on_set(homekit_value_t value) {
 #define FW_VERSION "0.0.1"
 
 homekit_characteristic_t name = HOMEKIT_CHARACTERISTIC_(NAME, DEVICE_NAME);
-homekit_characteristic_t manufacturer = HOMEKIT_CHARACTERISTIC_(MANUFACTURER,  DEVICE_MANUFACTURER);
+homekit_characteristic_t manufacturer = HOMEKIT_CHARACTERISTIC_(MANUFACTURER, DEVICE_MANUFACTURER);
 homekit_characteristic_t serial = HOMEKIT_CHARACTERISTIC_(SERIAL_NUMBER, DEVICE_SERIAL);
 homekit_characteristic_t model = HOMEKIT_CHARACTERISTIC_(MODEL, DEVICE_MODEL);
 homekit_characteristic_t revision = HOMEKIT_CHARACTERISTIC_(FIRMWARE_REVISION, FW_VERSION);
@@ -140,7 +164,7 @@ homekit_accessory_t *accessories[] = {
                         NULL
                 }),
                 HOMEKIT_SERVICE(LIGHTBULB, .primary = true, .characteristics = (homekit_characteristic_t*[]) {
-                        HOMEKIT_CHARACTERISTIC(NAME, "HomeKit LED"),
+                        HOMEKIT_CHARACTERISTIC(NAME, DEVICE_NAME),
                         HOMEKIT_CHARACTERISTIC(ON, false, .getter = led_on_get, .setter = led_on_set),
                         NULL
                 }),
@@ -157,20 +181,13 @@ homekit_server_config_t config = {
 };
 
 void on_wifi_ready() {
-        ESP_LOGI("INFORMATION", "Starting HomeKit server...");
+        ESP_LOGI(TAG, "WiFi ready, starting HomeKit");
         homekit_server_init(&config);
 }
 
 void app_main(void) {
-        esp_err_t ret = nvs_flash_init();
-        if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-                ESP_LOGW("WARNING", "NVS flash initialization failed, erasing...");
-                CHECK_ERROR(nvs_flash_erase());
-                ret = nvs_flash_init();
-        }
-        CHECK_ERROR(ret);
-
+        ESP_ERROR_CHECK(nvs_flash_init());
         gpio_init();
-        //                wifi name, password
-        wifi_config_init2(DEVICE_NAME, NULL, on_wifi_event);
+        xTaskCreate(button_task, "button_task", 2048, NULL, 10, NULL);
+        wifi_config_init(DEVICE_NAME, NULL, on_wifi_ready);
 }

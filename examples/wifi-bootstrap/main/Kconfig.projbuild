@@ -18,4 +18,10 @@ menu "StudioPieters"
               help
                    If you want to change the HomeKit Setup ID, you can do that here (Note: you need to make a new QR-CODE To make it work)
 
+      config ESP_BUTTON_GPIO
+              int "Set the GPIO for the factory Reset button"
+              default 0
+              help
+                  The GPIO number the button is connected to.
+
 endmenu
