@@ -20,7 +20,7 @@ menu "StudioPieters"
 
       config ESP_BUTTON_GPIO
               int "Set the GPIO for the factory Reset button"
-              default 0
+              default 33
               help
                   The GPIO number the button is connected to.
 
